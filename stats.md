@@ -102,7 +102,7 @@ To be there
 
 <p align="center">
   <a href="https://github.com/Jeevant010/Lunar_Docs">
-    <img src="https://github-readme-stats.vercel.app/api/pin/?username=jeevant010&repo=Lunar_Docs&title_color=blue&show_owner=true" alt="Lunar_Docs Repo Card">
+    <img src="https://github-readme-stats.vercel.app/api/pin/?username=jeevant010&repo=AI_Summarizer&title_color=blue&show_owner=true" alt="Lunar_Docs Repo Card">
   </a>
 </p>
 <p align="center">
