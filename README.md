@@ -101,8 +101,8 @@ To be there
 ## Repo Cards
 
 <p align="center">
-  <a href="https://github.com/Jeevant010/Lunar_Docs">
-    <img src="https://github-readme-stats.vercel.app/api/pin/?username=jeevant010&repo=Lunar_Docs&title_color=blue&show_owner=true" alt="Lunar_Docs Repo Card">
+  <a href="https://github.com/Jeevant010/Wedding_Web">
+    <img src="https://github-readme-stats.vercel.app/api/pin/?username=jeevant010&repo=Wedding_Web&title_color=blue&show_owner=true" alt="Wedding_Web Repo Card">
   </a>
 </p>
 <p align="center">
