@@ -1,26 +1,13 @@
-const contributions = [
-  {
-    name: "M_Mart",
-    url: "https://github.com/RakeshParkash/M_Mart",
-    description: "Major contributor. E-commerce platform.",
-    pr_count: 7,
-  },
-  {
-    name: "BlackBookEDU.ai",
-    url: "https://github.com/zadafiyaharsh2-ctrl/BlackBookEDU.ai",
-    description: "Frontend & backend PRs.",
-    pr_count: 2,
-  },
-];
+import { contributions } from "../../lib/contributions";
 
 export default function Contributions() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h2 className="text-2xl font-bold text-blue-700 mb-6">Contributions</h2>
       <div className="space-y-6">
-        {contributions.map((c, idx) => (
+        {contributions.map((c) => (
           <a
-            key={idx}
+            key={c.name}
             href={c.url}
             target="_blank"
             rel="noopener noreferrer"
