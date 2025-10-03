@@ -1,15 +1,14 @@
-import Bio from '../components/Bio';
-import Navbar from '../components/Navbar';
+import Bio from "../components/Bio";
+import Section from "../components/Section";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-gray-50">
-      <Navbar />
-      <div className="max-w-4xl mx-auto py-8 px-4">
+    <main className="min-h-screen">
+      <div className="max-w-4xl mx-auto py-8 px-4 space-y-8">
+        <Section title="Welcome">
+          <p className="text-gray-600">Explore my projects and contributions below.</p>
+        </Section>
         <Bio />
-        <div className="mt-10 text-center text-gray-500">
-          <p>Welcome to my portfolio. Explore my projects and contributions!</p>
-        </div>
       </div>
     </main>
   );
