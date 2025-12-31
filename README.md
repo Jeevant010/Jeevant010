@@ -58,8 +58,8 @@ To be there
     <td><strong>Tools</strong></td>
   </tr>
   <tr>
-    <td><img src="https://skillicons.dev/icons?i=ubuntu,linux,docker,aws&theme=dark"></td>
-    <td><img src="https://skillicons.dev/icons?i=github,vscode,vim,githubactions&theme=dark"></td>
+    <td><img src="https://skillicons.dev/icons?i=ubuntu,linux,docker,aws,azure&theme=dark"></td>
+    <td><img src="https://skillicons.dev/icons?i=github,vscode,vim,githubactions,vercel,netlify&theme=dark"></td>
   </tr>
   <tr>
     <td><strong>Languages</strong></td>
@@ -116,7 +116,7 @@ To be there
   </a>
 </p>
 <p align="center">
-  <a href="https://github.com/Jeevant010/Water_Management">
+  <a href="https://github.com/Jeevant010/LLM">
     <img src="https://github-readme-stats.vercel.app/api/pin/?username=jeevant010&repo=Water_Management&title_color=blue&show_owner=true" alt="Water_Management Repo Card">
   </a>
 </p>
