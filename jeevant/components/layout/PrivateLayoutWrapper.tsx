@@ -55,7 +55,7 @@ export default function PrivateLayoutWrapper({
         {/* Mobile Header (Only visible < 768px) */}
         <div className="md:hidden sticky top-0 z-30 bg-[#050505]/90 backdrop-blur-md p-4 border-b border-white/10 flex items-center justify-between">
            <span className="font-bold uppercase tracking-widest text-xs">Jeevant_OS</span>
-           <button onClick={() => setIsExpanded(true)} className="p-2 border border-white/10 rounded text-white">
+           <button title="menu" onClick={() => setIsExpanded(true)} className="p-2 border border-white/10 rounded text-white">
              <Menu size={18} />
            </button>
         </div>

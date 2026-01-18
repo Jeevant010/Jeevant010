@@ -50,7 +50,7 @@ export default function ProjectRow({ project }: { project: any }) {
 
       {/* Actions */}
       <div className="col-span-2 text-right">
-        <button onClick={handleDelete} disabled={loading} className="text-slate-600 hover:text-red-500 transition p-2">
+        <button title="trash2" onClick={handleDelete} disabled={loading} className="text-slate-600 hover:text-red-500 transition p-2">
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
