@@ -53,6 +53,43 @@ const LearningSchema = new Schema({
   status: { type: String, enum: ["not-started", "in-progress", "completed"], default: "not-started" },
 });
 
+// ... (Keep Project, Task, Note, Learning schemas from before)
+
+// --- 5. EXPERIENCE SCHEMA (Internships & Jobs) ---
+const ExperienceSchema = new Schema({
+  company: { type: String, required: true },
+  role: { type: String, required: true },
+  startDate: { type: Date, required: true },
+  endDate: { type: Date }, // Null means "Present"
+  description: { type: String }, // Bullet points
+  skillsUsed: [{ type: String }],
+  logoUrl: { type: String }, 
+  type: { type: String, enum: ["internship", "full-time", "freelance"], default: "internship" }
+});
+
+// --- 6. ACHIEVEMENT SCHEMA (Hackathons, LeetCode) ---
+const AchievementSchema = new Schema({
+  title: { type: String, required: true }, // e.g., "LeetCode Knight"
+  platform: { type: String }, // e.g., "LeetCode", "Hackathon"
+  date: { type: Date, default: Date.now },
+  proofLink: { type: String }, // Certificate URL
+  description: { type: String },
+  icon: { type: String, default: "trophy" } // icon name
+});
+
+// --- 7. CERTIFICATE SCHEMA ---
+const CertificateSchema = new Schema({
+  name: { type: String, required: true },
+  issuer: { type: String, required: true }, // e.g., "AWS", "Google"
+  issueDate: { type: Date },
+  expiryDate: { type: Date },
+  credentialId: { type: String },
+  url: { type: String }
+});
+
+export const Experience = models.Experience || model("Experience", ExperienceSchema);
+export const Achievement = models.Achievement || model("Achievement", AchievementSchema);
+export const Certificate = models.Certificate || model("Certificate", CertificateSchema);
 // Use "models.ModelName" || model("ModelName", schema) to prevent overwrite errors in Next.js
 export const Project = models.Project || model("Project", ProjectSchema);
 export const Task = models.Task || model("Task", TaskSchema);
