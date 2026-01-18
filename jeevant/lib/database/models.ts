@@ -102,6 +102,20 @@ const ApplicationSchema = new Schema({
   lastUpdated: { type: Date, default: Date.now }
 });
 
+// ... existing schemas ...
+
+// --- 9. MESSAGE SCHEMA (Contact Form) ---
+const MessageSchema = new Schema({
+  senderName: { type: String, required: true },
+  senderContact: { type: String, required: true }, // Email or Phone
+  content: { type: String, required: true },
+  priority: { type: String, enum: ["low", "high", "emergency"], default: "low" },
+  isRead: { type: Boolean, default: false },
+  timestamp: { type: Date, default: Date.now }
+});
+
+export const Message = models.Message || model("Message", MessageSchema);
+
 export const Application = models.Application || model("Application", ApplicationSchema);
 export const Experience = models.Experience || model("Experience", ExperienceSchema);
 export const Achievement = models.Achievement || model("Achievement", AchievementSchema);
