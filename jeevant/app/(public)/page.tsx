@@ -1,108 +1,97 @@
 import Link from "next/link";
-import { ArrowRight, Code, Terminal, Cpu, Zap, Layers } from "lucide-react";
+import { ArrowRight, Terminal, Cpu, Globe } from "lucide-react";
+import { getProfile } from "@/lib/actions/profile.actions";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const profile = await getProfile();
+
   return (
-    <div className="relative">
+    <div className="relative min-h-screen w-full overflow-hidden bg-black font-sans text-white">
       
-      {/* --- BACKGROUND FX --- */}
-      <div className="absolute inset-0 z-0 bg-grid-pattern pointer-events-none h-[800px]" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-blue-500/20 blur-[120px] rounded-full pointer-events-none" />
+      {/* --- 1. CINEMATIC BACKGROUND IMAGE --- */}
+      {/* High-res Cyberpunk City / Data Highway Image */}
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center opacity-60"
+        style={{ 
+          backgroundImage: "url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop')",
+          filter: "contrast(1.2) brightness(0.8)"
+        }}
+      />
+      
+      {/* Overlay Gradient to make text readable */}
+      <div className="absolute inset-0 z-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,transparent_0%,black_100%)]" />
 
-      {/* --- HERO SECTION --- */}
-      <section className="relative z-10 flex flex-col items-center text-center pt-32 pb-20 px-4">
+      {/* --- 2. HERO CONTENT --- */}
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 text-center">
         
-        {/* Badge */}
-        <div className="inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-sm font-medium text-blue-300 mb-8 backdrop-blur-sm">
-          <span className="flex h-2 w-2 rounded-full bg-blue-400 mr-2 animate-pulse"></span>
-          Open to Work & Collaborations
+        {/* Status Chip */}
+        <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-green-500/30 bg-green-900/20 px-4 py-1.5 backdrop-blur-md">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
+          </span>
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-green-400">
+            {profile.status}
+          </span>
         </div>
 
-        {/* Headline */}
-        <h1 className="text-6xl md:text-8xl font-extrabold tracking-tight text-white mb-6 leading-tight">
-          Build. <span className="glow-text">Scale.</span> Innovate.
+        {/* Main Title */}
+        <h1 className="mb-6 text-6xl font-black uppercase tracking-tighter text-white md:text-9xl" style={{ textShadow: "0 0 40px rgba(255,255,255,0.3)" }}>
+          {profile.name}
         </h1>
         
-        <p className="text-xl md:text-2xl text-slate-400 max-w-2xl mb-10 leading-relaxed">
-          The personal operating system of <strong>Jeevant</strong>. 
-          Merging Full-Stack Engineering with AI Agents to build the future of software.
+        {/* Subtitle / Role */}
+        <p className="mb-12 max-w-2xl text-lg font-light tracking-widest text-slate-300 md:text-xl">
+          <span className="text-blue-500 font-bold">//</span> {profile.title} <br/>
+          <span className="text-xs opacity-70">SYSTEM ARCHITECT & AI OPERATOR</span>
         </p>
 
-        {/* Buttons */}
-        <div className="flex flex-wrap gap-4 justify-center">
+        {/* Action Grid */}
+        <div className="grid w-full max-w-lg grid-cols-1 gap-4 md:grid-cols-2">
+          
           <Link 
             href="/projects" 
-            className="px-8 py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 transition shadow-[0_0_20px_rgba(37,99,235,0.5)] flex items-center gap-2"
+            className="group relative flex items-center justify-between overflow-hidden rounded-xl border border-white/20 bg-white/5 px-6 py-5 transition-all hover:bg-white/10 hover:border-blue-500/50"
           >
-            Explore Projects <ArrowRight className="w-5 h-5" />
+            <div className="flex flex-col text-left">
+              <span className="text-xs font-bold uppercase text-blue-400">01. Portfolio</span>
+              <span className="font-bold uppercase tracking-wider text-white">View Projects</span>
+            </div>
+            <Globe className="h-6 w-6 text-slate-500 transition-transform group-hover:scale-110 group-hover:text-white" />
+            <div className="absolute inset-0 -z-10 bg-gradient-to-r from-blue-600/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
           </Link>
-          <Link 
-            href="/dashboard" 
-            className="px-8 py-4 bg-white/5 text-white border border-white/10 font-bold rounded-xl hover:bg-white/10 transition backdrop-blur-md"
-          >
-            Enter Dashboard
-          </Link>
-        </div>
-      </section>
 
-      {/* --- FLOATING STATS BAR --- */}
-      <div className="relative z-20 max-w-4xl mx-auto -mt-8 mb-24">
-        <div className="glass-card rounded-2xl p-8 flex flex-col md:flex-row justify-between items-center gap-8 md:gap-0">
-          <div className="text-center md:text-left">
-            <div className="text-3xl font-bold text-white">1,525</div>
-            <div className="text-sm text-slate-400 uppercase tracking-wider font-semibold">LeetCode Rating</div>
-          </div>
-          <div className="w-full md:w-px h-px md:h-12 bg-white/10"></div>
-          <div className="text-center md:text-left">
-            <div className="text-3xl font-bold text-white">6th</div>
-            <div className="text-sm text-slate-400 uppercase tracking-wider font-semibold">Semester (CSE)</div>
-          </div>
-          <div className="w-full md:w-px h-px md:h-12 bg-white/10"></div>
-          <div className="text-center md:text-left">
-            <div className="text-3xl font-bold text-white">5+</div>
-            <div className="text-sm text-slate-400 uppercase tracking-wider font-semibold">Production Projects</div>
-          </div>
+          <Link 
+            href="/about" 
+            className="group relative flex items-center justify-between overflow-hidden rounded-xl border border-white/20 bg-white/5 px-6 py-5 transition-all hover:bg-white/10 hover:border-purple-500/50"
+          >
+            <div className="flex flex-col text-left">
+              <span className="text-xs font-bold uppercase text-purple-400">02. Identity</span>
+              <span className="font-bold uppercase tracking-wider text-white">Bio & Stats</span>
+            </div>
+            <Cpu className="h-6 w-6 text-slate-500 transition-transform group-hover:scale-110 group-hover:text-white" />
+            <div className="absolute inset-0 -z-10 bg-gradient-to-r from-purple-600/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+          </Link>
+
+        </div>
+
+      </div>
+
+      {/* --- 3. BOTTOM FOOTER DECORATION --- */}
+      <div className="absolute bottom-8 left-0 w-full px-8 flex justify-between items-end text-[10px] font-mono text-white/40 uppercase tracking-widest z-10">
+        <div>
+          Jeevant_OS v2.0 <br/>
+          Secure Connection
+        </div>
+        <div className="flex gap-4">
+          <span>LAT: 28.7041</span>
+          <span>LON: 77.1025</span>
         </div>
       </div>
 
-      {/* --- TECH STACK GRID --- */}
-      <section className="max-w-6xl mx-auto px-6 py-12">
-        <h2 className="text-3xl font-bold text-white mb-12 text-center">Powered By Modern Tech</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card 1 */}
-          <div className="glass-card p-8 rounded-2xl group">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition">
-              <Layers className="w-6 h-6 text-blue-400" />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2">MERN Stack</h3>
-            <p className="text-slate-400 leading-relaxed">
-              Building scalable backends with Node.js and interactive frontends with React & Next.js.
-            </p>
-          </div>
-
-          {/* Card 2 */}
-          <div className="glass-card p-8 rounded-2xl group">
-            <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition">
-              <Cpu className="w-6 h-6 text-purple-400" />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2">AI Agents</h3>
-            <p className="text-slate-400 leading-relaxed">
-              Developing local AI agents using Python, Ollama, and RAG pipelines for smarter apps.
-            </p>
-          </div>
-
-          {/* Card 3 */}
-          <div className="glass-card p-8 rounded-2xl group">
-            <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition">
-              <Zap className="w-6 h-6 text-green-400" />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2">Performance First</h3>
-            <p className="text-slate-400 leading-relaxed">
-              Optimized for speed. From database queries to client-side rendering with Next.js 15.
-            </p>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
