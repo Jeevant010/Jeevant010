@@ -9,7 +9,7 @@ export default async function ProjectCMS() {
   const projects = await getProjects();
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] -m-8 p-8 font-mono">
+    <div className="min-h-screen bg-[#0f0f0f] text-slate-300 p-8 font-mono -m-8">
       
       {/* HEADER */}
       <div className="flex items-center justify-between mb-8">
@@ -26,9 +26,9 @@ export default async function ProjectCMS() {
         <AddProjectForm />
       </div>
 
-      {/* FILE SYSTEM (Table) */}
+      {/* FILE SYSTEM (Grid Layout) */}
       <div className="border border-slate-800 bg-[#121212]">
-        {/* Table Header */}
+        {/* Header Row */}
         <div className="grid grid-cols-12 gap-4 p-4 border-b border-slate-800 bg-[#1a1a1a] text-xs font-bold text-slate-500 uppercase tracking-widest">
           <div className="col-span-5">File Name</div>
           <div className="col-span-3">Status</div>
@@ -36,7 +36,7 @@ export default async function ProjectCMS() {
           <div className="col-span-2 text-right">Actions</div>
         </div>
 
-        {/* Rows */}
+        {/* Project Rows */}
         <div className="divide-y divide-slate-800">
           {projects.length === 0 ? (
             <div className="p-12 text-center flex flex-col items-center gap-4 text-slate-600">
@@ -44,20 +44,9 @@ export default async function ProjectCMS() {
               <p>ARCHIVES ARE EMPTY.</p>
             </div>
           ) : (
-             // You need to update ProjectRow styling to match this grid layout, 
-             // or wrap the existing row in a div that matches the grid above.
-             // For now, let's keep it simple and just map them.
-            projects.map((p) => (
-              <div key={p._id} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-[#1a1a1a] transition group">
-                 {/* Note: To make ProjectRow work perfectly inside this Grid, 
-                    we usually refactor ProjectRow to accept className or be a flex container.
-                    Since ProjectRow is a <tr> currently, we need to Change ProjectRow to be a <div> based component.
-                 */}
-                 {/* TEMP FIX: We will just render the components raw here or you refactor ProjectRow to not be a <tr> */}
-                 <div className="col-span-12">
-                    {/* Render simplified row content here if you don't want to refactor ProjectRow immediately */}
-                    <ProjectRow project={p} /> 
-                 </div>
+            projects.map((p: any) => (
+              <div key={p._id} className="p-4 hover:bg-[#1a1a1a] transition group">
+                 <ProjectRow project={p} /> 
               </div>
             ))
           )}
