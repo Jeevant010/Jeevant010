@@ -1,129 +1,150 @@
-import { 
-  Activity, 
-  CheckCircle2, 
-  Clock, 
-  Plus, 
-  Search,
-  Zap,
-  Cpu,
-  Database,
-  Calendar
-} from "lucide-react";
+import { getProjects } from "@/lib/actions/project.action";
+import { getDailyTasks } from "@/lib/actions/task.actions";
+import { getNotes } from "@/lib/actions/note.actions";
+import { Activity, Target, FileText, Clock, ShieldAlert, Database, Terminal } from "lucide-react";
+import Link from "next/link";
 
-export default function Dashboard() {
+export const dynamic = "force-dynamic";
+
+export default async function Dashboard() {
+  // 1. FETCH REAL INTEL FROM DATABASE
+  const projects = await getProjects();
+  const tasks = await getDailyTasks();
+  const notes = await getNotes();
+
+  // 2. CALCULATE METRICS
+  const activeCases = projects.filter((p: any) => p.status !== "Archived").length;
+  const pendingTasks = tasks.filter((t: any) => !t.isCompleted);
+  const evidenceCount = notes.length;
+  
+  // High Priority item (first pending task)
+  const currentObjective = pendingTasks[0]?.title || "NO ACTIVE OBJECTIVES";
+
   return (
-    <div className="space-y-8">
+    <div className="min-h-screen bg-[#111] text-slate-300 p-8 font-mono relative overflow-hidden -m-8">
       
-      {/* --- TOP BAR (Welcome & Quick Actions) --- */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 glass-card rounded-2xl border-l-4 border-blue-500">
-        <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            Good Morning, Jeevant <span className="animate-pulse text-blue-500">●</span>
-          </h1>
-          <p className="text-slate-400 text-sm mt-1">System operational. 4 tasks pending for today.</p>
-        </div>
-        <div className="flex gap-3">
-          <button title="search" className="bg-slate-800 hover:bg-slate-700 text-white p-3 rounded-xl transition border border-slate-700">
-            <Search className="w-5 h-5" />
-          </button>
-          <button className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-3 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-blue-900/20 transition hover:scale-105">
-            <Plus className="w-4 h-4" />
-            New Entry
-          </button>
-        </div>
-      </div>
+      {/* --- BACKGROUND FX --- */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,18,18,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(255,0,0,0.02),rgba(255,0,0,0.06))] bg-[length:100%_4px,6px_100%] pointer-events-none z-0" />
+      <div className="absolute top-0 left-0 w-full h-1 bg-red-600/50 shadow-[0_0_20px_rgba(220,38,38,0.6)] z-20" />
 
-      {/* --- SYSTEM METRICS (The "OS" Feel) --- */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: "Brain Load", val: "12%", icon: Cpu, color: "text-blue-400" },
-          { label: "Goals Active", val: "3", icon: Zap, color: "text-yellow-400" },
-          { label: "Memory Used", val: "1.2GB", icon: Database, color: "text-purple-400" },
-          { label: "Streak", val: "12 Days", icon: Activity, color: "text-green-400" },
-        ].map((stat, i) => (
-          <div key={i} className="glass-card p-4 rounded-xl flex flex-col justify-between h-24 relative overflow-hidden group">
-            <div className="absolute right-0 top-0 p-3 opacity-10 group-hover:opacity-20 transition">
-              <stat.icon className="w-12 h-12" />
-            </div>
-            <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-wider">
-              <stat.icon className={`w-3 h-3 ${stat.color}`} /> {stat.label}
-            </div>
-            <div className="text-2xl font-bold text-white font-mono">{stat.val}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* --- MAIN WORKSPACE --- */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="relative z-10 max-w-7xl mx-auto space-y-12">
         
-        {/* Left: Priority Tasks */}
-        <div className="lg:col-span-2 glass-card rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-slate-400" /> Today's Priority
-            </h3>
-            <span className="text-xs text-slate-500 bg-slate-900/50 px-2 py-1 rounded">Daily Sprint</span>
+        {/* --- HEADER: TERMINAL STYLE --- */}
+        <div className="flex flex-col md:flex-row justify-between items-end border-b border-red-900/30 pb-6">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-3 h-3 bg-red-600 rounded-full animate-pulse shadow-[0_0_10px_red]" />
+              <span className="text-red-500 font-bold tracking-widest text-xs">SYSTEM_ONLINE // JEEVANT_OS_V2</span>
+            </div>
+            <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter">
+              Command Center
+            </h1>
           </div>
-          
-          <div className="space-y-3">
-            {[
-              { task: "Finish 'Projects' Page UI", tag: "Dev", time: "2h left", done: true },
-              { task: "Review EcoSort API Logic", tag: "AI Agent", time: "4h left", done: false },
-              { task: "LeetCode Daily Challenge", tag: "Growth", time: "8:00 PM", done: false },
-            ].map((t, i) => (
-              <div key={i} className={`flex items-center justify-between p-4 rounded-xl border transition group cursor-pointer ${t.done ? 'bg-slate-900/30 border-slate-800 opacity-50' : 'bg-slate-800/40 border-slate-700 hover:bg-slate-800'}`}>
-                <div className="flex items-center gap-4">
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${t.done ? 'border-green-500 bg-green-500/20' : 'border-slate-500 group-hover:border-blue-500'}`}>
-                    {t.done && <CheckCircle2 className="w-3 h-3 text-green-500" />}
-                  </div>
-                  <div>
-                    <p className={`font-medium ${t.done ? 'text-slate-500 line-through' : 'text-slate-200'}`}>{t.task}</p>
-                    <span className="text-xs text-slate-500">{t.tag}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 text-slate-500 text-xs bg-slate-950 px-2 py-1 rounded">
-                  <Clock className="w-3 h-3" /> {t.time}
-                </div>
-              </div>
-            ))}
+          <div className="text-right hidden md:block">
+            <div className="text-xs text-slate-500 uppercase tracking-widest mb-1">Current Date</div>
+            <div className="text-xl font-bold text-white">
+              {new Date().toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: 'short' }).toUpperCase()}
+            </div>
           </div>
         </div>
 
-        {/* Right: Quick Links / Status */}
-        <div className="glass-card rounded-2xl p-6 flex flex-col gap-6">
-          <h3 className="text-lg font-bold text-white">Active Stacks</h3>
+        {/* --- PRIMARY METRICS GRID --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            { label: "Active Cases", val: activeCases, icon: Target, color: "text-blue-500" },
+            { label: "Pending Objectives", val: pendingTasks.length, icon: Clock, color: "text-yellow-500" },
+            { label: "Evidence Collected", val: evidenceCount, icon: FileText, color: "text-slate-400" },
+            { label: "Sys Load", val: "NOMINAL", icon: Activity, color: "text-green-500" },
+          ].map((stat, i) => (
+            <div key={i} className="bg-[#1a1a1a] border border-white/5 p-6 relative group overflow-hidden">
+              <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                <stat.icon className="w-16 h-16" />
+              </div>
+              <div className="flex items-center gap-2 mb-4">
+                <stat.icon className={`w-4 h-4 ${stat.color}`} />
+                <span className="text-xs font-bold uppercase tracking-widest text-slate-500">{stat.label}</span>
+              </div>
+              <div className="text-4xl font-bold text-white tracking-tighter">{stat.val}</div>
+              {/* Corner accent */}
+              <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-slate-700" />
+            </div>
+          ))}
+        </div>
+
+        {/* --- MAIN INTELLIGENCE DISPLAY --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
           
-          <div className="space-y-4">
-            <div className="group cursor-pointer">
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-slate-300 group-hover:text-blue-400 transition">EcoSort AI</span>
-                <span className="text-slate-500">85%</span>
-              </div>
-              <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full w-[85%] bg-gradient-to-r from-blue-600 to-cyan-400"></div>
-              </div>
+          {/* LEFT: CURRENT OBJECTIVE (The 'Mission') */}
+          <div className="lg:col-span-2 bg-[#0a0a0a] border border-red-900/20 p-8 relative">
+            <div className="absolute top-4 right-4 flex gap-1">
+               <div className="w-12 h-1 bg-red-600/20" />
+               <div className="w-2 h-1 bg-red-600/20" />
             </div>
             
-            <div className="group cursor-pointer">
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-slate-300 group-hover:text-purple-400 transition">Portfolio OS</span>
-                <span className="text-slate-500">40%</span>
+            <h3 className="text-red-500 font-bold uppercase tracking-widest mb-6 flex items-center gap-2">
+              <ShieldAlert className="w-5 h-5" /> Priority Objective
+            </h3>
+            
+            <div className="text-2xl md:text-3xl font-bold text-white mb-8 border-l-4 border-red-600 pl-6 py-2 bg-gradient-to-r from-red-900/10 to-transparent">
+              {currentObjective}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+              <div className="space-y-4">
+                <h4 className="text-xs font-bold text-slate-500 uppercase">Recent Intel (Notes)</h4>
+                <div className="space-y-2">
+                  {notes.slice(0, 3).map((note: any) => (
+                    <Link key={note._id} href="/brain" className="block p-3 bg-[#151515] border border-white/5 hover:border-white/20 transition group">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-bold text-slate-300 group-hover:text-white truncate max-w-[200px]">{note.title}</span>
+                        <span className="text-[10px] text-slate-600">{new Date(note.updatedAt).toLocaleDateString()}</span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
               </div>
-              <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full w-[40%] bg-gradient-to-r from-purple-600 to-pink-400"></div>
+
+              <div className="space-y-4">
+                <h4 className="text-xs font-bold text-slate-500 uppercase">System Logs</h4>
+                <div className="font-mono text-xs text-slate-500 space-y-1 p-4 bg-[#050505] border border-white/5 h-full">
+                  <p> SYSTEM_BOOT_SEQUENCE_INIT</p>
+                  <p> DATABASE_CONN_ESTABLISHED... <span className="text-green-500">OK</span></p>
+                  <p> NEXT_JS_SERVER_READY... <span className="text-green-500">OK</span></p>
+                  <p> USER_JEEVANT_AUTHENTICATED</p>
+                  <p className="animate-pulse"> WAITING_FOR_INPUT_</p>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="mt-auto p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
-            <h4 className="text-sm font-bold text-blue-300 mb-1">Idea Capture</h4>
-            <p className="text-xs text-blue-200/60 mb-3">Found a new bug or feature idea?</p>
-            <button className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg transition">
-              Log to Brain
-            </button>
+          {/* RIGHT: QUICK ACTIONS (Terminal Buttons) */}
+          <div className="flex flex-col gap-4">
+            <Link href="/planner/daily" className="flex-1 bg-[#151515] border border-white/5 p-6 hover:bg-[#202020] hover:border-white/20 transition group flex flex-col justify-center items-center text-center gap-4">
+              <Clock className="w-8 h-8 text-yellow-500 group-hover:scale-110 transition" />
+              <div>
+                <div className="font-bold text-white uppercase tracking-wider">Open War Room</div>
+                <div className="text-xs text-slate-500 mt-1">Manage Daily Objectives</div>
+              </div>
+            </Link>
+            
+            <Link href="/cms/projects" className="flex-1 bg-[#151515] border border-white/5 p-6 hover:bg-[#202020] hover:border-white/20 transition group flex flex-col justify-center items-center text-center gap-4">
+              <Database className="w-8 h-8 text-blue-500 group-hover:scale-110 transition" />
+              <div>
+                <div className="font-bold text-white uppercase tracking-wider">Access Case Files</div>
+                <div className="text-xs text-slate-500 mt-1">Manage Projects (CMS)</div>
+              </div>
+            </Link>
+            
+            <Link href="/brain" className="flex-1 bg-[#151515] border border-white/5 p-6 hover:bg-[#202020] hover:border-white/20 transition group flex flex-col justify-center items-center text-center gap-4">
+              <Terminal className="w-8 h-8 text-slate-400 group-hover:scale-110 transition" />
+              <div>
+                <div className="font-bold text-white uppercase tracking-wider">The Mind Place</div>
+                <div className="text-xs text-slate-500 mt-1">Log New Evidence</div>
+              </div>
+            </Link>
           </div>
-        </div>
 
+        </div>
       </div>
     </div>
   );
