@@ -124,6 +124,21 @@ const SnippetSchema = new Schema({
   isCopied: { type: Number, default: 0 } // Track how many times it was useful
 });
 
+
+// --- 11. PROFILE SCHEMA (Singleton) ---
+const ProfileSchema = new Schema({
+  name: { type: String, default: "Jeevant" },
+  title: { type: String, default: "Full Stack Engineer" },
+  level: { type: Number, default: 1 }, // e.g. "Lvl 3"
+  leetcodeRating: { type: Number, default: 0 },
+  githubUsername: { type: String, default: "Jeevant010" },
+  resumeLink: { type: String, default: "#" },
+  avatarUrl: { type: String, default: "https://github.com/Jeevant010.png" },
+  status: { type: String, default: "Available for Hire" }, // The glowing status text
+  updatedAt: { type: Date, default: Date.now }
+});
+
+export const Profile = models.Profile || model("Profile", ProfileSchema);
 export const Snippet = models.Snippet || model("Snippet", SnippetSchema);
 export const Message = models.Message || model("Message", MessageSchema);
 export const Application = models.Application || model("Application", ApplicationSchema);
