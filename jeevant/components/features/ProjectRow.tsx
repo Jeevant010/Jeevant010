@@ -14,49 +14,47 @@ export default function ProjectRow({ project }: { project: any }) {
   };
 
   const handleDelete = async () => {
-    if(!confirm("Are you sure you want to delete this project?")) return;
+    if(!confirm("Destroy this case file?")) return;
     setLoading(true);
     await deleteProject(project._id);
     setLoading(false);
   };
 
   return (
-    <tr className="hover:bg-slate-800/30 transition group">
-      <td className="px-6 py-4 font-medium text-white flex items-center gap-3">
-        <div className="p-2 bg-slate-800 rounded">
-          <FileText className="w-4 h-4 text-blue-400" />
-        </div>
+    <div className="grid grid-cols-12 gap-4 w-full items-center text-sm">
+      
+      {/* Name */}
+      <div className="col-span-5 font-bold text-slate-200 flex items-center gap-3">
+        <FileText className="w-4 h-4 text-slate-600" />
         {project.title}
-        {loading && <Loader2 className="w-3 h-3 animate-spin text-slate-500" />}
-      </td>
-      <td className="px-6 py-4">
-        <span className={`px-2 py-1 rounded text-xs border bg-slate-900 border-slate-700 text-slate-400`}>
-          {project.status || "Planned"}
+        {loading && <Loader2 className="w-3 h-3 animate-spin text-red-500" />}
+      </div>
+
+      {/* Status */}
+      <div className="col-span-3">
+        <span className="px-2 py-1 bg-slate-800 text-slate-400 text-xs uppercase tracking-wider rounded border border-slate-700">
+          {project.status || "PLANNED"}
         </span>
-      </td>
-      <td className="px-6 py-4">
-        <button 
-          onClick={handleToggle}
-          disabled={loading}
-          className="flex items-center gap-2 hover:text-white transition"
-        >
-          {project.visibility === 'public' ? (
-            <><Eye className="w-4 h-4 text-green-400" /> Public</>
-          ) : (
-            <><EyeOff className="w-4 h-4 text-slate-500" /> Private</>
-          )}
+      </div>
+
+      {/* Visibility */}
+      <div className="col-span-2">
+        <button onClick={handleToggle} disabled={loading} className="hover:text-white text-slate-500 transition flex items-center gap-2 text-xs uppercase font-bold">
+           {project.visibility === 'public' ? (
+             <><Eye className="w-4 h-4 text-green-500" /> PUBLIC</>
+           ) : (
+             <><EyeOff className="w-4 h-4 text-red-500" /> CLASSIFIED</>
+           )}
         </button>
-      </td>
-      <td className="px-6 py-4 text-right">
-        <button 
-          onClick={handleDelete}
-          disabled={loading}
-          className="p-2 hover:bg-red-500/20 text-red-400 rounded-lg transition" 
-          title="Delete"
-        >
+      </div>
+
+      {/* Actions */}
+      <div className="col-span-2 text-right">
+        <button onClick={handleDelete} disabled={loading} className="text-slate-600 hover:text-red-500 transition p-2">
           <Trash2 className="w-4 h-4" />
         </button>
-      </td>
-    </tr>
+      </div>
+
+    </div>
   );
 }
