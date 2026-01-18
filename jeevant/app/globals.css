@@ -74,3 +74,14 @@ body {
   transform: translateY(-2px);
   transition: all 0.3s ease;
 }
+
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+.animate-scan {
+  animation: scan 3s linear infinite;
+}
+.animate-spin-slow {
+  animation: spin 8s linear infinite;
+}
