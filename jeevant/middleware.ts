@@ -36,6 +36,7 @@ export const config = {
     '/planner/:path*',
     '/brain/:path*',
     '/career/:path*',
-    '/learning/:path*'
+    '/learning/:path*',
+    '/arsenal/:path*'
   ],
 };

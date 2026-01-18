@@ -102,7 +102,6 @@ const ApplicationSchema = new Schema({
   lastUpdated: { type: Date, default: Date.now }
 });
 
-// ... existing schemas ...
 
 // --- 9. MESSAGE SCHEMA (Contact Form) ---
 const MessageSchema = new Schema({
@@ -114,8 +113,19 @@ const MessageSchema = new Schema({
   timestamp: { type: Date, default: Date.now }
 });
 
-export const Message = models.Message || model("Message", MessageSchema);
 
+
+// --- 10. SNIPPET SCHEMA (The Arsenal) ---
+const SnippetSchema = new Schema({
+  title: { type: String, required: true },
+  language: { type: String, required: true }, // e.g., 'tsx', 'python'
+  code: { type: String, required: true },
+  tags: [{ type: String }],
+  isCopied: { type: Number, default: 0 } // Track how many times it was useful
+});
+
+export const Snippet = models.Snippet || model("Snippet", SnippetSchema);
+export const Message = models.Message || model("Message", MessageSchema);
 export const Application = models.Application || model("Application", ApplicationSchema);
 export const Experience = models.Experience || model("Experience", ExperienceSchema);
 export const Achievement = models.Achievement || model("Achievement", AchievementSchema);
