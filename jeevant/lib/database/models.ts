@@ -87,6 +87,22 @@ const CertificateSchema = new Schema({
   url: { type: String }
 });
 
+
+const ApplicationSchema = new Schema({
+  company: { type: String, required: true },
+  role: { type: String, required: true },
+  status: { 
+    type: String, 
+    enum: ["applied", "interview", "offer", "rejected", "ghosted"], 
+    default: "applied" 
+  },
+  salary: { type: String }, // e.g. "50k" or "15LPA"
+  notes: { type: String },
+  dateApplied: { type: Date, default: Date.now },
+  lastUpdated: { type: Date, default: Date.now }
+});
+
+export const Application = models.Application || model("Application", ApplicationSchema);
 export const Experience = models.Experience || model("Experience", ExperienceSchema);
 export const Achievement = models.Achievement || model("Achievement", AchievementSchema);
 export const Certificate = models.Certificate || model("Certificate", CertificateSchema);
