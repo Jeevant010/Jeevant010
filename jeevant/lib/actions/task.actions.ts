@@ -23,7 +23,7 @@ export async function getDailyTasks() {
 }
 
 // 2. CREATE TASK
-export async function createTask(formData: FormData) {
+export async function createTask(formData: FormData): Promise<void> {
   try {
     await connectDB();
     const title = formData.get("title");
@@ -36,9 +36,8 @@ export async function createTask(formData: FormData) {
 
     revalidatePath("/planner/daily");
     revalidatePath("/dashboard"); // Update the dashboard stats too
-    return { success: true };
   } catch (error) {
-    return { success: false };
+    console.error("Failed to create task:", error);
   }
 }
 
