@@ -24,19 +24,21 @@ export async function getNotes(searchQuery: string = "") {
 }
 
 // 2. LOG NEW CLUE (Create Note)
-export async function createNote(formData: FormData) {
+export async function createNote(formData: FormData): Promise<void> {
   try {
     await connectDB();
     const title = formData.get("title");
     const content = formData.get("content");
-    const tags = (formData.get("tags") as string).split(",").map(t => t.trim());
+    const rawTags = formData.get("tags");
+    const tags = typeof rawTags === "string" && rawTags.trim().length > 0
+      ? rawTags.split(",").map((t) => t.trim()).filter(Boolean)
+      : [];
 
     await Note.create({ title, content, tags, isPinned: false });
     
     revalidatePath("/brain");
-    return { success: true };
   } catch (error) {
-    return { success: false };
+    console.error("Failed to create note:", error);
   }
 }
 
