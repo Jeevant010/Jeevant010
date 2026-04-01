@@ -5,7 +5,7 @@ import connectDB from "@/lib/db";
 import { Project } from "@/lib/database/models";
 
 // 1. CREATE
-export async function createProject(formData: FormData) {
+export async function createProject(formData: FormData): Promise<void> {
   try {
     await connectDB();
 
@@ -26,10 +26,8 @@ export async function createProject(formData: FormData) {
 
     // Refresh the CMS page so the new project shows up immediately
     revalidatePath("/cms/projects");
-    return { success: true };
   } catch (error) {
     console.error("Failed to create project:", error);
-    return { success: false, error: "Failed to create project" };
   }
 }
 
