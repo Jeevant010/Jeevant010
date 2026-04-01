@@ -13,7 +13,7 @@ export async function createProject(formData: FormData): Promise<void> {
     const description = formData.get("description") as string;
     const repoLink = formData.get("repoLink") as string;
     // Auto-generate slug from title (e.g., "EcoSort AI" -> "ecosort-ai")
-    const slug = title.toLowerCase().replace(/ /g, "-") + "-" + Date.now(); 
+    const slug = title.toLowerCase().replace(/ /g, "-") + "-" + Date.now();
 
     await Project.create({
       title,
@@ -37,7 +37,7 @@ export async function getProjects() {
     await connectDB();
     // Sort by newest first
     const projects = await Project.find({}).sort({ createdAt: -1 }).lean();
-    
+
     // Convert _id to string for Next.js serialization
     return projects.map((p: any) => ({
       ...p,
@@ -55,7 +55,7 @@ export async function toggleVisibility(id: string, currentStatus: string) {
     await connectDB();
     const newStatus = currentStatus === "public" ? "private" : "public";
     await Project.findByIdAndUpdate(id, { visibility: newStatus });
-    
+
     revalidatePath("/cms/projects");
     revalidatePath("/projects"); // Also update the public page!
     return { success: true };
