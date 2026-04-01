@@ -8,12 +8,17 @@ import { Note } from "@/lib/database/models";
 export async function getNotes(searchQuery: string = "") {
   try {
     await connectDB();
-    const query = searchQuery 
-      ? { $or: [{ title: { $regex: searchQuery, $options: 'i' } }, { content: { $regex: searchQuery, $options: 'i' } }] }
+    const query = searchQuery
+      ? {
+          $or: [
+            { title: { $regex: searchQuery, $options: "i" } },
+            { content: { $regex: searchQuery, $options: "i" } },
+          ],
+        }
       : {};
 
     const notes = await Note.find(query).sort({ isPinned: -1, updatedAt: -1 });
-    
+
     return notes.map((n: any) => ({
       ...n.toObject(),
       _id: n._id.toString(),
@@ -30,12 +35,16 @@ export async function createNote(formData: FormData): Promise<void> {
     const title = formData.get("title");
     const content = formData.get("content");
     const rawTags = formData.get("tags");
-    const tags = typeof rawTags === "string" && rawTags.trim().length > 0
-      ? rawTags.split(",").map((t) => t.trim()).filter(Boolean)
-      : [];
+    const tags =
+      typeof rawTags === "string" && rawTags.trim().length > 0
+        ? rawTags
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean)
+        : [];
 
     await Note.create({ title, content, tags, isPinned: false });
-    
+
     revalidatePath("/brain");
   } catch (error) {
     console.error("Failed to create note:", error);
