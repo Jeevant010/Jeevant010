@@ -23,11 +23,11 @@ export default async function ProjectsHolo() {
             <Globe className="w-8 h-8 text-cyan-400" />
           </div>
           <div>
-            <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-widest" style={{ textShadow: "0 0 10px cyan" }}>
-              Sector: Projects
+            <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-widest drop-shadow-[0_0_10px_cyan]">
+              Projects
             </h1>
             <p className="text-cyan-600 text-sm tracking-[0.3em] mt-1">
-              // DEPLOYED SYSTEMS & SCHEMATICS
+              // SELECTED WORK & BUILDS
             </p>
           </div>
         </div>
@@ -36,7 +36,7 @@ export default async function ProjectsHolo() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {projects.length === 0 ? (
             <div className="col-span-full border border-dashed border-cyan-900 p-20 text-center text-cyan-800 animate-pulse">
-              NO SYSTEMS DETECTED IN THIS SECTOR.
+              NO PUBLIC PROJECTS YET.
             </div>
           ) : (
             projects.map((project: any) => (
