@@ -21,8 +21,8 @@ function SubmitButton() {
 
 export default function AddProjectForm() {
   return (
-    <form action={createProject} className="flex gap-2 items-end bg-slate-900/50 p-4 rounded-xl border border-slate-800 mb-6">
-      <div className="flex-1 space-y-1">
+    <form action={createProject} className="grid gap-3 bg-slate-900/50 p-4 rounded-xl border border-slate-800 mb-6 md:grid-cols-6">
+      <div className="md:col-span-2 space-y-1">
         <label className="text-xs text-slate-400 ml-1">Project Name</label>
         <input 
           name="title" 
@@ -31,7 +31,7 @@ export default function AddProjectForm() {
           className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none transition"
         />
       </div>
-      <div className="flex-1 space-y-1 hidden md:block">
+      <div className="md:col-span-2 space-y-1">
         <label className="text-xs text-slate-400 ml-1">Short Description</label>
         <input 
           name="description" 
@@ -40,6 +40,18 @@ export default function AddProjectForm() {
           className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none transition"
         />
       </div>
+      <div className="md:col-span-1 space-y-1">
+        <label className="text-xs text-slate-400 ml-1">Start Date</label>
+        <input name="startDate" type="date" placeholder="YYYY-MM-DD" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none transition" />
+      </div>
+      <div className="md:col-span-1 space-y-1">
+        <label className="text-xs text-slate-400 ml-1">End Date</label>
+        <input name="endDate" type="date" placeholder="YYYY-MM-DD" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none transition" />
+      </div>
+      <label className="md:col-span-2 flex items-center gap-2 text-xs uppercase tracking-wider text-slate-400 mt-1">
+        <input name="isOngoing" type="checkbox" className="h-4 w-4 rounded border-slate-700 bg-slate-950 text-blue-500" />
+        Ongoing project
+      </label>
       <SubmitButton />
     </form>
   );
