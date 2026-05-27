@@ -68,7 +68,7 @@ export default async function AboutRPG() {
           {/* Header */}
           <div className="border-b-2 border-[#4a3c30] pb-4 flex justify-between items-end">
             <div>
-               <h1 className="text-5xl font-black text-[#e8dcc5] uppercase tracking-tighter" style={{ textShadow: "2px 2px 0px #000" }}>
+               <h1 className="text-5xl font-black text-[#e8dcc5] uppercase tracking-tighter [text-shadow:2px_2px_0px_#000]">
                  Character Sheet
                </h1>
                <p className="text-[#8a7045] font-bold mt-2 font-mono">// CLASS: MERN_ARCHMAGE // SPECIALTY: AI_SUMMONING</p>
