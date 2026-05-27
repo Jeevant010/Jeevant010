@@ -26,11 +26,11 @@ export default async function MindPlace({
       {/* --- HEADER --- */}
       <div className="relative z-10 flex flex-col md:flex-row justify-between items-end mb-12 border-b border-white/10 pb-6">
         <div>
-          <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter" style={{ textShadow: "0 0 20px rgba(255,255,255,0.2)" }}>
-            The Mind Place
+          <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+            Notes
           </h1>
           <p className="text-slate-400 font-mono mt-2">
-            // CASE: JEEVANT_OS // EVIDENCE_LOG
+            // PERSONAL NOTES // RESEARCH LOG
           </p>
         </div>
 
@@ -39,10 +39,10 @@ export default async function MindPlace({
           <input 
             name="q"
             defaultValue={query}
-            placeholder="SEARCH EVIDENCE..." 
+            placeholder="SEARCH NOTES..." 
             className="w-full bg-black/30 border-b-2 border-slate-600 text-white px-4 py-3 focus:outline-none focus:border-white font-mono placeholder:text-slate-600 transition-colors"
           />
-          <button type="submit" className="absolute right-0 top-3 text-slate-500 hover:text-white">
+          <button type="submit" title="Search notes" aria-label="Search notes" className="absolute right-0 top-3 text-slate-500 hover:text-white">
             <Search className="w-5 h-5" />
           </button>
         </form>
@@ -55,13 +55,13 @@ export default async function MindPlace({
             <input 
               name="title" 
               required 
-              placeholder="SUBJECT..." 
+                placeholder="TITLE..."
               className="bg-transparent text-lg font-bold text-white placeholder-slate-600 outline-none mb-2"
             />
             <textarea 
               name="content" 
               required 
-              placeholder="Type your observations here..." 
+                placeholder="Type your notes, papers, or observations here..." 
               className="bg-transparent text-sm text-slate-300 placeholder-slate-700 outline-none resize-none h-20 font-mono custom-scrollbar"
             />
             <input 
@@ -72,7 +72,7 @@ export default async function MindPlace({
           </div>
           <button type="submit" className="bg-white text-black font-bold px-6 py-2 rounded md:w-32 hover:bg-slate-200 transition flex flex-col items-center justify-center gap-1 uppercase tracking-widest text-xs">
             <Save className="w-5 h-5" />
-            Log Clue
+            Save Note
           </button>
         </form>
       </div>
@@ -80,7 +80,7 @@ export default async function MindPlace({
       {/* --- EVIDENCE BOARD --- */}
       {notes.length === 0 ? (
         <div className="relative z-10 text-center py-20 opacity-50">
-          <p className="text-slate-600 font-mono text-xl">NO EVIDENCE FOUND ON DESK.</p>
+          <p className="text-slate-600 font-mono text-xl">NO NOTES FOUND.</p>
         </div>
       ) : (
         <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
