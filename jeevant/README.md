@@ -20,6 +20,28 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Local Admin Access
+
+This app uses a single environment-driven admin password for login.
+
+- Set the password in `.env.local` as `ADMIN_SECRET`.
+- The login page compares the entered password against that value.
+- If you change `ADMIN_SECRET`, restart the dev server so the new value is picked up.
+
+## Admin Content Areas
+
+- `/cms/schedule` is the day/week planner for time blocks, recurring work, and color-coded events.
+- `/cms/journey` is where you add experience entries with start and end dates for the public timeline.
+- `/cms/expertise` is where you add achievements, certifications, and proof links.
+- `/cms/resume` edits the public resume identity fields such as title, resume link, and profile links.
+- `/cms/projects` now supports optional project start and end dates plus an ongoing flag, so the public timeline and mini-Gantt can show real chronology.
+- `/cms/schedule` also supports clearing events older than 30 days from the admin panel.
+
+## Troubleshooting
+
+- If `npm run dev` says it cannot find `package.json`, make sure you are inside the `jeevant` folder before running it.
+- If Next.js/Turbopack complains about the workspace root, keep `turbopack.root` pointed at the `jeevant` directory in `next.config.ts`.
+- If port `3000` is already in use, stop the existing dev server or run the app on another port with `npm run dev -- --port 3001`.
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
