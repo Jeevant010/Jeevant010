@@ -9,6 +9,9 @@ const ProjectSchema = new Schema({
   techStack: [{ type: String }],
   repoLink: { type: String },
   liveLink: { type: String },
+  startDate: { type: Date },
+  endDate: { type: Date },
+  isOngoing: { type: Boolean, default: false },
   visibility: { 
     type: String, 
     enum: ["public", "private", "archived"], 
@@ -38,6 +41,7 @@ const NoteSchema = new Schema({
   title: { type: String, required: true },
   content: { type: String, default: "" },
   tags: [{ type: String }],
+  visibility: { type: String, enum: ["public", "private"], default: "private" },
   isPinned: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
@@ -50,6 +54,7 @@ const LearningSchema = new Schema({
   url: { type: String },
   totalModules: { type: Number, default: 0 },
   completedModules: { type: Number, default: 0 },
+  visibility: { type: String, enum: ["public", "private"], default: "private" },
   status: { type: String, enum: ["not-started", "in-progress", "completed"], default: "not-started" },
 });
 
@@ -85,6 +90,21 @@ const CertificateSchema = new Schema({
   expiryDate: { type: Date },
   credentialId: { type: String },
   url: { type: String }
+});
+
+
+// --- SCHEDULE SCHEMA (Planner entries / Calendar) ---
+const ScheduleSchema = new Schema({
+  title: { type: String, required: true },
+  start: { type: Date, required: true }, // full ISO Date for start
+  end: { type: Date }, // optional end datetime
+  projectId: { type: Schema.Types.ObjectId, ref: "Project" },
+  notes: { type: String },
+  visibility: { type: String, enum: ["public", "private"], default: "private" },
+  isRecurring: { type: Boolean, default: false },
+  recurrence: { type: String, enum: ["none", "daily", "weekly", "monthly"], default: "none" },
+  colorCode: { type: String, enum: ["slate", "sky", "emerald", "amber", "rose", "violet"], default: "sky" },
+  createdAt: { type: Date, default: Date.now }
 });
 
 
@@ -150,3 +170,4 @@ export const Project = models.Project || model("Project", ProjectSchema);
 export const Task = models.Task || model("Task", TaskSchema);
 export const Note = models.Note || model("Note", NoteSchema);
 export const Learning = models.Learning || model("Learning", LearningSchema);
+export const Schedule = models.Schedule || model("Schedule", ScheduleSchema);

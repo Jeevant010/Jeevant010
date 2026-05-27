@@ -27,10 +27,13 @@ export async function addExperience(formData: FormData) {
     role: formData.get("role"),
     company: formData.get("company"),
     description: formData.get("description"),
-    startDate: new Date(),
-    type: "internship"
+    startDate: formData.get("startDate") ? new Date(String(formData.get("startDate"))) : new Date(),
+    endDate: formData.get("endDate") ? new Date(String(formData.get("endDate"))) : undefined,
+    type: String(formData.get("type") || "internship")
   });
   revalidatePath("/about");
+  revalidatePath("/journey");
+  revalidatePath("/resume");
 }
 
 // 3. ADD LOOT (Achievement)
@@ -39,7 +42,10 @@ export async function addAchievement(formData: FormData) {
   await Achievement.create({
     title: formData.get("title"),
     platform: formData.get("platform"),
-    description: formData.get("description")
+    description: formData.get("description"),
+    proofLink: formData.get("proofLink"),
+    date: formData.get("date") ? new Date(String(formData.get("date"))) : undefined,
   });
   revalidatePath("/about");
+  revalidatePath("/expertise");
 }

@@ -28,12 +28,26 @@ export async function getNotes(searchQuery: string = "") {
   }
 }
 
+export async function getPublicNotes() {
+  try {
+    await connectDB();
+    const notes = await Note.find({ visibility: "public" }).sort({ isPinned: -1, updatedAt: -1 });
+    return notes.map((n: any) => ({
+      ...n.toObject(),
+      _id: n._id.toString(),
+    }));
+  } catch (error) {
+    return [];
+  }
+}
+
 // 2. LOG NEW CLUE (Create Note)
 export async function createNote(formData: FormData): Promise<void> {
   try {
     await connectDB();
     const title = formData.get("title");
     const content = formData.get("content");
+    const visibility = String(formData.get("visibility") || "private");
     const rawTags = formData.get("tags");
     const tags =
       typeof rawTags === "string" && rawTags.trim().length > 0
@@ -43,7 +57,7 @@ export async function createNote(formData: FormData): Promise<void> {
             .filter(Boolean)
         : [];
 
-    await Note.create({ title, content, tags, isPinned: false });
+    await Note.create({ title, content, tags, visibility, isPinned: false });
 
     revalidatePath("/brain");
   } catch (error) {

@@ -20,7 +20,7 @@ interface SidebarProps {
 
 export default function Sidebar({ isExpanded, toggleSidebar, isMobile }: SidebarProps) {
   const pathname = usePathname();
-  const [mode, setMode] = useState<"OS" | "CMS">(pathname.includes("/cms") ? "CMS" : "OS");
+  const [mode, setMode] = useState<"VIEW" | "ADMIN">(pathname.includes("/cms") ? "ADMIN" : "VIEW");
 
   return (
     <aside className="h-full w-full flex flex-col border-r border-white/10 bg-[#0a0a0a] text-slate-400">
@@ -31,10 +31,10 @@ export default function Sidebar({ isExpanded, toggleSidebar, isMobile }: Sidebar
         {/* Logo / Title (Visible when expanded) */}
         {isExpanded ? (
           <span className="font-bold uppercase tracking-widest text-xs text-white">
-            System Dock
+            Site Menu
           </span>
         ) : (
-          <span className="w-full text-center text-xs font-bold">OS</span>
+          <span className="w-full text-center text-xs font-bold">Menu</span>
         )}
 
         {/* Toggle Button */}
@@ -51,16 +51,16 @@ export default function Sidebar({ isExpanded, toggleSidebar, isMobile }: Sidebar
         <div className="p-4 shrink-0">
           <div className="flex w-full items-center justify-between rounded-lg bg-white/5 p-1">
             <button 
-              onClick={() => setMode("OS")}
-              className={`flex-1 flex items-center justify-center gap-2 rounded py-2 text-xs font-bold uppercase transition-all whitespace-nowrap ${mode === "OS" ? 'bg-blue-600 text-white shadow-lg' : 'hover:text-white'}`}
+              onClick={() => setMode("VIEW")}
+              className={`flex-1 flex items-center justify-center gap-2 rounded py-2 text-xs font-bold uppercase transition-all whitespace-nowrap ${mode === "VIEW" ? 'bg-blue-600 text-white shadow-lg' : 'hover:text-white'}`}
             >
               <Monitor size={14} /> View
             </button>
             <button 
-              onClick={() => setMode("CMS")}
-              className={`flex-1 flex items-center justify-center gap-2 rounded py-2 text-xs font-bold uppercase transition-all whitespace-nowrap ${mode === "CMS" ? 'bg-yellow-600 text-white shadow-lg' : 'hover:text-white'}`}
+              onClick={() => setMode("ADMIN")}
+              className={`flex-1 flex items-center justify-center gap-2 rounded py-2 text-xs font-bold uppercase transition-all whitespace-nowrap ${mode === "ADMIN" ? 'bg-yellow-600 text-white shadow-lg' : 'hover:text-white'}`}
             >
-              <Settings size={14} /> Edit
+              <Settings size={14} /> Admin
             </button>
           </div>
         </div>
@@ -69,10 +69,10 @@ export default function Sidebar({ isExpanded, toggleSidebar, isMobile }: Sidebar
       {/* --- MODE ICONS (Collapsed) --- */}
       {!isExpanded && (
         <div className="flex flex-col items-center gap-4 py-4 shrink-0 border-b border-white/5">
-           <button onClick={() => setMode("OS")} className={`p-2 rounded-lg ${mode === "OS" ? "text-blue-500 bg-blue-500/10" : "text-slate-600"}`} title="OS Mode">
+           <button onClick={() => setMode("VIEW")} className={`p-2 rounded-lg ${mode === "VIEW" ? "text-blue-500 bg-blue-500/10" : "text-slate-600"}`} title="View Mode">
              <Monitor size={20} />
            </button>
-           <button onClick={() => setMode("CMS")} className={`p-2 rounded-lg ${mode === "CMS" ? "text-yellow-500 bg-yellow-500/10" : "text-slate-600"}`} title="CMS Mode">
+           <button onClick={() => setMode("ADMIN")} className={`p-2 rounded-lg ${mode === "ADMIN" ? "text-yellow-500 bg-yellow-500/10" : "text-slate-600"}`} title="Admin Mode">
              <Settings size={20} />
            </button>
         </div>
@@ -81,22 +81,26 @@ export default function Sidebar({ isExpanded, toggleSidebar, isMobile }: Sidebar
       {/* --- SCROLLABLE LINKS --- */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 custom-scrollbar">
         <div className="flex flex-col gap-1">
-          {mode === "OS" ? (
+          {mode === "VIEW" ? (
             <>
-              {isExpanded && <SectionHeader label="Personal OS" />}
-              <SidebarItem href="/dashboard" icon={<LayoutDashboard size={20} />} label="Command Center" active={pathname === "/dashboard"} expanded={isExpanded} />
-              <SidebarItem href="/planner/daily" icon={<Crosshair size={20} />} label="War Room" active={pathname.includes("planner")} expanded={isExpanded} />
-              <SidebarItem href="/career" icon={<Briefcase size={20} />} label="Corp Intel" active={pathname === "/career"} expanded={isExpanded} />
-              <SidebarItem href="/brain" icon={<Brain size={20} />} label="Mind Place" active={pathname === "/brain"} expanded={isExpanded} />
-              <SidebarItem href="/learning" icon={<Library size={20} />} label="The Matrix" active={pathname === "/learning"} expanded={isExpanded} />
-              <SidebarItem href="/arsenal" icon={<Box size={20} />} label="Arsenal" active={pathname === "/arsenal"} expanded={isExpanded} />
+              {isExpanded && <SectionHeader label="Personal Site" />}
+              <SidebarItem href="/dashboard" icon={<LayoutDashboard size={20} />} label="Overview" active={pathname === "/dashboard"} expanded={isExpanded} />
+              <SidebarItem href="/planner/daily" icon={<Crosshair size={20} />} label="Schedule" active={pathname.includes("planner")} expanded={isExpanded} />
+              <SidebarItem href="/career" icon={<Briefcase size={20} />} label="Work" active={pathname === "/career"} expanded={isExpanded} />
+              <SidebarItem href="/brain" icon={<Brain size={20} />} label="Notes" active={pathname === "/brain"} expanded={isExpanded} />
+              <SidebarItem href="/learning" icon={<Library size={20} />} label="Learning" active={pathname === "/learning"} expanded={isExpanded} />
+              <SidebarItem href="/arsenal" icon={<Box size={20} />} label="Tools" active={pathname === "/arsenal"} expanded={isExpanded} />
             </>
           ) : (
             <>
-              {isExpanded && <SectionHeader label="God Mode" />}
-              <SidebarItem href="/cms/projects" icon={<FileCog size={20} />} label="Project Files" active={pathname.includes("projects")} isCms expanded={isExpanded} />
-              <SidebarItem href="/cms/rpg" icon={<Sword size={20} />} label="RPG Stats" active={pathname.includes("rpg")} isCms expanded={isExpanded} />
-              <SidebarItem href="/cms/profile" icon={<UserCog size={20} />} label="Identity Matrix" active={pathname.includes("profile")} isCms expanded={isExpanded} />
+              {isExpanded && <SectionHeader label="Admin" />}
+              <SidebarItem href="/cms/projects" icon={<FileCog size={20} />} label="Projects" active={pathname.includes("projects")} isCms expanded={isExpanded} />
+              <SidebarItem href="/cms/journey" icon={<Sword size={20} />} label="Journey" active={pathname.includes("journey")} isCms expanded={isExpanded} />
+              <SidebarItem href="/cms/expertise" icon={<Box size={20} />} label="Expertise" active={pathname.includes("expertise")} isCms expanded={isExpanded} />
+              <SidebarItem href="/cms/resume" icon={<FileCog size={20} />} label="Resume" active={pathname.includes("resume")} isCms expanded={isExpanded} />
+              <SidebarItem href="/cms/schedule" icon={<Crosshair size={20} />} label="Schedule" active={pathname.includes("schedule")} isCms expanded={isExpanded} />
+              <SidebarItem href="/cms/rpg" icon={<Sword size={20} />} label="Content" active={pathname.includes("rpg")} isCms expanded={isExpanded} />
+              <SidebarItem href="/cms/profile" icon={<UserCog size={20} />} label="Profile" active={pathname.includes("profile")} isCms expanded={isExpanded} />
             </>
           )}
         </div>
@@ -108,7 +112,7 @@ export default function Sidebar({ isExpanded, toggleSidebar, isMobile }: Sidebar
           <button className={`flex w-full items-center gap-3 rounded-xl border border-red-900/30 bg-red-900/10 p-3 text-red-400 hover:bg-red-900/30 hover:text-red-200 transition-all group overflow-hidden ${isExpanded ? 'justify-start' : 'justify-center'}`}>
             <LogOut size={20} className="shrink-0" />
             <span className={`text-sm font-bold uppercase tracking-wider whitespace-nowrap transition-opacity duration-300 ${isExpanded ? 'opacity-100' : 'opacity-0 hidden w-0'}`}>
-              Disconnect
+              Sign out
             </span>
           </button>
         </form>

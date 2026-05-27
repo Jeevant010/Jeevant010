@@ -12,6 +12,9 @@ export async function createProject(formData: FormData): Promise<void> {
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
     const repoLink = formData.get("repoLink") as string;
+    const startDateRaw = formData.get("startDate") as string;
+    const endDateRaw = formData.get("endDate") as string;
+    const isOngoing = formData.get("isOngoing") === "on";
     // Auto-generate slug from title (e.g., "EcoSort AI" -> "ecosort-ai")
     const slug = title.toLowerCase().replace(/ /g, "-") + "-" + Date.now();
 
@@ -20,6 +23,9 @@ export async function createProject(formData: FormData): Promise<void> {
       slug,
       description,
       repoLink,
+      startDate: startDateRaw ? new Date(startDateRaw) : undefined,
+      endDate: isOngoing ? undefined : endDateRaw ? new Date(endDateRaw) : undefined,
+      isOngoing,
       status: "planned",
       visibility: "private",
     });
