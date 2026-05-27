@@ -1,19 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  /* Modern CSS Variables for Theming */
-  --background: #f8fafc; /* Slate 50 */
-  --foreground: #0f172a; /* Slate 900 */
-  --primary: #2563eb;    /* Blue 600 */
-  --secondary: #64748b;  /* Slate 500 */
+  --background: #0b0b0f;
+  --foreground: #eef2ff;
+  --primary: #3b82f6;
+  --secondary: #94a3b8;
+  --shell-bg: #050505;
+  --shell-surface: #0b0b0f;
+  --shell-text: #f8fafc;
+  --shell-muted: #94a3b8;
+  --shell-border: rgba(255, 255, 255, 0.12);
+  --shell-accent: #60a5fa;
 }
 
-/* Dark Mode Overrides (if you add a .dark class to body later) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f172a;
-    --foreground: #f8fafc;
-  }
+:root[data-theme="light"] {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --primary: #2563eb;
+  --secondary: #475569;
+  --shell-bg: #f8fafc;
+  --shell-surface: #ffffff;
+  --shell-text: #0f172a;
+  --shell-muted: #64748b;
+  --shell-border: rgba(15, 23, 42, 0.12);
+  --shell-accent: #2563eb;
 }
 
 /* Custom Scrollbar - Standard CSS (No @apply) */
@@ -44,12 +54,31 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.theme-shell {
+  background: var(--shell-bg);
+  color: var(--shell-text);
+}
+
+.theme-surface {
+  background: var(--shell-surface);
+  border-color: var(--shell-border);
+}
+
+.theme-muted {
+  color: var(--shell-muted);
+}
+
+.theme-accent {
+  color: var(--shell-accent);
+}
+
 /* --- THE "EXPENSIVE" BACKGROUND --- */
 .bg-grid-pattern {
   background-size: 50px 50px;
   background-image: 
     linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
   mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
 }
 
@@ -62,8 +91,8 @@ body {
 
 .glass-card {
   background: rgba(30, 41, 59, 0.4);
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
