@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${mono.variable} bg-black text-white antialiased selection:bg-blue-500/30 selection:text-blue-200`}>
+      <body className={`${inter.variable} ${mono.variable} bg-shell-bg text-shell-text antialiased selection:bg-shell-accent/30 selection:text-shell-text`}>
         
         {/* MAIN CONTENT WRAPPER */}
         <main className="mb-32"> 
