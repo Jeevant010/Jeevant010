@@ -19,55 +19,69 @@ export default async function Dashboard() {
   const currentObjective = pendingTasks[0]?.title || "NO ACTIVE OBJECTIVES";
 
   return (
-    <div className="min-h-screen bg-[#111] text-slate-300 p-8 font-mono relative overflow-hidden -m-8">
-      {/* Background FX */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,18,18,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(255,0,0,0.02),rgba(255,0,0,0.06))] bg-[length:100%_4px,6px_100%] pointer-events-none z-0" />
-      <div className="absolute top-0 left-0 w-full h-1 bg-red-600/50 shadow-[0_0_20px_rgba(220,38,38,0.6)] z-20" />
-
-      <div className="relative z-10 max-w-7xl mx-auto space-y-12">
+    <div className="min-h-full bg-transparent p-4 sm:p-6 md:p-10 font-mono relative">
+      <div className="relative z-10 max-w-7xl mx-auto space-y-8 sm:space-y-12">
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-end border-b border-red-900/30 pb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-shell-border pb-6 relative gap-4">
+          <div className="absolute bottom-0 left-0 w-1/3 h-[2px] bg-gradient-to-r from-[color:var(--accent)] to-transparent" />
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-3 h-3 bg-red-600 rounded-full animate-pulse shadow-[0_0_10px_red]" />
-              <span className="text-red-500 font-bold tracking-widest text-xs">SYSTEM_ONLINE // JEEVANT_PORTFOLIO_V2</span>
+              <div className="w-3 h-3 bg-[color:var(--accent)] rounded-full animate-pulse shadow-[0_0_15px_var(--accent)]" />
+              <span className="text-[color:var(--accent)] font-bold tracking-[0.3em] text-[10px] sm:text-xs uppercase">SYSTEM_ONLINE // THE_CONTINENTAL</span>
             </div>
-              <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter">Overview</h1>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-shell-text uppercase tracking-tighter drop-shadow-md">
+              Operations Board
+            </h1>
           </div>
         </div>
 
-        {/* Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Metrics / Case Files */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {[
-            { label: "Active Projects", val: activeCases, icon: Target, color: "text-blue-500" },
-            { label: "Open Tasks", val: pendingTasks.length, icon: Clock, color: "text-yellow-500" },
-            { label: "Notes", val: evidenceCount, icon: FileText, color: "text-slate-400" },
-            { label: "Status", val: "READY", icon: Activity, color: "text-green-500" },
+            { label: "Active Directives", val: activeCases, icon: Target },
+            { label: "Open Threads", val: pendingTasks.length, icon: Clock },
+            { label: "Evidence Files", val: evidenceCount, icon: FileText },
+            { label: "System Status", val: "NOMINAL", icon: Activity },
           ].map((stat, i) => (
-            <div key={i} className="bg-[#1a1a1a] border border-white/5 p-6 relative group overflow-hidden">
-              <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity"><stat.icon className="w-16 h-16" /></div>
-              <div className="flex items-center gap-2 mb-4"><stat.icon className={`w-4 h-4 ${stat.color}`} /><span className="text-xs font-bold uppercase tracking-widest text-slate-500">{stat.label}</span></div>
-              <div className="text-4xl font-bold text-white tracking-tighter">{stat.val}</div>
+            <div key={i} className="cut-corners bg-[#0a0a0f]/80 backdrop-blur-xl border border-shell-border p-6 relative group overflow-hidden transition-all hover:border-[color:var(--accent)] hover:shadow-[0_0_30px_rgba(245,158,11,0.15)]">
+              <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
+                <stat.icon className="w-24 h-24 text-[color:var(--accent)] transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500" />
+              </div>
+              <div className="flex items-center gap-2 mb-4 relative z-10">
+                <stat.icon className="w-4 h-4 text-[color:var(--accent)]" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-shell-muted group-hover:text-[color:var(--accent)] transition-colors">{stat.label}</span>
+              </div>
+              <div className="text-3xl sm:text-4xl font-black text-shell-text tracking-tighter relative z-10 drop-shadow-md">{stat.val}</div>
             </div>
           ))}
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 h-full">
           {/* Mission Monitor */}
-          <div className="lg:col-span-2 bg-[#0a0a0a] border border-red-900/20 p-8 relative flex flex-col h-full">
-            <h3 className="text-red-500 font-bold uppercase tracking-widest mb-6 flex items-center gap-2"><ShieldAlert className="w-5 h-5" /> Current Focus</h3>
-            <div className="text-2xl md:text-3xl font-bold text-white mb-8 border-l-4 border-red-600 pl-6 py-2 bg-gradient-to-r from-red-900/10 to-transparent">{currentObjective}</div>
+          <div className="lg:col-span-2 cut-corners-reverse bg-[#0a0a0f]/80 backdrop-blur-xl border border-shell-border p-6 sm:p-8 relative flex flex-col h-full shadow-2xl group hover:border-blue-500/50 transition-colors">
+            
+            <h3 className="text-blue-500 font-bold uppercase tracking-widest mb-6 flex items-center gap-3 text-xs sm:text-sm">
+              <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" /> Current Primary Objective
+            </h3>
+            
+            <div className="text-xl sm:text-2xl md:text-3xl font-black text-shell-text mb-8 border-l-2 border-blue-500 pl-4 sm:pl-6 py-4 bg-gradient-to-r from-blue-500/10 to-transparent tracking-tight leading-snug">
+              {currentObjective}
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-auto">
               <div className="space-y-4">
-                <h4 className="text-xs font-bold text-slate-500 uppercase">Recent Notes</h4>
-                <div className="space-y-2">
+                <h4 className="text-[10px] font-bold text-shell-muted uppercase tracking-[0.3em] border-b border-shell-border pb-2">Recent Intel (Notes)</h4>
+                <div className="space-y-3">
                   {notes.slice(0, 3).map((note: any) => (
-                    <Link key={note._id} href="/brain" className="block p-3 bg-[#151515] border border-white/5 hover:border-white/20 transition group">
-                      <div className="flex justify-between items-center"><span className="text-sm font-bold text-slate-300 group-hover:text-white truncate max-w-[200px]">{note.title}</span><span className="text-[10px] text-slate-600">{new Date(note.updatedAt).toLocaleDateString()}</span></div>
+                    <Link key={note._id} href="/brain" className="block p-3 sm:p-4 bg-black/40 border border-shell-border hover:border-blue-500/50 transition group/note">
+                      <div className="flex justify-between items-start gap-4">
+                        <span className="text-xs sm:text-sm font-bold text-shell-text group-hover/note:text-blue-400 transition-colors line-clamp-1">{note.title}</span>
+                        <span className="text-[9px] text-shell-muted shrink-0 uppercase tracking-wider font-sans">{new Date(note.updatedAt).toLocaleDateString()}</span>
+                      </div>
                     </Link>
                   ))}
+                  {notes.length === 0 && <p className="text-xs text-shell-muted italic font-sans">No recent intel.</p>}
                 </div>
               </div>
             </div>
@@ -75,10 +89,10 @@ export default async function Dashboard() {
 
           {/* Quick Actions Grid (On-Screen Nav) */}
           <div className="grid grid-cols-2 gap-4 h-full content-start">
-             <DashboardLink href="/planner/daily" title="Schedule" sub="Tasks" icon={<Clock className="w-6 h-6 text-red-500" />} />
-             <DashboardLink href="/brain" title="Notes" sub="Writing" icon={<Terminal className="w-6 h-6 text-yellow-500" />} />
-             <DashboardLink href="/career" title="Work" sub="Experience" icon={<Briefcase className="w-6 h-6 text-pink-500" />} />
-             <DashboardLink href="/cms/projects" title="Admin" sub="Manage" icon={<Database className="w-6 h-6 text-blue-500" />} isSpecial />
+             <DashboardLink href="/planner/daily" title="Schedule" sub="Agenda" icon={<Clock className="w-5 h-5 sm:w-6 sm:h-6" />} />
+             <DashboardLink href="/brain" title="Notes" sub="Intel" icon={<Terminal className="w-5 h-5 sm:w-6 sm:h-6" />} />
+             <DashboardLink href="/cms/rpg" title="Quests" sub="RPG Hub" icon={<Briefcase className="w-5 h-5 sm:w-6 sm:h-6" />} />
+             <DashboardLink href="/cms/projects" title="Admin" sub="Manage" icon={<Database className="w-5 h-5 sm:w-6 sm:h-6" />} isSpecial />
           </div>
         </div>
       </div>
@@ -88,9 +102,19 @@ export default async function Dashboard() {
 
 function DashboardLink({ href, title, sub, icon, isSpecial }: any) {
   return (
-    <Link href={href} className={`p-4 border ${isSpecial ? 'border-blue-500/50 bg-blue-900/10' : 'border-white/5 bg-[#151515]'} hover:border-white/20 hover:scale-[1.02] transition-all group flex flex-col justify-between h-32`}>
-      <div className="flex justify-between items-start">{icon} {isSpecial && <span className="text-[9px] font-bold bg-blue-500 text-black px-1 rounded">EDIT</span>}</div>
-      <div><div className={`font-bold uppercase tracking-wider ${isSpecial ? 'text-blue-200' : 'text-white'}`}>{title}</div><div className="text-xs text-slate-500 mt-1">{sub}</div></div>
+    <Link href={href} className={`cut-corners p-4 sm:p-5 border ${isSpecial ? 'border-amber-500/50 bg-amber-500/10' : 'border-shell-border bg-black/60'} hover:border-[color:var(--accent)] hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] transition-all group flex flex-col justify-between h-32 sm:h-36 backdrop-blur-sm`}>
+      <div className="flex justify-between items-start text-shell-muted group-hover:text-[color:var(--accent)] transition-colors">
+        {icon} 
+        {isSpecial && <span className="text-[9px] font-bold bg-amber-500 text-black px-1.5 py-0.5 rounded tracking-widest shadow-[0_0_10px_rgba(245,158,11,0.5)]">ROOT</span>}
+      </div>
+      <div>
+        <div className={`font-black uppercase tracking-widest mt-4 text-xs sm:text-sm ${isSpecial ? 'text-amber-500' : 'text-shell-text'}`}>
+          {title}
+        </div>
+        <div className="text-[9px] sm:text-[10px] uppercase text-shell-muted mt-1 tracking-[0.2em]">
+          {sub}
+        </div>
+      </div>
     </Link>
   )
 }
