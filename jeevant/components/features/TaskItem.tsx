@@ -25,15 +25,15 @@ export default function TaskItem({ task }: { task: any }) {
           onClick={handleToggle}
           className={`w-5 h-5 rounded-full border flex items-center justify-center transition ${completed ? 'bg-green-500 border-green-500' : 'border-slate-500 hover:border-blue-400'}`}
         >
-          {completed && <Check className="w-3 h-3 text-white" />}
+          {completed && <Check className="w-3 h-3 text-shell-text" />}
         </button>
-        <span className={`text-sm ${completed ? 'line-through text-slate-500' : 'text-slate-200'}`}>
+        <span className={`text-sm ${completed ? 'line-through text-shell-muted' : 'text-slate-200'}`}>
           {task.title}
         </span>
       </div>
       
       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition">
-        <button title="trash" onClick={handleDelete} className="text-slate-500 hover:text-red-400">
+        <button title="trash" onClick={handleDelete} className="text-shell-muted hover:text-red-400">
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
