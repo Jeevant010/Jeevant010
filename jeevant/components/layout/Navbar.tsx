@@ -18,7 +18,7 @@ export default async function Navbar() {
 
   return (
     <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-fit px-4">
-      <div className="bg-[color:var(--shell-bg)]/95 backdrop-blur-xl border border-[color:var(--shell-border)] rounded-2xl p-2 shadow-2xl flex items-center gap-2 overflow-x-auto custom-scrollbar">
+      <div className="bg-shell-bg/95 backdrop-blur-xl border border-shell-border rounded-2xl p-2 shadow-2xl flex items-center gap-2 overflow-x-auto custom-scrollbar">
         
         {/* =======================================
             ZONE 1: PUBLIC (The Facade)
@@ -27,13 +27,10 @@ export default async function Navbar() {
           <NavLink href="/" icon={<Terminal size={18} />} label="Home" />
           <NavLink href="/about" icon={<User size={18} />} label="About" />
           <NavLink href="/journey" icon={<MapPinned size={18} />} label="Journey" />
-          <NavLink href="/expertise" icon={<Sparkles size={18} />} label="Expertise" />
           <NavLink href="/projects" icon={<Code size={18} />} label="Projects" />
           <NavLink href="/research" icon={<Radio size={18} />} label="Research" />
           <NavLink href="/library" icon={<Library size={18} />} label="Library" />
-          <NavLink href="/resume" icon={<FileCog size={18} />} label="Resume" />
           <NavLink href="/schedule" icon={<Crosshair size={18} />} label="Schedule" />
-          <NavLink href="/responsibilities" icon={<Shield size={18} />} label="Responsibilities" />
           <NavLink href="/contact" icon={<Terminal size={18} />} label="Contact" />
         </div>
 
@@ -41,7 +38,7 @@ export default async function Navbar() {
           <>
             <div className="w-px h-8 bg-gradient-to-b from-transparent via-white/20 to-transparent mx-1"></div>
 
-            <div className="flex items-center gap-1 px-2 bg-white/5 rounded-xl border border-white/5 mx-1">
+            <div className="flex items-center gap-1 px-2 bg-shell-text/5 rounded-xl border border-shell-border mx-1">
               <NavLink href="/dashboard" icon={<LayoutDashboard size={18} />} label="Overview" activeColor="text-red-500" />
               <NavLink href="/planner/daily" icon={<Crosshair size={18} />} label="Schedule" activeColor="text-red-500" />
               <NavLink href="/career" icon={<Briefcase size={18} />} label="Work" activeColor="text-pink-500" />
@@ -58,20 +55,15 @@ export default async function Navbar() {
               <NavLink href="/cms/profile" icon={<UserCog size={18} />} label="Profile" activeColor="text-purple-400" isCms />
             </div>
             
-            <form action={logout} className="ml-2 border-l border-white/10 pl-2">
-              <button className="p-3 rounded-xl hover:bg-red-950 text-slate-600 hover:text-red-500 transition-all flex items-center justify-center" title="System Shutdown">
+            <form action={logout} className="ml-2 border-l border-shell-border pl-2">
+              <button className="p-3 rounded-xl hover:bg-red-950 text-shell-muted hover:text-red-500 transition-all flex items-center justify-center" title="System Shutdown">
                 <LogOut size={16} />
               </button>
             </form>
           </>
         )}
 
-        {/* LOGIN LINK (Hidden when logged in) */}
-        {!isLoggedIn && (
-           <Link href="/login" className="ml-2 text-[10px] font-mono text-slate-700 hover:text-white transition uppercase tracking-widest px-2 whitespace-nowrap">
-             // Admin Login
-          </Link>
-        )}
+
 
       </div>
     </nav>
@@ -83,7 +75,7 @@ function NavLink({
   href, 
   icon, 
   label, 
-  activeColor = "text-white", 
+  activeColor = "text-shell-text", 
   isCms = false 
 }: { 
   href: string, 
@@ -95,15 +87,15 @@ function NavLink({
   return (
     <Link 
       href={href} 
-      className={`group relative p-3 rounded-xl transition-all flex flex-col items-center gap-1 shrink-0 ${isCms ? 'hover:bg-blue-900/20 hover:border-blue-500/30 border border-transparent' : 'hover:bg-white/10'}`}
+      className={`group relative p-3 rounded-xl transition-all flex flex-col items-center gap-1 shrink-0 ${isCms ? 'hover:bg-blue-900/20 hover:border-blue-500/30 border border-transparent' : 'hover:bg-shell-text/10'}`}
     >
-      <span className={`text-slate-400 group-hover:${activeColor} transition-colors`}>{icon}</span>
+      <span className={`text-shell-muted group-hover:${activeColor} transition-colors`}>{icon}</span>
       
       {/* Tooltip */}
-      <span className="absolute -top-14 left-1/2 -translate-x-1/2 bg-[#0a0a0a] border border-white/20 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider text-white opacity-0 group-hover:opacity-100 transition-all transform group-hover:-translate-y-1 whitespace-nowrap pointer-events-none shadow-xl z-50">
+      <span className="absolute -top-14 left-1/2 -translate-x-1/2 bg-shell-surface border border-shell-border px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider text-shell-text opacity-0 group-hover:opacity-100 transition-all transform group-hover:-translate-y-1 whitespace-nowrap pointer-events-none shadow-xl z-50">
         {label}
         {/* Tiny arrow for tooltip */}
-        <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#0a0a0a] border-r border-b border-white/20 rotate-45"></span>
+        <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-shell-surface border-r border-b border-shell-border rotate-45"></span>
       </span>
     </Link>
   );
