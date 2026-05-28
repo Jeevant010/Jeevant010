@@ -12,7 +12,6 @@ export default function PrivateLayoutWrapper({
   const [isExpanded, setIsExpanded] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Handle screen resize to auto-collapse on mobile
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
@@ -24,54 +23,48 @@ export default function PrivateLayoutWrapper({
       }
     };
     
-    // Init
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return (
-    // APP SHELL: 100vh height, Hidden Overflow (No scrollbars on body)
-    <div className="flex h-screen w-full bg-[#050505] overflow-hidden text-slate-300">
+    // APP SHELL: The Mind Place OS
+    <div className="flex h-screen w-full bg-[color:var(--mindplace-bg)] overflow-hidden text-shell-text relative font-mono">
       
-      {/* --- SIDEBAR CONTAINER (Desktop) --- 
-          This div takes up physical space. The Main content MUST shrink to accommodate it.
-      */}
+      {/* Mind Place FX */}
+      <div className="absolute inset-0 bg-mindplace-grid opacity-30 pointer-events-none z-0" />
+      <div className="film-grain z-50" />
+
+      {/* --- SIDEBAR CONTAINER --- */}
       <div 
-        className={`hidden md:block shrink-0 transition-[width] duration-300 ease-in-out relative z-40 ${
+        className={`hidden md:block shrink-0 transition-[width] duration-300 ease-in-out relative z-40 border-r border-shell-border bg-shell-bg/40 backdrop-blur-xl ${
           isExpanded ? "w-[240px]" : "w-[80px]"
         }`}
       >
         <Sidebar isExpanded={isExpanded} toggleSidebar={() => setIsExpanded(!isExpanded)} isMobile={false} />
       </div>
 
-      {/* --- MAIN CONTENT AREA --- 
-          flex-1: Fill remaining width
-          min-w-0: CRITICAL. This forces grids inside to shrink instead of overflow.
-          overflow-y-auto: Independent vertical scrolling.
-      */}
-      <main className="flex-1 min-w-0 h-full overflow-y-auto overflow-x-hidden relative bg-[#050505] transition-all duration-300">
+      {/* --- MAIN CONTENT AREA --- */}
+      <main className="flex-1 min-w-0 h-full overflow-y-auto overflow-x-hidden relative z-10 transition-all duration-300">
         
-        {/* Mobile Header (Only visible < 768px) */}
-        <div className="md:hidden sticky top-0 z-30 bg-[#050505]/90 backdrop-blur-md p-4 border-b border-white/10 flex items-center justify-between">
-           <span className="font-bold uppercase tracking-widest text-xs">Jeevant_OS</span>
-           <button title="menu" onClick={() => setIsExpanded(true)} className="p-2 border border-white/10 rounded text-white">
+        {/* Mobile Header */}
+        <div className="md:hidden sticky top-0 z-30 bg-shell-bg/80 backdrop-blur-md p-4 border-b border-shell-border flex items-center justify-between">
+           <span className="font-bold uppercase tracking-widest text-xs text-[color:var(--accent)]">Jeevant_OS // Mind_Place</span>
+           <button title="menu" onClick={() => setIsExpanded(true)} className="p-2 border border-shell-border rounded text-shell-text">
              <Menu size={18} />
            </button>
         </div>
 
-        {/* PAGE CONTENT */}
-        <div className="w-full">
+        <div className="w-full h-full relative">
           {children}
         </div>
 
       </main>
 
-      {/* --- MOBILE OVERLAY SIDEBAR --- 
-          Fixed on top of everything. Only for mobile.
-      */}
+      {/* --- MOBILE OVERLAY SIDEBAR --- */}
       <div 
-        className={`md:hidden fixed inset-y-0 left-0 z-50 w-[240px] bg-[#0a0a0a] shadow-2xl transform transition-transform duration-300 ease-out ${
+        className={`md:hidden fixed inset-y-0 left-0 z-50 w-[240px] bg-[#050505] shadow-2xl transform transition-transform duration-300 ease-out ${
           isExpanded ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -81,11 +74,10 @@ export default function PrivateLayoutWrapper({
       {/* Mobile Backdrop */}
       {isExpanded && isMobile && (
         <div 
-          className="md:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
+          className="md:hidden fixed inset-0 bg-shell-bg/80 z-40 backdrop-blur-md"
           onClick={() => setIsExpanded(false)}
         />
       )}
-
     </div>
   );
 }
