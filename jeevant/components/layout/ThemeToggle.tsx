@@ -33,7 +33,7 @@ export default function ThemeToggle() {
     <button
       type="button"
       onClick={toggleTheme}
-      className="inline-flex items-center gap-2 rounded-full border border-[color:var(--shell-border)] bg-[color:var(--shell-surface)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--shell-text)] transition hover:border-blue-400/50 hover:bg-blue-500/10"
+      className="inline-flex items-center gap-2 rounded-full border border-shell-border bg-shell-surface px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-shell-text transition hover:border-blue-400/50 hover:bg-blue-500/10"
       aria-label="Toggle theme"
     >
       {theme === "dark" ? <Sun className="h-4 w-4 text-yellow-300" /> : <Moon className="h-4 w-4 text-blue-300" />}
