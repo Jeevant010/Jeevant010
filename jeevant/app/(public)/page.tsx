@@ -1,181 +1,159 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, Briefcase, CalendarDays, Code2, FileText, FolderOpen, LayoutDashboard, MapPinned, ScrollText, ShieldCheck, Sparkles } from "lucide-react";
-import { getDailyTasks } from "@/lib/actions/task.actions";
-import { getLearning } from "@/lib/actions/learning.actions";
-import { getNotes } from "@/lib/actions/note.actions";
-import { getCharacterSheet } from "@/lib/actions/rpg.actions";
+import { ArrowRight, BookOpen, Briefcase, CalendarDays, Code2, MapPinned, Cpu, Shield, Sword, Award, Crosshair, Fingerprint, Terminal } from "lucide-react";
 import { getProfile } from "@/lib/actions/profile.actions";
-import { getProjects } from "@/lib/actions/project.action";
+import { getPublicProjects } from "@/lib/actions/project.action";
+import { getCharacterSheet } from "@/lib/actions/rpg.actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [profile, projects, learning, notes, sheet, tasks] = await Promise.all([
-    getProfile(),
-    getProjects(),
-    getLearning(),
-    getNotes(),
-    getCharacterSheet(),
-    getDailyTasks(),
+  const [profile, projects, sheet] = await Promise.all([
+    getProfile(), 
+    getPublicProjects(),
+    getCharacterSheet()
   ]);
 
-  const publicProjects = projects.filter((project: any) => project.visibility === "public");
-  const activeTasks = tasks.filter((task: any) => !task.isCompleted);
-  const currentFocus = activeTasks[0]?.title || "Build a sharper public portfolio and keep the admin data flowing.";
-  const latestJourney = sheet.quests[0];
-  const highlights = notes.slice(0, 3);
-  const learningCount = learning.length;
-
   return (
-    <div className="space-y-8">
-      <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.2),transparent_40%),linear-gradient(180deg,#0b0b0b,#050505)] px-6 py-16 shadow-2xl sm:px-10 lg:px-14">
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:48px_48px] opacity-50" />
-        <div className="relative grid gap-10 lg:grid-cols-[1.4fr_0.9fr] lg:items-end">
-          <div className="space-y-6">
-            <div className="inline-flex items-center gap-3 rounded-full border border-green-500/20 bg-green-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-green-300">
-              <span className="h-2 w-2 rounded-full bg-green-400" />
-              {profile.status}
+    <div className="space-y-12 sm:space-y-16">
+      {/* JOHN WICK / CYBERPUNK HERO SECTION */}
+      <section className="relative overflow-hidden cut-corners border border-amber-500/20 bg-[#050505] px-6 py-16 sm:py-20 shadow-[0_0_50px_rgba(245,158,11,0.05)] sm:px-10 lg:px-14 min-h-[70vh] flex flex-col justify-center group">
+        
+        {/* Background FX (Continental / Matrix) */}
+        <div className="absolute inset-0 bg-mindplace-grid opacity-10 pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(245,158,11,0.1),transparent_50%),radial-gradient(circle_at_bottom_left,rgba(6,182,212,0.05),transparent_40%)] pointer-events-none" />
+        <div className="absolute top-0 right-10 w-[2px] h-full bg-gradient-to-b from-transparent via-amber-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+        
+        <div className="relative z-10 grid gap-10 lg:grid-cols-[1fr_400px] lg:items-center max-w-6xl mx-auto w-full">
+          <div className="space-y-6 sm:space-y-8">
+            <div className="inline-flex items-center gap-3 cut-corners border border-amber-500/30 bg-amber-500/5 px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+              <Crosshair className="h-3 w-3 sm:h-4 sm:w-4 animate-pulse" />
+              STATUS: {profile.status}
             </div>
 
-            <div className="max-w-3xl space-y-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-blue-300">Portfolio / Work / Research / Writing</p>
-              <h1 className="text-5xl font-black tracking-tight text-white sm:text-6xl lg:text-7xl">
+            <div className="space-y-2 sm:space-y-4">
+              <h1 className="text-4xl sm:text-6xl lg:text-8xl font-black tracking-tighter text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] uppercase">
                 {profile.name}
               </h1>
-              <p className="max-w-2xl text-lg leading-8 text-slate-300">
-                {profile.title}. This site is a living portfolio for projects, schedule, journey, research notes, and the practical proof behind the resume.
+              <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.4em] text-cyan-400 font-mono flex items-center gap-2">
+                <Terminal className="w-4 h-4" /> {profile.title}
+              </p>
+              <p className="max-w-xl text-base sm:text-lg leading-relaxed text-slate-400 font-serif italic mt-4 border-l-2 border-amber-500/50 pl-4">
+                "Whoever comes, whoever it is... I'll build it. I'll build it all." 
+                <br /><span className="text-xs text-slate-500 font-sans mt-2 block">— The Architect's Continental Database.</span>
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <Link href="/projects" className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-blue-100">
-                View projects <ArrowRight className="h-4 w-4" />
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <Link href="/projects" className="cut-corners flex items-center justify-center gap-2 bg-amber-500 px-6 py-4 text-sm font-black uppercase tracking-widest text-black transition hover:bg-amber-400 hover:shadow-[0_0_20px_rgba(245,158,11,0.5)]">
+                Access Archives <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link href="/journey" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/30 hover:bg-white/10">
-                Read journey <MapPinned className="h-4 w-4" />
-              </Link>
-              <Link href="/contact" className="inline-flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-500/10 px-5 py-3 text-sm font-semibold text-blue-100 transition hover:bg-blue-500/20">
-                Contact me <LayoutDashboard className="h-4 w-4" />
+              <Link href="/about" className="cut-corners flex items-center justify-center gap-2 border border-slate-700 bg-slate-900/50 px-6 py-4 text-sm font-bold uppercase tracking-widest text-slate-300 transition hover:border-cyan-500 hover:text-cyan-400">
+                View Dossier <Fingerprint className="h-4 w-4" />
               </Link>
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-            {[
-              { label: "Public projects", value: publicProjects.length, icon: FolderOpen },
-              { label: "Current tasks", value: activeTasks.length, icon: Briefcase },
-              { label: "Research notes", value: notes.length, icon: ScrollText },
-              { label: "Learning items", value: learningCount, icon: BookOpen },
-            ].map((item) => (
-              <div key={item.label} className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
-                <item.icon className="h-5 w-5 text-blue-300" />
-                <div className="mt-4 text-3xl font-black text-white">{item.value}</div>
-                <div className="mt-1 text-xs uppercase tracking-[0.25em] text-slate-400">{item.label}</div>
+          {/* Quick Stats / Continental Dossier */}
+          <div className="cut-corners-reverse border border-slate-800 bg-black/80 p-6 sm:p-8 relative overflow-hidden group-hover:border-amber-500/30 transition-colors">
+            <div className="absolute -top-10 -right-10 opacity-5 pointer-events-none group-hover:opacity-20 transition-opacity duration-1000">
+              <Cpu className="w-48 h-48 text-cyan-500" />
+            </div>
+            
+            <h3 className="text-[10px] uppercase tracking-[0.4em] text-slate-500 mb-6 font-bold flex items-center gap-2">
+               <Shield className="w-3 h-3 text-cyan-500" /> Executive Summary
+            </h3>
+            
+            <div className="space-y-4 sm:space-y-6 relative z-10 font-mono">
+              <div className="flex justify-between items-end border-b border-slate-800 pb-2">
+                <div className="text-[10px] uppercase text-slate-500 font-bold tracking-widest">Threat Level</div>
+                <div className="text-xl sm:text-2xl font-black text-amber-500">{profile.level}</div>
               </div>
-            ))}
+              <div className="flex justify-between items-end border-b border-slate-800 pb-2">
+                <div className="text-[10px] uppercase text-slate-500 font-bold tracking-widest">Logic (LC)</div>
+                <div className="text-xl sm:text-2xl font-black text-white">{profile.leetcodeRating}</div>
+              </div>
+              <div className="flex justify-between items-end border-b border-slate-800 pb-2">
+                <div className="text-[10px] uppercase text-slate-500 font-bold tracking-widest">Acquired Assets</div>
+                <div className="text-xl sm:text-2xl font-black text-white">{sheet.loot.length}</div>
+              </div>
+              <div className="flex justify-between items-end border-b border-slate-800 pb-2">
+                <div className="text-[10px] uppercase text-slate-500 font-bold tracking-widest">Public Deploys</div>
+                <div className="text-xl sm:text-2xl font-black text-cyan-400">{projects.length}</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-6 sm:p-8">
-          <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+      {/* MATRIX / CYBERPUNK GRIDS */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* FEATURED PROJECTS */}
+        <section className="cut-corners border border-slate-800 bg-[#0a0a0a] p-6 sm:p-10 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          
+          <div className="flex items-center justify-between border-b border-slate-800 pb-6 relative z-10 mb-8">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Current focus</p>
-              <h2 className="mt-2 text-2xl font-bold text-white">What I am working on right now</h2>
+              <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-cyan-500">Selected Work</p>
+              <h2 className="mt-1 text-2xl sm:text-3xl font-black text-white tracking-tight uppercase">Recent Archives</h2>
             </div>
-            <Sparkles className="h-6 w-6 text-blue-300" />
+            <Code2 className="h-6 w-6 sm:h-8 sm:w-8 text-cyan-500 opacity-50" />
           </div>
-          <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300">{currentFocus}</p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            {activeTasks.slice(0, 2).map((task: any) => (
-              <div key={task._id} className="rounded-2xl border border-white/10 bg-black/40 p-5">
-                <div className="text-[10px] uppercase tracking-[0.35em] text-slate-500">Schedule</div>
-                <div className="mt-3 text-base font-semibold text-white">{task.title}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="rounded-[2rem] border border-white/10 bg-gradient-to-br from-blue-500/10 to-transparent p-6 sm:p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-200">Journey</p>
-          <h2 className="mt-2 text-2xl font-bold text-white">Experience in plain language</h2>
-          <div className="mt-6 space-y-4">
-            <div className="rounded-2xl border border-white/10 bg-black/30 p-5">
-              <div className="text-sm font-semibold text-white">Latest role</div>
-              <div className="mt-2 text-sm text-slate-300">{latestJourney ? `${latestJourney.role} at ${latestJourney.company}` : "Add your latest role from the admin panel."}</div>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-black/30 p-5">
-              <div className="text-sm font-semibold text-white">Public reading</div>
-              <div className="mt-2 text-sm text-slate-300">Research notes and learning entries are ready to turn into a books and papers archive.</div>
-            </div>
-            <Link href="/journey" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/30 hover:bg-white/10">
-              Open journey page <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <section className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 rounded-[2rem] border border-white/10 bg-white/[0.03] p-6 sm:p-8">
-          <div className="flex items-center justify-between border-b border-white/10 pb-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Selected work</p>
-              <h2 className="mt-2 text-2xl font-bold text-white">Featured projects</h2>
-            </div>
-            <Code2 className="h-6 w-6 text-blue-300" />
-          </div>
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {publicProjects.slice(0, 4).map((project: any) => (
-              <Link key={project._id} href="/projects" className="group rounded-2xl border border-white/10 bg-black/30 p-5 transition hover:border-blue-400/40 hover:bg-white/5">
-                <div className="text-[10px] uppercase tracking-[0.35em] text-slate-500">Project</div>
-                <div className="mt-3 text-lg font-semibold text-white group-hover:text-blue-200">{project.title}</div>
-                <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-400">{project.description}</p>
+          
+          <div className="grid gap-4 sm:gap-6 relative z-10">
+            {projects.slice(0, 3).map((project: any) => (
+              <Link key={project._id} href="/projects" className="group/item block rounded border border-slate-800 bg-[#111] p-4 sm:p-6 transition-all hover:border-cyan-500 hover:bg-[#151515]">
+                <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-slate-600 mb-2 group-hover/item:text-cyan-500 transition-colors">sys.file.{project.slug}</div>
+                <h3 className="text-lg sm:text-xl font-bold text-white group-hover/item:text-cyan-400 transition-colors">{project.title}</h3>
+                <p className="mt-2 line-clamp-2 text-xs sm:text-sm leading-relaxed text-slate-400 font-serif italic">{project.description}</p>
               </Link>
             ))}
           </div>
-        </div>
+        </section>
 
-        <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-6 sm:p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Research</p>
-          <h2 className="mt-2 text-2xl font-bold text-white">Recent notes</h2>
-          <div className="mt-6 space-y-4">
-            {highlights.map((note: any) => (
-              <div key={note._id} className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                <div className="text-sm font-semibold text-white">{note.title}</div>
-                <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-400">{note.content || "Use this space for books, papers, and research summaries."}</p>
+        {/* LATEST ACHIEVEMENTS (LOOT) */}
+        <section className="cut-corners-reverse border border-slate-800 bg-[#0a0a0a] p-6 sm:p-10 relative overflow-hidden group">
+          <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-amber-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          
+          <div className="flex items-center justify-between border-b border-slate-800 pb-6 relative z-10 mb-8">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-amber-500">Recent Honors</p>
+              <h2 className="mt-1 text-2xl sm:text-3xl font-black text-white tracking-tight uppercase">Acquired Loot</h2>
+            </div>
+            <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-amber-500 opacity-50" />
+          </div>
+          
+          <div className="grid gap-4 sm:gap-6 relative z-10">
+            {sheet.loot.slice(0, 3).map((item: any) => (
+              <div key={item._id} className="group/item rounded border border-slate-800 bg-[#111] p-4 sm:p-6 transition-all hover:border-amber-500 hover:bg-[#151515]">
+                <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-slate-600 mb-2 flex items-center gap-2 group-hover/item:text-amber-500 transition-colors">
+                  <Award className="w-3 h-3" /> {item.platform}
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-white group-hover/item:text-amber-400 transition-colors">{item.title}</h3>
+                <p className="mt-2 line-clamp-2 text-xs sm:text-sm leading-relaxed text-slate-400 font-serif italic">{item.description}</p>
               </div>
             ))}
+            {sheet.loot.length === 0 && (
+               <div className="text-slate-500 text-sm font-serif italic text-center py-12">No loot acquired yet.</div>
+            )}
           </div>
-          <Link href="/research" className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/30 hover:bg-white/10">
-            Open research page <ArrowRight className="h-4 w-4" />
+        </section>
+      </div>
+
+      {/* EXPLORATION NAV (MODERN SLEEK) */}
+      <section className="grid gap-4 sm:gap-6 md:grid-cols-3">
+        {[
+          { href: "/journey", label: "Journey", desc: "Experience & Quests.", icon: MapPinned },
+          { href: "/schedule", label: "Schedule", desc: "Public Operations.", icon: CalendarDays },
+          { href: "/library", label: "Library", desc: "Archives & Lore.", icon: BookOpen },
+        ].map((item) => (
+          <Link key={item.href} href={item.href} className="cut-corners group border border-slate-800 bg-[#0a0a0a] p-6 text-center transition hover:border-white hover:bg-[#111]">
+            <div className="mx-auto flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center border border-slate-700 bg-black group-hover:border-white group-hover:bg-white transition-colors">
+              <item.icon className="h-4 w-4 sm:h-5 sm:w-5 text-slate-400 group-hover:text-black transition-colors" />
+            </div>
+            <h3 className="mt-4 text-base sm:text-lg font-black uppercase tracking-widest text-white">{item.label}</h3>
+            <p className="mt-2 text-xs sm:text-sm text-slate-500 font-serif italic">{item.desc}</p>
           </Link>
-        </div>
-      </section>
-
-      <section className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-6 sm:p-8">
-        <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">More pages</p>
-            <h2 className="mt-2 text-2xl font-bold text-white">The site should answer more than one question.</h2>
-          </div>
-          <Sparkles className="h-6 w-6 text-blue-300" />
-        </div>
-
-        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {[
-            { href: "/expertise", label: "Expertise", description: "Skills, strengths, and tech stack", icon: Code2 },
-            { href: "/schedule", label: "Schedule", description: "Daily focus and planning", icon: CalendarDays },
-            { href: "/responsibilities", label: "Responsibilities", description: "What I own and maintain", icon: ShieldCheck },
-            { href: "/resume", label: "Resume", description: "Short summary and download", icon: FileText },
-          ].map((item) => (
-            <Link key={item.href} href={item.href} className="group rounded-2xl border border-white/10 bg-black/30 p-5 transition hover:border-blue-400/40 hover:bg-white/5">
-              <item.icon className="h-5 w-5 text-blue-300" />
-              <div className="mt-4 text-lg font-semibold text-white group-hover:text-blue-200">{item.label}</div>
-              <p className="mt-2 text-sm leading-6 text-slate-400">{item.description}</p>
-            </Link>
-          ))}
-        </div>
+        ))}
       </section>
     </div>
   );
