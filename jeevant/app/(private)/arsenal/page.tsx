@@ -31,12 +31,12 @@ export default async function ArsenalPage() {
         </h3>
         <form action={addSnippet} className="space-y-4">
           <div className="flex gap-4">
-             <input name="title" placeholder="ITEM NAME (e.g. Auth Hook)" required className="flex-1 bg-[#1a1816] border border-[#50453b] p-3 text-white outline-none focus:border-green-600" />
-             <input name="language" placeholder="TYPE (e.g. TSX)" required className="w-32 bg-[#1a1816] border border-[#50453b] p-3 text-white outline-none focus:border-green-600" />
+             <input name="title" placeholder="ITEM NAME (e.g. Auth Hook)" required className="flex-1 bg-[#1a1816] border border-[#50453b] p-3 text-shell-text outline-none focus:border-green-600" />
+             <input name="language" placeholder="TYPE (e.g. TSX)" required className="w-32 bg-[#1a1816] border border-[#50453b] p-3 text-shell-text outline-none focus:border-green-600" />
           </div>
-          <textarea name="code" placeholder="SOURCE CODE DATA..." required className="w-full h-32 bg-[#1a1816] border border-[#50453b] p-3 text-white font-mono text-sm outline-none focus:border-green-600 resize-none custom-scrollbar" />
-          <input name="tags" placeholder="TAGS (comma separated)" className="w-full bg-[#1a1816] border border-[#50453b] p-3 text-white outline-none focus:border-green-600" />
-          <button className="w-full py-3 bg-[#3a3530] border border-[#50453b] text-[#e0d0c0] font-bold uppercase hover:bg-green-800 hover:text-white transition">
+          <textarea name="code" placeholder="SOURCE CODE DATA..." required className="w-full h-32 bg-[#1a1816] border border-[#50453b] p-3 text-shell-text font-mono text-sm outline-none focus:border-green-600 resize-none custom-scrollbar" />
+          <input name="tags" placeholder="TAGS (comma separated)" className="w-full bg-[#1a1816] border border-[#50453b] p-3 text-shell-text outline-none focus:border-green-600" />
+          <button className="w-full py-3 bg-[#3a3530] border border-[#50453b] text-[#e0d0c0] font-bold uppercase hover:bg-green-800 hover:text-shell-text transition">
             Store in Inventory
           </button>
         </form>
@@ -62,11 +62,11 @@ export default async function ArsenalPage() {
             </div>
 
             {/* Hover Overlay Action */}
-            <div className="absolute inset-0 bg-black/80 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute inset-0 bg-shell-bg/80 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
                <button className="p-3 bg-white text-black rounded-full hover:scale-110 transition">
                  <Copy className="w-6 h-6" />
                </button>
-               <div className="text-white font-bold uppercase tracking-widest text-xs">Equip</div>
+               <div className="text-shell-text font-bold uppercase tracking-widest text-xs">Equip</div>
             </div>
 
           </div>
