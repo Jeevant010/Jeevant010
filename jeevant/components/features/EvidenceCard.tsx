@@ -42,7 +42,7 @@ export default function EvidenceCard({ note }: { note: any }) {
       <div className="mt-4 flex items-center justify-between pt-4 border-t border-slate-900/10">
         <div className="flex gap-1 flex-wrap">
           {note.tags.map((tag: string, i: number) => (
-            <span key={i} className="px-1.5 py-0.5 bg-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-widest">
+            <span key={i} className="px-1.5 py-0.5 bg-slate-200 text-shell-muted text-[10px] font-bold uppercase tracking-widest">
               #{tag}
             </span>
           ))}
@@ -51,7 +51,7 @@ export default function EvidenceCard({ note }: { note: any }) {
           title="trash2"
           onClick={handleDelete}
           disabled={loading}
-          className="text-slate-400 hover:text-red-600 transition"
+          className="text-shell-muted hover:text-red-600 transition"
         >
           <Trash2 className="w-4 h-4" />
         </button>
