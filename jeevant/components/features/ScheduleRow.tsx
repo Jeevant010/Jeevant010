@@ -13,9 +13,9 @@ export default function ScheduleRow({ entry }: { entry: any }) {
   return (
     <div className="p-4 flex items-start justify-between">
       <div>
-        <div className="text-sm font-semibold text-white">{entry.title}</div>
-        <div className="text-xs text-slate-400">{start.toLocaleString()} {end ? `– ${end.toLocaleTimeString()}` : ""}</div>
-        {entry.notes ? <div className="text-xs text-slate-300 mt-2">{entry.notes}</div> : null}
+        <div className="text-sm font-semibold text-shell-text">{entry.title}</div>
+        <div className="text-xs text-shell-muted">{start.toLocaleString()} {end ? `– ${end.toLocaleTimeString()}` : ""}</div>
+        {entry.notes ? <div className="text-xs text-shell-muted mt-2">{entry.notes}</div> : null}
       </div>
 
       <div className="flex items-center gap-2">
