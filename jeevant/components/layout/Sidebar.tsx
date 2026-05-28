@@ -23,14 +23,14 @@ export default function Sidebar({ isExpanded, toggleSidebar, isMobile }: Sidebar
   const [mode, setMode] = useState<"VIEW" | "ADMIN">(pathname.includes("/cms") ? "ADMIN" : "VIEW");
 
   return (
-    <aside className="h-full w-full flex flex-col border-r border-white/10 bg-[#0a0a0a] text-slate-400">
+    <aside className="h-full w-full flex flex-col border-r border-shell-border bg-[#0a0a0a] text-shell-muted">
       
       {/* --- HEADER --- */}
-      <div className="flex h-16 shrink-0 items-center justify-between border-b border-white/10 px-4">
+      <div className="flex h-16 shrink-0 items-center justify-between border-b border-shell-border px-4">
         
         {/* Logo / Title (Visible when expanded) */}
         {isExpanded ? (
-          <span className="font-bold uppercase tracking-widest text-xs text-white">
+          <span className="font-bold uppercase tracking-widest text-xs text-shell-text">
             Site Menu
           </span>
         ) : (
@@ -40,7 +40,7 @@ export default function Sidebar({ isExpanded, toggleSidebar, isMobile }: Sidebar
         {/* Toggle Button */}
         <button 
           onClick={toggleSidebar}
-          className="p-1.5 hover:bg-white/10 rounded-lg text-slate-400 transition-colors"
+          className="p-1.5 hover:bg-shell-surface rounded-lg text-shell-muted transition-colors"
         >
           {isMobile ? <X size={20} /> : <Menu size={20} />}
         </button>
@@ -49,16 +49,16 @@ export default function Sidebar({ isExpanded, toggleSidebar, isMobile }: Sidebar
       {/* --- MODE SWITCHER (Tabs) --- */}
       {isExpanded && (
         <div className="p-4 shrink-0">
-          <div className="flex w-full items-center justify-between rounded-lg bg-white/5 p-1">
+          <div className="flex w-full items-center justify-between rounded-lg bg-shell-text/5 p-1">
             <button 
               onClick={() => setMode("VIEW")}
-              className={`flex-1 flex items-center justify-center gap-2 rounded py-2 text-xs font-bold uppercase transition-all whitespace-nowrap ${mode === "VIEW" ? 'bg-blue-600 text-white shadow-lg' : 'hover:text-white'}`}
+              className={`flex-1 flex items-center justify-center gap-2 rounded py-2 text-xs font-bold uppercase transition-all whitespace-nowrap ${mode === "VIEW" ? 'bg-blue-600 text-shell-text shadow-lg' : 'hover:text-shell-text'}`}
             >
               <Monitor size={14} /> View
             </button>
             <button 
               onClick={() => setMode("ADMIN")}
-              className={`flex-1 flex items-center justify-center gap-2 rounded py-2 text-xs font-bold uppercase transition-all whitespace-nowrap ${mode === "ADMIN" ? 'bg-yellow-600 text-white shadow-lg' : 'hover:text-white'}`}
+              className={`flex-1 flex items-center justify-center gap-2 rounded py-2 text-xs font-bold uppercase transition-all whitespace-nowrap ${mode === "ADMIN" ? 'bg-yellow-600 text-shell-text shadow-lg' : 'hover:text-shell-text'}`}
             >
               <Settings size={14} /> Admin
             </button>
@@ -69,10 +69,10 @@ export default function Sidebar({ isExpanded, toggleSidebar, isMobile }: Sidebar
       {/* --- MODE ICONS (Collapsed) --- */}
       {!isExpanded && (
         <div className="flex flex-col items-center gap-4 py-4 shrink-0 border-b border-white/5">
-           <button onClick={() => setMode("VIEW")} className={`p-2 rounded-lg ${mode === "VIEW" ? "text-blue-500 bg-blue-500/10" : "text-slate-600"}`} title="View Mode">
+           <button onClick={() => setMode("VIEW")} className={`p-2 rounded-lg ${mode === "VIEW" ? "text-blue-500 bg-blue-500/10" : "text-shell-muted"}`} title="View Mode">
              <Monitor size={20} />
            </button>
-           <button onClick={() => setMode("ADMIN")} className={`p-2 rounded-lg ${mode === "ADMIN" ? "text-yellow-500 bg-yellow-500/10" : "text-slate-600"}`} title="Admin Mode">
+           <button onClick={() => setMode("ADMIN")} className={`p-2 rounded-lg ${mode === "ADMIN" ? "text-yellow-500 bg-yellow-500/10" : "text-shell-muted"}`} title="Admin Mode">
              <Settings size={20} />
            </button>
         </div>
@@ -107,7 +107,7 @@ export default function Sidebar({ isExpanded, toggleSidebar, isMobile }: Sidebar
       </div>
 
       {/* --- FOOTER --- */}
-      <div className="p-4 border-t border-white/10 shrink-0 bg-[#0a0a0a]">
+      <div className="p-4 border-t border-shell-border shrink-0 bg-[#0a0a0a]">
         <form action={logout}>
           <button className={`flex w-full items-center gap-3 rounded-xl border border-red-900/30 bg-red-900/10 p-3 text-red-400 hover:bg-red-900/30 hover:text-red-200 transition-all group overflow-hidden ${isExpanded ? 'justify-start' : 'justify-center'}`}>
             <LogOut size={20} className="shrink-0" />
@@ -124,7 +124,7 @@ export default function Sidebar({ isExpanded, toggleSidebar, isMobile }: Sidebar
 
 // Small helper for headers
 function SectionHeader({ label }: { label: string }) {
-  return <div className="mb-2 mt-2 px-4 text-[10px] font-bold uppercase tracking-widest text-slate-600 whitespace-nowrap">{label}</div>;
+  return <div className="mb-2 mt-2 px-4 text-[10px] font-bold uppercase tracking-widest text-shell-muted whitespace-nowrap">{label}</div>;
 }
 
 // Sidebar Item
@@ -136,7 +136,7 @@ function SidebarItem({ href, icon, label, active, isCms, expanded }: any) {
       className={`flex items-center gap-3 rounded-xl p-3 transition-all duration-200 whitespace-nowrap overflow-hidden
         ${active 
           ? (isCms ? 'bg-yellow-600/20 text-yellow-500 border border-yellow-600/50' : 'bg-blue-600/20 text-blue-400 border border-blue-600/50') 
-          : 'hover:bg-white/5 hover:text-white'}
+          : 'hover:bg-shell-text/5 hover:text-shell-text'}
         ${expanded ? 'justify-start' : 'justify-center'}
       `}
     >
