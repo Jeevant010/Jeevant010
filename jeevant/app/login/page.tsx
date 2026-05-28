@@ -10,7 +10,7 @@ function SubmitButton() {
   return (
     <button 
       disabled={pending}
-      className={`w-full mt-8 py-4 font-mono text-xs font-bold tracking-[0.3em] uppercase transition-all duration-500 border ${pending ? 'bg-red-900/20 border-red-500 text-red-500 animate-pulse' : 'bg-transparent border-white/10 text-slate-500 hover:border-white hover:text-white hover:bg-white/5'}`}
+      className={`w-full mt-8 py-4 font-mono text-xs font-bold tracking-[0.3em] uppercase transition-all duration-500 border ${pending ? 'bg-red-900/20 border-red-500 text-red-500 animate-pulse' : 'bg-transparent border-shell-border text-shell-muted hover:border-white hover:text-shell-text hover:bg-shell-text/5'}`}
     >
       {pending ? "VERIFYING_IDENTITY..." : "INITIATE_HANDSHAKE"}
     </button>
@@ -21,7 +21,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-shell-bg flex flex-col items-center justify-center p-4 relative overflow-hidden">
       
       {/* Abstract Background */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.03),transparent_50%)] animate-pulse-slow pointer-events-none" />
@@ -31,9 +31,9 @@ export default function LoginPage() {
         
         {/* Icon */}
         <div className="flex justify-center mb-12">
-          <div className="w-24 h-24 rounded-full border border-white/10 flex items-center justify-center relative">
-            <div className="absolute inset-0 border border-white/20 rounded-full animate-ping opacity-20" />
-            <Fingerprint className="w-10 h-10 text-white/50" />
+          <div className="w-24 h-24 rounded-full border border-shell-border flex items-center justify-center relative">
+            <div className="absolute inset-0 border border-shell-border rounded-full animate-ping opacity-20" />
+            <Fingerprint className="w-10 h-10 text-shell-text/50" />
           </div>
         </div>
 
@@ -52,9 +52,9 @@ export default function LoginPage() {
               placeholder="ENTER ACCESS KEY" 
               required
               autoFocus
-              className="w-full bg-black border-b border-white/20 py-4 text-center text-white text-xl font-mono tracking-[0.5em] focus:outline-none focus:border-white/50 placeholder:text-white/10 transition-colors"
+              className="w-full bg-shell-bg border-b border-shell-border py-4 text-center text-shell-text text-xl font-mono tracking-[0.5em] focus:outline-none focus:border-white/50 placeholder:text-shell-text/10 transition-colors"
             />
-            <Lock className="w-4 h-4 text-white/20 absolute right-0 top-1/2 -translate-y-1/2 group-focus-within:text-white transition-colors" />
+            <Lock className="w-4 h-4 text-shell-text/20 absolute right-0 top-1/2 -translate-y-1/2 group-focus-within:text-shell-text transition-colors" />
           </div>
 
           {error && (
@@ -67,7 +67,7 @@ export default function LoginPage() {
         </form>
 
         <div className="mt-16 text-center">
-           <p className="text-[10px] text-white/20 font-mono">
+           <p className="text-[10px] text-shell-text/20 font-mono">
              SECURE_CONNECTION // {new Date().getFullYear()} // JEEVANT_OS
            </p>
         </div>
