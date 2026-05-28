@@ -1,11 +1,12 @@
 "use client";
 
-import { toggleVisibility, deleteProject } from "@/lib/actions/project.action";
-import { FileText, Eye, EyeOff, Trash2, Loader2 } from "lucide-react";
+import { toggleVisibility, deleteProject, updateProject } from "@/lib/actions/project.action";
+import { FileText, Eye, EyeOff, Trash2, Edit2, Loader2, Save, X } from "lucide-react";
 import { useState } from "react";
 
 export default function ProjectRow({ project }: { project: any }) {
   const [loading, setLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   const handleToggle = async () => {
     setLoading(true);
@@ -20,26 +21,75 @@ export default function ProjectRow({ project }: { project: any }) {
     setLoading(false);
   };
 
+  if (isEditing) {
+    const startStr = project.startDate ? new Date(project.startDate).toISOString().slice(0, 10) : "";
+    const endStr = project.endDate ? new Date(project.endDate).toISOString().slice(0, 10) : "";
+    
+    return (
+      <form action={async (formData) => {
+        setLoading(true);
+        await updateProject(formData);
+        setLoading(false);
+        setIsEditing(false);
+      }} className="bg-slate-900 border border-slate-700 p-4 rounded-lg space-y-3 relative">
+        <button type="button" onClick={() => setIsEditing(false)} className="absolute top-2 right-2 text-shell-muted hover:text-white"><X className="w-4 h-4" /></button>
+        
+        <input type="hidden" name="id" value={project._id} />
+        
+        <div className="grid grid-cols-2 gap-3">
+          <div className="col-span-2">
+            <label className="text-xs font-bold uppercase text-shell-muted mb-1 block">Project Title</label>
+            <input name="title" defaultValue={project.title} className="w-full bg-[#121212] border border-slate-800 p-2 text-sm text-shell-text" required />
+          </div>
+          <div className="col-span-2">
+            <label className="text-xs font-bold uppercase text-shell-muted mb-1 block">Description</label>
+            <textarea name="description" defaultValue={project.description} className="w-full bg-[#121212] border border-slate-800 p-2 text-sm text-shell-text h-20" required />
+          </div>
+          <div>
+            <label className="text-xs font-bold uppercase text-shell-muted mb-1 block">Start Date</label>
+            <input type="date" name="startDate" defaultValue={startStr} className="w-full bg-[#121212] border border-slate-800 p-2 text-sm text-shell-text" />
+          </div>
+          <div>
+            <label className="text-xs font-bold uppercase text-shell-muted mb-1 block">End Date</label>
+            <input type="date" name="endDate" defaultValue={endStr} className="w-full bg-[#121212] border border-slate-800 p-2 text-sm text-shell-text" />
+          </div>
+          <div className="col-span-2 flex items-center gap-2">
+            <input type="checkbox" name="isOngoing" defaultChecked={project.isOngoing} className="w-4 h-4 bg-[#121212] border-slate-800" />
+            <label className="text-xs font-bold uppercase text-shell-muted">Ongoing (No end date)</label>
+          </div>
+          <div className="col-span-2">
+            <label className="text-xs font-bold uppercase text-shell-muted mb-1 block">Repo Link</label>
+            <input name="repoLink" defaultValue={project.repoLink} className="w-full bg-[#121212] border border-slate-800 p-2 text-sm text-shell-text" />
+          </div>
+        </div>
+
+        <button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded text-xs uppercase tracking-widest flex items-center justify-center gap-2 mt-2">
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save Changes
+        </button>
+      </form>
+    );
+  }
+
   return (
     <div className="grid grid-cols-12 gap-4 w-full items-center text-sm">
       
       {/* Name */}
-      <div className="col-span-5 font-bold text-slate-200 flex items-center gap-3">
-        <FileText className="w-4 h-4 text-slate-600" />
-        {project.title}
+      <div className="col-span-4 font-bold text-slate-200 flex items-center gap-3">
+        <FileText className="w-4 h-4 text-shell-muted shrink-0" />
+        <span className="truncate">{project.title}</span>
         {loading && <Loader2 className="w-3 h-3 animate-spin text-red-500" />}
       </div>
 
       {/* Status */}
       <div className="col-span-3">
-        <span className="px-2 py-1 bg-slate-800 text-slate-400 text-xs uppercase tracking-wider rounded border border-slate-700">
+        <span className="px-2 py-1 bg-slate-800 text-shell-muted text-[10px] uppercase tracking-wider rounded border border-slate-700">
           {project.status || "PLANNED"}
         </span>
       </div>
 
       {/* Visibility */}
-      <div className="col-span-2">
-        <button onClick={handleToggle} disabled={loading} className="hover:text-white text-slate-500 transition flex items-center gap-2 text-xs uppercase font-bold">
+      <div className="col-span-3">
+        <button onClick={handleToggle} disabled={loading} className="hover:text-shell-text text-shell-muted transition flex items-center gap-2 text-xs uppercase font-bold">
            {project.visibility === 'public' ? (
              <><Eye className="w-4 h-4 text-green-500" /> PUBLIC</>
            ) : (
@@ -49,8 +99,11 @@ export default function ProjectRow({ project }: { project: any }) {
       </div>
 
       {/* Actions */}
-      <div className="col-span-2 text-right">
-        <button title="trash2" onClick={handleDelete} disabled={loading} className="text-slate-600 hover:text-red-500 transition p-2">
+      <div className="col-span-2 text-right flex justify-end gap-2">
+        <button title="edit" onClick={() => setIsEditing(true)} disabled={loading} className="text-shell-muted hover:text-blue-400 transition p-1">
+          <Edit2 className="w-4 h-4" />
+        </button>
+        <button title="trash2" onClick={handleDelete} disabled={loading} className="text-shell-muted hover:text-red-500 transition p-1">
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
