@@ -55,6 +55,17 @@ export async function getProjects() {
   }
 }
 
+export async function getPublicProjects() {
+  try {
+    await connectDB();
+    const projects = await Project.find({ visibility: "public" }).sort({ createdAt: -1 }).lean();
+    return projects.map((p: any) => ({ ...p, _id: p._id.toString() }));
+  } catch (error) {
+    console.error("Failed to fetch public projects:", error);
+    return [];
+  }
+}
+
 // 3. UPDATE (Toggle Visibility)
 export async function toggleVisibility(id: string, currentStatus: string) {
   try {
@@ -67,6 +78,37 @@ export async function toggleVisibility(id: string, currentStatus: string) {
     return { success: true };
   } catch (error) {
     return { success: false };
+  }
+}
+
+export async function updateProject(formData: FormData) {
+  try {
+    await connectDB();
+    const id = formData.get("id");
+    if(!id) return;
+    
+    const title = formData.get("title") as string;
+    const description = formData.get("description") as string;
+    const repoLink = formData.get("repoLink") as string;
+    const startDateRaw = formData.get("startDate") as string;
+    const endDateRaw = formData.get("endDate") as string;
+    const isOngoing = formData.get("isOngoing") === "on";
+
+    await Project.findByIdAndUpdate(id, {
+      title,
+      description,
+      repoLink,
+      startDate: startDateRaw ? new Date(startDateRaw) : undefined,
+      endDate: isOngoing ? undefined : endDateRaw ? new Date(endDateRaw) : undefined,
+      isOngoing,
+    });
+
+    revalidatePath("/cms/projects");
+    revalidatePath("/projects");
+    revalidatePath("/");
+    revalidatePath("/journey");
+  } catch (error) {
+    console.error("Failed to update project:", error);
   }
 }
 
