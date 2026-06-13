@@ -1,41 +1,41 @@
 @import "tailwindcss";
 
 :root {
-  /* Dark Mode (Cinematic / Alan Wake Vibe) */
-  --background: #030305; /* Deep cinematic black */
-  --foreground: #f1f5f9; /* Slate 100 for high contrast but not harsh white */
-  --primary: #3b82f6; /* Cold blue */
-  --secondary: #94a3b8; /* Slate 400 */
-  --accent: #f59e0b; /* Amber/Gold for "Mind Place" highlights */
+  /* Dark Mode (Tactical Night-Vision / Modern Warfare) */
+  --background: #020402; /* Extremely dark green-tinted black */
+  --foreground: #e2e8f0; 
+  --primary: #10b981; /* Tactical Emerald */
+  --secondary: #64748b; 
+  --accent: #059669; 
   
-  --shell-bg: #030305;
-  --shell-surface: #0a0a0f;
-  --shell-text: #f8fafc;
-  --shell-muted: #94a3b8;
-  --shell-border: rgba(255, 255, 255, 0.1);
-  --shell-accent: #60a5fa;
+  --shell-bg: #030504;
+  --shell-surface: #0a100d;
+  --shell-text: #f1f5f9;
+  --shell-muted: #64748b;
+  --shell-border: rgba(16, 185, 129, 0.15); /* Green tinted border */
+  --shell-accent: #10b981;
   
-  --cinematic-glow: rgba(96, 165, 250, 0.15);
+  --cinematic-glow: rgba(16, 185, 129, 0.1); /* Emerald glow */
   --mindplace-bg: #000000;
-  --mindplace-grid: rgba(255, 255, 255, 0.03);
+  --mindplace-grid: rgba(16, 185, 129, 0.05); /* Night vision grid */
 }
 
 :root[data-theme="light"] {
-  /* Light Mode (Clean, High Contrast, Robust) */
-  --background: #f8fafc; /* Slate 50 */
-  --foreground: #020617; /* Slate 950 */
-  --primary: #2563eb; /* Strong blue */
-  --secondary: #475569; /* Slate 600 */
-  --accent: #d97706; /* Dark amber */
+  /* Light Mode (Clean Corporate Intel) */
+  --background: #f8fafc;
+  --foreground: #020617;
+  --primary: #059669;
+  --secondary: #475569;
+  --accent: #10b981;
   
   --shell-bg: #f1f5f9;
   --shell-surface: #ffffff;
   --shell-text: #020617;
   --shell-muted: #475569;
   --shell-border: rgba(2, 6, 23, 0.1);
-  --shell-accent: #2563eb;
+  --shell-accent: #059669;
   
-  --cinematic-glow: rgba(37, 99, 235, 0.1);
+  --cinematic-glow: rgba(5, 150, 105, 0.05);
   --mindplace-bg: #f8fafc;
   --mindplace-grid: rgba(2, 6, 23, 0.05);
 }
