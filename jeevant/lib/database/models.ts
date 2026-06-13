@@ -56,6 +56,7 @@ const LearningSchema = new Schema({
   completedModules: { type: Number, default: 0 },
   visibility: { type: String, enum: ["public", "private"], default: "private" },
   status: { type: String, enum: ["not-started", "in-progress", "completed"], default: "not-started" },
+  type: { type: String, enum: ["book", "paper", "course", "guide"], default: "course" },
 });
 
 // ... (Keep Project, Task, Note, Learning schemas from before)
@@ -79,7 +80,8 @@ const AchievementSchema = new Schema({
   date: { type: Date, default: Date.now },
   proofLink: { type: String }, // Certificate URL
   description: { type: String },
-  icon: { type: String, default: "trophy" } // icon name
+  icon: { type: String, default: "trophy" }, // icon name
+  visibility: { type: String, enum: ["public", "private"], default: "public" },
 });
 
 // --- 7. CERTIFICATE SCHEMA ---
@@ -149,8 +151,10 @@ const SnippetSchema = new Schema({
 const ProfileSchema = new Schema({
   name: { type: String, default: "Jeevant" },
   title: { type: String, default: "Full Stack Engineer" },
-  level: { type: Number, default: 1 }, // e.g. "Lvl 3"
-  leetcodeRating: { type: Number, default: 0 },
+  stats: [{
+    label: { type: String, required: true },
+    value: { type: String, required: true }
+  }],
   githubUsername: { type: String, default: "Jeevant010" },
   resumeLink: { type: String, default: "#" },
   avatarUrl: { type: String, default: "https://github.com/Jeevant010.png" },
