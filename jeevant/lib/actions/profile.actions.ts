@@ -20,11 +20,18 @@ export async function getProfile() {
 export async function updateProfile(formData: FormData) {
   await connectDB();
   
+  const statsRaw = formData.get("stats") as string;
+  let stats = [];
+  try {
+    stats = statsRaw ? JSON.parse(statsRaw) : [];
+  } catch(e) {
+    console.error("Failed to parse stats JSON");
+  }
+
   const data = {
     name: formData.get("name"),
     title: formData.get("title"),
-    level: Number(formData.get("level")),
-    leetcodeRating: Number(formData.get("leetcodeRating")),
+    stats,
     githubUsername: formData.get("githubUsername"),
     resumeLink: formData.get("resumeLink"),
     avatarUrl: formData.get("avatarUrl"),
