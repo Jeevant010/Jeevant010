@@ -32,7 +32,12 @@ export async function getNotes(searchQuery: string = "") {
 export async function getPublicNotes() {
   try {
     await connectDB();
-    const notes = await Note.find({ visibility: "public" }).sort({ updatedAt: -1 });
+    const { getSession } = await import("@/lib/auth");
+    const session = await getSession();
+    const isAdmin = session && session.role === "admin";
+    
+    const query = isAdmin ? {} : { visibility: "public" };
+    const notes = await Note.find(query).sort({ updatedAt: -1 });
     return notes.map((n: any) => ({
       ...n.toObject(),
       _id: n._id.toString(),
