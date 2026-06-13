@@ -1,5 +1,5 @@
-import { getLearning, addLearning } from "@/lib/actions/learning.actions";
-import { Terminal, Code, Check } from "lucide-react";
+import { getLearning, addLearning, deleteLearning, incrementLearning } from "@/lib/actions/learning.actions";
+import { Terminal, Code, Check, Trash2, Plus } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -56,7 +56,12 @@ export default async function LearningMatrix() {
                  
                  <div className="flex-1">
                    <div className="flex justify-between mb-1">
-                     <h3 className="font-bold text-lg text-shell-text group-hover:text-green-300">{item.title}</h3>
+                     <div className="flex items-center gap-2">
+                       <h3 className="font-bold text-lg text-shell-text group-hover:text-green-300">{item.title}</h3>
+                       <form action={async () => { "use server"; await deleteLearning(item._id); }}>
+                         <button className="text-green-900 hover:text-red-500 transition-colors" title="Delete record"><Trash2 className="w-4 h-4" /></button>
+                       </form>
+                     </div>
                      <span className="font-mono text-green-600">{progress}%</span>
                    </div>
                    {/* Progress Bar */}
@@ -65,11 +70,20 @@ export default async function LearningMatrix() {
                    </div>
                  </div>
 
-                 <div className="text-right hidden md:block">
-                    <div className="text-xs text-green-800 uppercase">Status</div>
-                    <div className="font-bold text-green-400 uppercase tracking-widest">
-                      {progress === 100 ? "UPLOAD COMPLETE" : "DOWNLOADING..."}
+                 <div className="text-right hidden md:flex flex-col items-end gap-2 justify-center">
+                    <div>
+                      <div className="text-xs text-green-800 uppercase">Status</div>
+                      <div className="font-bold text-green-400 uppercase tracking-widest">
+                        {progress === 100 ? "UPLOAD COMPLETE" : "DOWNLOADING..."}
+                      </div>
                     </div>
+                    {progress < 100 && (
+                      <form action={async () => { "use server"; await incrementLearning(item._id); }}>
+                        <button className="flex items-center gap-1 text-[10px] uppercase font-bold text-green-900 border border-green-900 px-2 py-1 hover:bg-green-900 hover:text-black transition" title="Increment Progress">
+                          <Plus className="w-3 h-3" /> Advance
+                        </button>
+                      </form>
+                    )}
                  </div>
                </div>
              )
