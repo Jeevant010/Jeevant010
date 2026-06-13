@@ -11,6 +11,7 @@ export async function proxy(request: NextRequest) {
     "/brain",
     "/career",
     "/learning",
+    "/arsenal",
   ];
   const path = request.nextUrl.pathname;
   const isProtected = protectedPaths.some((prefix) => path.startsWith(prefix));
@@ -20,16 +21,17 @@ export async function proxy(request: NextRequest) {
     const cookie = request.cookies.get("session")?.value;
 
     // 3. CRITICAL: Verify the encryption
-    // If cookie is missing OR decryption fails, redirect to login
     if (!cookie) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
 
     const session = await decrypt(cookie);
 
-    if (!session) {
-      // Cookie existed but was fake/tampered
-      return NextResponse.redirect(new URL("/login", request.url));
+    if (!session || session.role !== "admin") {
+      // Cookie existed but was fake/tampered/expired — clear it
+      const response = NextResponse.redirect(new URL("/login", request.url));
+      response.cookies.delete("session");
+      return response;
     }
   }
 
