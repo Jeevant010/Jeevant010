@@ -7,7 +7,7 @@ import {
   // OS (Visual)
   LayoutDashboard, Crosshair, Briefcase, Brain, Library, Box,
   // CMS (Edit)
-  FileCog, Sword, UserCog,
+  FileCog, Sword, UserCog, Calendar, Award, Compass, FileText,
   // System
   LogOut 
 } from "lucide-react";
@@ -50,9 +50,13 @@ export default async function Navbar() {
             <div className="w-px h-8 bg-gradient-to-b from-transparent via-blue-500/50 to-transparent mx-1"></div>
 
             <div className="flex items-center gap-1 pl-2">
-              <NavLink href="/cms/projects" icon={<FileCog size={18} />} label="Project Editor" activeColor="text-blue-400" isCms />
-              <NavLink href="/cms/rpg" icon={<Sword size={18} />} label="Site Data" activeColor="text-yellow-600" isCms />
-              <NavLink href="/cms/profile" icon={<UserCog size={18} />} label="Profile" activeColor="text-purple-400" isCms />
+              <NavLink href="/cms/projects" icon={<FileCog size={18} />} label="Projects" activeColor="text-blue-400" isCms />
+              <NavLink href="/cms/rpg" icon={<Sword size={18} />} label="RPG / Quests" activeColor="text-yellow-600" isCms />
+              <NavLink href="/cms/schedule" icon={<Calendar size={18} />} label="Schedule" activeColor="text-emerald-400" isCms />
+              <NavLink href="/cms/expertise" icon={<Award size={18} />} label="Expertise" activeColor="text-amber-400" isCms />
+              <NavLink href="/cms/journey" icon={<Compass size={18} />} label="Journey" activeColor="text-cyan-400" isCms />
+              <NavLink href="/cms/resume" icon={<FileText size={18} />} label="Resume" activeColor="text-rose-400" isCms />
+              <NavLink href="/cms/profile" icon={<UserCog size={18} />} label="Identity" activeColor="text-purple-400" isCms />
             </div>
             
             <form action={logout} className="ml-2 border-l border-shell-border pl-2">
