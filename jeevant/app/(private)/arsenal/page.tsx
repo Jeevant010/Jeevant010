@@ -1,5 +1,6 @@
 import { getSnippets, addSnippet } from "@/lib/actions/snippet.actions";
-import { Box, Copy, Terminal, Plus } from "lucide-react";
+import { Box, Plus } from "lucide-react";
+import SnippetCard from "./SnippetCard";
 
 export const dynamic = "force-dynamic";
 
@@ -45,31 +46,7 @@ export default async function ArsenalPage() {
       {/* The Inventory Grid */}
       <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {snippets.map((item: any) => (
-          <div key={item._id} className="group bg-[#221e1a] border-2 border-[#403530] hover:border-[#e0d0c0] transition-colors p-1 relative overflow-hidden h-64 flex flex-col">
-            
-            {/* Header */}
-            <div className="bg-[#302822] p-2 flex justify-between items-center border-b border-[#403530]">
-              <span className="font-bold text-[#e0d0c0] uppercase text-sm truncate">{item.title}</span>
-              <span className="text-[10px] font-bold bg-[#1a1816] px-1 text-[#8a7560] border border-[#403530]">{item.language}</span>
-            </div>
-
-            {/* Code Preview */}
-            <div className="flex-1 bg-[#100e0c] p-3 overflow-hidden relative">
-               <pre className="text-[10px] font-mono text-green-500/80 leading-tight whitespace-pre-wrap break-all">
-                 {item.code.substring(0, 300)}...
-               </pre>
-               <div className="absolute inset-0 bg-gradient-to-t from-[#100e0c] to-transparent" />
-            </div>
-
-            {/* Hover Overlay Action */}
-            <div className="absolute inset-0 bg-shell-bg/80 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
-               <button className="p-3 bg-white text-black rounded-full hover:scale-110 transition">
-                 <Copy className="w-6 h-6" />
-               </button>
-               <div className="text-shell-text font-bold uppercase tracking-widest text-xs">Equip</div>
-            </div>
-
-          </div>
+          <SnippetCard key={item._id} item={item} />
         ))}
       </div>
     </div>
