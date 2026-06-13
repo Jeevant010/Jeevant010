@@ -2,7 +2,8 @@ import Link from "next/link";
 import { getCharacterSheet } from "@/lib/actions/rpg.actions";
 import { getProfile } from "@/lib/actions/profile.actions";
 import { getProjects } from "@/lib/actions/project.action";
-import { Skull, Map, FileText, Flashlight } from "lucide-react";
+import { ShieldAlert, Map, FileText, Flashlight, Target } from "lucide-react";
+import { getTacticalColor, cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -13,49 +14,51 @@ export default async function JourneyPage() {
     .sort((left: any, right: any) => new Date(right.startDate).getTime() - new Date(left.startDate).getTime());
 
   return (
-    <div className="space-y-12 sm:space-y-16 font-serif">
-      {/* ALAN WAKE / RE HERO */}
-      <section className="relative overflow-hidden border border-red-900/30 bg-[#050303] p-8 sm:p-16 shadow-[0_0_50px_rgba(153,27,27,0.1)] group">
+    <div className="space-y-12 sm:space-y-16 font-mono relative sm:-m-8 p-4 sm:p-8 transition-colors">
+      {/* TACTICAL BACKGROUND */}
+      <div className="fixed inset-0 z-[-1] bg-background pointer-events-none transition-colors duration-500">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10 mix-blend-screen" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--color-shell-accent),transparent_60%),radial-gradient(circle_at_bottom_left,rgba(6,182,212,0.05),transparent_50%)] opacity-20" />
+        <div className="absolute left-0 top-0 w-full h-full bg-mindplace-grid [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+      </div>
+
+      {/* TACTICAL HERO */}
+      <section className="relative overflow-hidden border border-shell-border bg-shell-surface/80 backdrop-blur p-8 sm:p-16 shadow-[0_0_50px_var(--color-cinematic-glow)] group rounded-xl">
         
-        {/* Fog & Flashlight FX */}
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 mix-blend-overlay pointer-events-none" />
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-red-900/10 blur-[100px] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(153,27,27,0.15),transparent_60%)] pointer-events-none" />
-        
-        {/* Torn Edge Effect Top & Bottom */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPjxwYXRoIGQ9Ik0wIDBMNCA0TDggMEw4IDhMMCA4WiIgZmlsbD0iIzAyMDIwMiIvPjwvc3ZnPg==')] opacity-50" />
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPjxwYXRoIGQ9Ik0wIDhMNCA0TDggOEw4IDBMMCAwWiIgZmlsbD0iIzAyMDIwMiIvPjwvc3ZnPg==')] opacity-50" />
+        {/* Scanning Line */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-shell-accent/10 to-transparent h-[200%] w-full animate-scan pointer-events-none" />
 
         <div className="relative z-10 max-w-3xl space-y-4">
           <div className="flex items-center gap-3">
-             <Flashlight className="w-5 h-5 text-red-700 animate-pulse" />
-             <p className="text-xs font-bold uppercase tracking-[0.5em] text-red-800/80 font-mono">Incident Report // Level {profile.level}</p>
+             <Target className="w-5 h-5 text-shell-accent animate-pulse" />
+             <p className="text-xs font-bold uppercase tracking-[0.5em] text-shell-muted">Field Report // Operator {profile.level}</p>
           </div>
-          <h1 className="text-4xl sm:text-6xl font-black tracking-tighter text-[#c5bba1] uppercase drop-shadow-[0_2px_10px_rgba(0,0,0,1)]">
-            Survival Logs
+          <h1 className="text-4xl sm:text-6xl font-black tracking-tighter text-shell-text uppercase drop-shadow-[0_2px_10px_var(--color-shell-accent)]">
+            Operations Log
           </h1>
-          <p className="text-base sm:text-lg leading-relaxed text-[#7a6b5d] italic border-l-4 border-red-900/50 pl-4">
-            Typewritten accounts of previous engagements, acquired skills, and the trails left behind in the dark.
+          <p className="text-base sm:text-lg leading-relaxed text-shell-muted border-l-4 border-shell-accent pl-4 font-sans">
+            Detailed accounts of previous engagements, acquired skills, and chronological trace routes of all deployments.
           </p>
         </div>
       </section>
 
-      {/* TIMELINE (TYPEWRITER LOGS) */}
-      <section className="border border-[#1a1412] bg-[#0a0705] p-6 sm:p-12 relative overflow-hidden">
+      {/* TIMELINE (FIELD EXPERIENCE) */}
+      <section className="border border-shell-border bg-shell-surface/60 backdrop-blur p-6 sm:p-12 relative overflow-hidden rounded-xl">
         
-        <div className="flex items-center justify-between border-b border-[#2a1c12] pb-6 mb-10 relative z-10">
-          <h2 className="text-2xl sm:text-4xl font-black text-[#c5bba1] uppercase tracking-tighter flex items-center gap-3">
-            <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-red-900" />
+        <div className="flex items-center justify-between border-b border-shell-border pb-6 mb-10 relative z-10">
+          <h2 className="text-2xl sm:text-4xl font-black text-shell-text uppercase tracking-tighter flex items-center gap-3">
+            <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-shell-accent" />
             Field Experience
           </h2>
-          <span className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.4em] text-[#7a6b5d]">Classified</span>
+          <span className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.4em] text-shell-muted">Classified</span>
         </div>
         
-        <div className="space-y-8 sm:space-y-16 relative before:absolute before:inset-0 before:left-5 sm:before:left-1/2 before:-translate-x-px before:h-full before:w-[1px] before:bg-gradient-to-b before:from-red-900/50 before:via-[#1a1412] before:to-transparent">
+        <div className="space-y-8 sm:space-y-16 relative before:absolute before:inset-0 before:left-5 sm:before:left-1/2 before:-translate-x-px before:h-full before:w-[1px] before:bg-gradient-to-b before:from-shell-accent/50 before:via-shell-border before:to-transparent">
           {sheet.quests.length === 0 ? (
-            <div className="text-sm text-[#7a6b5d] text-center py-12 relative z-10 italic">No records found. The pages are blank.</div>
+            <div className="text-sm text-shell-muted text-center py-12 relative z-10 italic">No records found. The archives are empty.</div>
           ) : (
-            sheet.quests.map((quest: any, i: number) => {
+            sheet.quests.map((quest: any, index: number) => {
+              const theme = getTacticalColor(index);
               const start = new Date(quest.startDate);
               const end = quest.endDate ? new Date(quest.endDate) : null;
               const isOngoing = !end;
@@ -63,37 +66,34 @@ export default async function JourneyPage() {
               return (
                 <div key={quest._id} className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between sm:odd:flex-row-reverse group">
                   
-                  {/* Timeline Blood Drop Node */}
-                  <div className={`absolute left-5 sm:left-1/2 -translate-x-1/2 flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 border-[#0a0705] z-10 ${isOngoing ? 'bg-red-700 shadow-[0_0_20px_rgba(185,28,28,0.8)]' : 'bg-[#2a1c12]'}`}>
-                    <Skull className={`w-3 h-3 sm:w-4 sm:h-4 ${isOngoing ? 'text-black' : 'text-[#7a6b5d]'}`} />
+                  {/* Timeline Node */}
+                  <div className={cn("absolute left-5 sm:left-1/2 -translate-x-1/2 flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 z-10 bg-shell-bg transition-colors", theme.borderHover, theme.border)}>
+                    <div className={cn("w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-colors", isOngoing ? cn(theme.bg, theme.glow, 'animate-pulse') : 'bg-shell-muted')} />
                   </div>
                   
-                  {/* Typewriter Document Card */}
+                  {/* Document Card */}
                   <div className="w-full sm:w-[calc(50%-3rem)] pl-12 sm:pl-0 pt-2 sm:pt-0">
-                     <div className={`p-6 sm:p-8 border bg-[#110c0a] shadow-2xl transition-all relative overflow-hidden ${isOngoing ? 'border-red-900/50' : 'border-[#2a1c12] hover:border-red-900/30'}`}>
-                        {/* Torn Paper Effect Top */}
-                        <div className="absolute top-0 left-0 right-0 h-1 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPjxwYXRoIGQ9Ik0wIDBMNCA0TDggMEw4IDhMMCA4WiIgZmlsbD0iIzBhMDcwNSIvPjwvc3ZnPg==')] opacity-50" />
+                     <div className={cn("p-6 sm:p-8 border bg-shell-bg shadow-2xl transition-all relative overflow-hidden", theme.borderHover, isOngoing ? theme.border : "border-shell-border")}>
                         
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
                            <div>
-                             <div className={`text-[10px] sm:text-xs font-mono font-bold uppercase tracking-[0.3em] mb-1 ${isOngoing ? 'text-red-600' : 'text-[#7a6b5d]'}`}>
-                               {isOngoing ? ">> STATUS: ACTIVE" : ">> STATUS: SURVIVED"}
+                             <div className={cn("text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] mb-1", isOngoing ? theme.text : "text-shell-muted")}>
+                               {isOngoing ? ">> STATUS: ACTIVE" : ">> STATUS: CONCLUDED"}
                              </div>
-                             <h3 className="text-xl sm:text-2xl font-black text-[#d4c5a3] uppercase">{quest.role}</h3>
-                             <h4 className="text-xs sm:text-sm font-bold uppercase tracking-widest text-[#8a7045] mt-1 font-mono">ORG: {quest.company}</h4>
+                             <h3 className="text-xl sm:text-2xl font-black text-shell-text uppercase">{quest.role}</h3>
+                             <h4 className={cn("text-xs sm:text-sm font-bold uppercase tracking-widest mt-1", theme.text)}>ORG: {quest.company}</h4>
                            </div>
-                           <div className="text-[10px] font-mono border-b border-[#2a1c12] text-[#7a6b5d]">
+                           <div className="text-[10px] border-b border-shell-border text-shell-muted">
                              {start.getFullYear()} - {isOngoing ? 'PRESENT' : end?.getFullYear()}
                            </div>
                         </div>
                         
-                        {/* Typewriter Text content */}
-                        <p className="mt-6 text-sm sm:text-base text-[#a89c8a] font-mono leading-relaxed whitespace-pre-wrap">
+                        <p className="mt-6 text-sm sm:text-base text-shell-muted/90 font-sans leading-relaxed whitespace-pre-wrap">
                           {quest.description}
                         </p>
                         
                         {quest.type && (
-                          <div className="mt-6 inline-block border-t border-[#2a1c12] pt-2 w-full text-right text-[10px] font-bold uppercase tracking-[0.4em] text-red-900/80 font-mono">
+                          <div className={cn("mt-6 inline-block border-t border-shell-border pt-2 w-full text-right text-[10px] font-bold uppercase tracking-[0.4em]", theme.text)}>
                             ATTACHMENT: {quest.type}
                           </div>
                         )}
@@ -106,43 +106,44 @@ export default async function JourneyPage() {
         </div>
       </section>
 
-      {/* PROJECT ROUTE MAP (BLOOD TRAIL) */}
-      <section className="border border-[#1a1412] bg-[#0a0705] p-6 sm:p-12 relative overflow-hidden">
-        <div className="absolute bottom-0 right-0 w-64 h-64 bg-red-900/5 blur-[100px] pointer-events-none" />
+      {/* PROJECT ROUTE MAP */}
+      <section className="border border-shell-border bg-shell-surface/60 backdrop-blur p-6 sm:p-12 relative overflow-hidden rounded-xl">
+        <div className="absolute bottom-0 right-0 w-64 h-64 bg-shell-accent/5 blur-[100px] pointer-events-none" />
         
-        <div className="flex items-center justify-between border-b border-[#2a1c12] pb-6 mb-8 relative z-10">
+        <div className="flex items-center justify-between border-b border-shell-border pb-6 mb-8 relative z-10">
           <div>
-            <p className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.4em] text-[#7a6b5d]">Trace Route</p>
-            <h2 className="mt-1 text-2xl sm:text-3xl font-black text-[#c5bba1] uppercase tracking-tighter">Project History</h2>
+            <p className="text-[10px] sm:text-xs uppercase tracking-[0.4em] text-shell-muted">Trace Route</p>
+            <h2 className="mt-1 text-2xl sm:text-3xl font-black text-shell-text uppercase tracking-tighter">Project History</h2>
           </div>
-          <Map className="h-6 w-6 sm:h-8 sm:w-8 text-red-900" />
+          <Map className="h-6 w-6 sm:h-8 sm:w-8 text-shell-accent" />
         </div>
         
         {sortedProjects.length === 0 ? (
-          <div className="mt-6 text-sm text-[#7a6b5d] italic">The trail has gone cold. No projects documented.</div>
+          <div className="mt-6 text-sm text-shell-muted italic text-center">The trail has gone cold. No projects documented.</div>
         ) : (
           <div className="grid gap-6 sm:gap-8 relative z-10">
-            {sortedProjects.map((project: any) => {
+            {sortedProjects.map((project: any, index: number) => {
+              const theme = getTacticalColor(index + 3);
               const start = project.startDate ? new Date(project.startDate) : null;
               const end = project.endDate ? new Date(project.endDate) : null;
               return (
-                <div key={project._id} className="grid gap-4 md:grid-cols-[1fr_2fr] items-center border border-[#1a1412] bg-[#0c0908] p-4 sm:p-6 transition-all hover:border-red-900/30">
+                <Link href={`/projects/${project.slug || project._id}`} key={project._id} className={cn("group grid gap-4 md:grid-cols-[1fr_2fr] items-center border bg-shell-bg p-4 sm:p-6 transition-all", theme.borderHover, theme.border)}>
                   <div>
-                    <div className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.3em] text-red-800 font-bold mb-2">
+                    <div className={cn("text-[10px] sm:text-xs uppercase tracking-[0.3em] font-bold mb-2", theme.text)}>
                       {start ? start.toLocaleDateString(undefined, { month: "short", year: "numeric" }) : "UNKNOWN"}
                       {end ? ` -> ${end.toLocaleDateString(undefined, { month: "short", year: "numeric" })}` : project.isOngoing ? " -> PRESENT" : ""}
                     </div>
-                    <div className="text-xl sm:text-2xl font-black text-[#d4c5a3] uppercase">{project.title}</div>
-                    <div className="mt-2 text-xs sm:text-sm text-[#8a7045] line-clamp-3 font-mono">{project.description}</div>
+                    <div className="text-xl sm:text-2xl font-black text-shell-text uppercase group-hover:text-shell-text transition-colors">{project.title}</div>
+                    <div className="mt-2 text-xs sm:text-sm text-shell-muted line-clamp-3 font-sans">{project.description}</div>
                   </div>
                   
-                  {/* Blood Trail Progress Bar */}
+                  {/* Progress Bar */}
                   <div className="flex items-center w-full mt-4 md:mt-0">
-                    <div className="relative h-1 w-full overflow-hidden bg-[#1a1412]">
-                      <div className={`absolute inset-y-0 left-0 bg-gradient-to-r from-red-950 to-red-600 ${project.isOngoing ? "w-full animate-pulse shadow-[0_0_10px_rgba(220,38,38,0.5)]" : "w-full opacity-30"}`} />
+                    <div className="relative h-1 w-full overflow-hidden bg-shell-surface">
+                      <div className={cn("absolute inset-y-0 left-0", theme.bg, project.isOngoing ? cn("w-full animate-pulse", theme.glow) : "w-full opacity-30")} />
                     </div>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>
