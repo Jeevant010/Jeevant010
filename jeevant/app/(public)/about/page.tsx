@@ -1,161 +1,185 @@
 import { getCharacterSheet } from "@/lib/actions/rpg.actions";
+import { getProfile } from "@/lib/actions/profile.actions";
 import { 
-  Sword, 
   Shield, 
-  Scroll, 
-  Crown, 
   Map, 
-  Star,
-  Zap,
-  Gem 
+  Target,
+  Terminal,
+  Activity,
+  Crosshair,
+  Database,
+  Lock
 } from "lucide-react";
+import { getTacticalColor, cn } from "@/lib/utils";
 
-// Ensure page updates when data changes
 export const dynamic = "force-dynamic";
 
 export default async function AboutRPG() {
-  // FETCH REAL DATA
-  const { quests, loot } = await getCharacterSheet();
+  const [profile, { quests, loot }] = await Promise.all([
+    getProfile(),
+    getCharacterSheet()
+  ]);
 
   return (
-    <div className="min-h-screen bg-[#070504] text-[#d4c5a3] p-4 sm:p-8 font-serif relative overflow-hidden sm:-m-8">
+    <div className="min-h-screen text-shell-text p-4 sm:p-8 font-mono relative sm:-m-8 transition-colors">
       
-      {/* --- ATMOSPHERIC FX (Alan Wake / Elden Ring) --- */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(180,100,20,0.15),rgba(10,5,5,1))] pointer-events-none" />
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-yellow-600/20 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-yellow-600/50 to-transparent shadow-[0_0_30px_rgba(217,119,6,0.8)]" />
+      {/* --- TACTICAL BACKGROUND (Matches Home) --- */}
+      <div className="fixed inset-0 z-[-1] bg-background pointer-events-none transition-colors duration-500">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10 mix-blend-screen" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--color-shell-accent),transparent_60%),radial-gradient(circle_at_bottom_left,rgba(6,182,212,0.05),transparent_50%)] opacity-20" />
+        <div className="absolute left-0 top-0 w-full h-full bg-mindplace-grid [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+      </div>
 
-      {/* Fog Overlay */}
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10 mix-blend-screen pointer-events-none" />
-
-      <div className="relative z-10 max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pt-8 sm:pt-12">
+      <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pt-8 sm:pt-12">
         
-        {/* --- LEFT: HERO CARD --- */}
+        {/* --- LEFT: OPERATOR CARD --- */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-[#110e0c]/80 backdrop-blur-md border border-[#3a2c1f] rounded p-2 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative group">
+          <div className="bg-shell-bg/60 backdrop-blur-md border border-shell-border rounded-xl p-4 shadow-[0_20px_50px_var(--color-cinematic-glow)] relative group transition-colors">
             {/* Corner Ornaments */}
-            <div className="absolute -top-1 -left-1 w-4 sm:w-6 h-4 sm:h-6 border-t-2 border-l-2 border-yellow-600/50" />
-            <div className="absolute -bottom-1 -right-1 w-4 sm:w-6 h-4 sm:h-6 border-b-2 border-r-2 border-yellow-600/50" />
+            <div className="absolute -top-1 -left-1 w-4 sm:w-6 h-4 sm:h-6 border-t-2 border-l-2 border-shell-accent/50" />
+            <div className="absolute -bottom-1 -right-1 w-4 sm:w-6 h-4 sm:h-6 border-b-2 border-r-2 border-shell-accent/50" />
             
             {/* Avatar */}
-            <div className="aspect-[3/4] w-full max-w-[280px] sm:max-w-full mx-auto bg-[#0a0807] rounded-sm border border-[#2a1c12] flex items-center justify-center relative overflow-hidden">
-               {/* Replace this URL with your actual photo URL later */}
-               <div className="absolute inset-0 bg-[url('https://github.com/Jeevant010.png')] bg-cover bg-center opacity-70 group-hover:scale-105 group-hover:opacity-100 transition-all duration-1000 grayscale group-hover:grayscale-0" />
-               <div className="absolute bottom-0 w-full bg-gradient-to-t from-[#070504] via-[#070504]/80 to-transparent h-32" />
-               <div className="absolute bottom-4 left-4 right-4 text-center sm:text-left">
-                 <h2 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-widest drop-shadow-[0_0_10px_rgba(0,0,0,1)]">Jeevant</h2>
-                 <p className="text-yellow-600 text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] mt-1">Lvl 21 Technomancer</p>
+            <div className="aspect-[3/4] w-full max-w-[320px] sm:max-w-full mx-auto bg-shell-surface rounded border border-shell-border flex items-center justify-center relative overflow-hidden transition-colors">
+               <div 
+                 className="absolute inset-0 bg-cover bg-center opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-1000 grayscale group-hover:grayscale-[50%]" 
+                 style={{ backgroundImage: `url('${profile.avatarUrl}')` }}
+               />
+               <div className="absolute bottom-0 w-full bg-gradient-to-t from-shell-bg via-shell-bg/80 to-transparent h-40" />
+               <div className="absolute bottom-6 left-6 right-6">
+                 <h2 className="text-2xl sm:text-3xl font-black text-shell-text uppercase tracking-widest flex items-center gap-2">
+                   {profile.name} <Lock className="w-4 h-4 text-shell-accent" />
+                 </h2>
+                 <p className="text-shell-accent text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] mt-2 flex items-center gap-2">
+                   <Target className="w-3 h-3" /> OPERATOR_ID: {profile._id.slice(-6).toUpperCase()}
+                 </p>
                </div>
             </div>
             
-            {/* Stats */}
-            <div className="mt-6 space-y-4 px-4 pb-4">
-              <div className="flex justify-between items-center text-xs sm:text-sm font-bold border-b border-[#2a1c12] pb-2">
-                <span className="flex items-center gap-2 text-[#8a7045] uppercase tracking-widest"><Sword className="w-4 h-4 text-red-900" /> ATK</span>
-                <span className="text-red-500 font-mono drop-shadow-[0_0_5px_rgba(239,68,68,0.5)]">1525 (LC)</span>
-              </div>
-              <div className="flex justify-between items-center text-xs sm:text-sm font-bold border-b border-[#2a1c12] pb-2">
-                <span className="flex items-center gap-2 text-[#8a7045] uppercase tracking-widest"><Shield className="w-4 h-4 text-emerald-900" /> DEF</span>
-                <span className="text-emerald-500 font-mono drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]">MAX</span>
-              </div>
-              <div className="flex justify-between items-center text-xs sm:text-sm font-bold border-b border-[#2a1c12] pb-2">
-                <span className="flex items-center gap-2 text-[#8a7045] uppercase tracking-widest"><Zap className="w-4 h-4 text-blue-900" /> MANA</span>
-                <span className="text-blue-500 font-mono drop-shadow-[0_0_5px_rgba(59,130,246,0.5)]">Infinite</span>
-              </div>
+            {/* Stats HUD */}
+            <div className="mt-6 space-y-3 px-2 pb-4">
+              <h3 className="text-[10px] uppercase tracking-[0.4em] text-shell-muted font-bold mb-4 flex items-center gap-2 border-b border-shell-border pb-2">
+                <Activity className="w-3 h-3 text-shell-accent" /> Performance Metrics
+              </h3>
+              
+              {profile.stats?.map((stat: any, i: number) => (
+                <div key={i} className="flex justify-between items-end border-b border-shell-border pb-2 hover:border-shell-accent/50 transition-colors group/stat">
+                  <span className="text-[10px] font-bold text-shell-muted uppercase tracking-widest group-hover/stat:text-shell-text">{stat.label}</span>
+                  <span className="text-sm font-mono text-shell-accent">{stat.value}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* --- RIGHT: QUESTS & LOOT --- */}
+        {/* --- RIGHT: OPERATIONS & INTEL --- */}
         <div className="lg:col-span-8 space-y-12">
           
           {/* Header */}
-          <div className="border-b border-[#2a1c12] pb-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 relative">
-            <div className="absolute -bottom-[1px] left-0 w-32 h-[1px] bg-yellow-600/50 shadow-[0_0_10px_rgba(217,119,6,0.8)]" />
+          <div className="border-b border-shell-border pb-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 relative">
+            <div className="absolute -bottom-[1px] left-0 w-32 h-[1px] bg-shell-accent/50 shadow-[0_0_10px_var(--color-shell-accent)]" />
             <div>
-               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#e8dcc5] uppercase tracking-tighter drop-shadow-[0_5px_15px_rgba(0,0,0,1)]">
-                 Character Sheet
+               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-shell-text uppercase tracking-tighter">
+                 Operational Dossier
                </h1>
-               <p className="text-[#8a7045] font-bold mt-2 font-mono text-[10px] sm:text-xs tracking-[0.3em] uppercase">
-                 // CLASS: MERN_ARCHMAGE // SPECIALTY: AI_SUMMONING
+               <p className="text-shell-accent font-bold mt-2 font-mono text-[10px] sm:text-xs tracking-[0.3em] uppercase">
+                 // SYS.RECORD.ACTIVE // SECURITY_CLEARANCE: AUTHORIZED
                </p>
             </div>
             <div className="hidden md:block">
-              <Crown className="w-12 h-12 text-yellow-600/20 drop-shadow-[0_0_15px_rgba(217,119,6,0.2)]" />
+              <Database className="w-12 h-12 text-shell-accent opacity-20" />
             </div>
           </div>
 
-          {/* DYNAMIC LOOT (Achievements) */}
-          <div className="bg-[#0a0807]/80 backdrop-blur-sm p-6 sm:p-8 rounded border border-[#2a1c12] relative group">
-             <div className="absolute top-0 right-0 w-16 h-16 bg-yellow-600/5 blur-[30px] group-hover:bg-yellow-600/10 transition-colors" />
-             <h3 className="text-lg sm:text-xl font-bold text-[#d4c5a3] mb-6 flex items-center gap-3 uppercase tracking-widest">
-               <div className="w-8 h-8 bg-[#110e0c] rounded flex items-center justify-center border border-[#3a2c1f]">
-                 <Star className="w-4 h-4 text-yellow-600" />
+          {/* DYNAMIC LOOT (Achievements/Intel) */}
+          <div className="bg-shell-surface/80 backdrop-blur p-6 sm:p-8 rounded-xl border border-shell-border relative group transition-colors">
+             <div className="absolute top-0 right-0 w-16 h-16 bg-cyan-500/5 blur-[30px] group-hover:bg-cyan-500/10 transition-colors" />
+             <h3 className="text-lg sm:text-xl font-bold text-shell-text mb-6 flex items-center gap-3 uppercase tracking-widest">
+               <div className="w-8 h-8 bg-shell-bg rounded flex items-center justify-center border border-shell-border">
+                 <Shield className="w-4 h-4 text-cyan-500" />
                </div>
-               Acquired Relics
+               Acquired Intel
              </h3>
              
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                {loot.length === 0 ? (
-                 <div className="col-span-full text-center py-8 text-[#5a4a3a] italic font-serif">No relics acquired yet.</div>
+                 <div className="col-span-full text-center py-8 text-shell-muted italic font-mono text-xs">No intel acquired yet.</div>
                ) : (
-                 loot.map((item: any) => (
-                   <div key={item._id} className="bg-[#110e0c] p-4 sm:p-5 rounded border border-[#2a1c12] flex items-start gap-4 hover:border-yellow-600/30 transition group/item relative overflow-hidden">
-                     <div className="absolute inset-0 bg-gradient-to-r from-yellow-600/5 to-transparent opacity-0 group-hover/item:opacity-100 transition-opacity" />
-                     <div className="w-10 h-10 rounded bg-[#070504] border border-[#2a1c12] flex items-center justify-center text-yellow-600/50 group-hover/item:text-yellow-600 group-hover/item:border-yellow-600/30 transition shrink-0 relative z-10">
-                       <Gem className="w-5 h-5" />
+                 loot.map((item: any, index: number) => {
+                   const theme = getTacticalColor(index);
+                   return (
+                     <div key={item._id} className={cn("bg-shell-bg/50 p-4 sm:p-5 rounded border flex items-start gap-4 transition group/item relative overflow-hidden", theme.border, theme.borderHover)}>
+                       <div className={cn("absolute inset-0 opacity-0 group-hover/item:opacity-100 transition-opacity bg-gradient-to-r to-transparent", theme.text.replace("text-", "from-").replace("500", "500/5"))} />
+                       <div className={cn("w-10 h-10 rounded bg-shell-surface border flex items-center justify-center transition shrink-0 relative z-10 text-shell-muted", theme.border, theme.textHover, theme.borderHover)}>
+                         <Database className="w-4 h-4" />
+                       </div>
+                       <div className="relative z-10">
+                         <div className={cn("text-[10px] uppercase font-bold mb-1 tracking-widest flex items-center gap-1", theme.text)}>
+                           {item.visibility === "private" && <Lock className="w-3 h-3 text-red-500" />} {item.platform}
+                         </div>
+                         <div className={cn("text-sm sm:text-base font-bold text-shell-text transition-colors", theme.textHover)}>{item.title}</div>
+                         <p className="text-xs text-shell-muted mt-2 leading-relaxed line-clamp-2">{item.description}</p>
+                       </div>
                      </div>
-                     <div className="relative z-10">
-                       <div className="text-[10px] uppercase font-bold text-[#8a7045] mb-1 tracking-widest">{item.platform}</div>
-                       <div className="text-sm sm:text-base font-bold text-[#e8dcc5]">{item.title}</div>
-                       <p className="text-xs text-[#5a4a3a] mt-2 leading-relaxed font-serif italic line-clamp-3 group-hover/item:text-[#8a7045] transition-colors">{item.description}</p>
-                     </div>
-                   </div>
-                 ))
+                   );
+                 })
                )}
              </div>
           </div>
 
-          {/* DYNAMIC QUESTS (Experience) */}
+          {/* DYNAMIC QUESTS (Operations) */}
           <div className="space-y-6">
-             <h3 className="text-lg sm:text-xl font-bold text-[#d4c5a3] flex items-center gap-3 uppercase tracking-widest">
-               <div className="w-8 h-8 bg-[#110e0c] rounded flex items-center justify-center border border-[#3a2c1f]">
-                 <Scroll className="w-4 h-4 text-[#8a7045]" />
+             <h3 className="text-lg sm:text-xl font-bold text-shell-text flex items-center gap-3 uppercase tracking-widest">
+               <div className="w-8 h-8 bg-shell-bg rounded flex items-center justify-center border border-shell-border">
+                 <Terminal className="w-4 h-4 text-shell-accent" />
                </div>
-               Quest Logs
+               Field Operations
              </h3>
 
-             <div className="relative pl-6 sm:pl-10 space-y-8 sm:space-y-12 before:absolute before:inset-0 before:left-3 sm:before:left-5 before:h-full before:w-[1px] before:bg-gradient-to-b before:from-yellow-600/50 before:via-[#2a1c12] before:to-transparent">
+             <div className="relative pl-6 sm:pl-10 space-y-8 sm:space-y-12 before:absolute before:inset-0 before:left-3 sm:before:left-5 before:h-full before:w-[1px] before:bg-gradient-to-b before:from-shell-accent/50 before:via-shell-border before:to-transparent">
                {quests.length === 0 ? (
-                 <div className="py-8 text-[#5a4a3a] italic font-serif text-center">No quests recorded in the archives.</div>
+                 <div className="py-8 text-shell-muted italic font-mono text-xs text-center">No operations recorded in the archives.</div>
                ) : (
-                 quests.map((quest: any) => (
-                   <div key={quest._id} className="relative group">
-                     {/* Timeline Node */}
-                     <div className="absolute -left-[30px] sm:-left-[46px] top-4 w-4 sm:w-6 h-4 sm:h-6 rounded-full bg-[#070504] border border-yellow-600/50 flex items-center justify-center shadow-[0_0_10px_rgba(217,119,6,0.5)] z-10">
-                       <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 bg-yellow-600 rounded-full" />
-                     </div>
-                     
-                     {/* Card */}
-                     <div className="bg-[#110e0c]/80 backdrop-blur-md p-6 sm:p-8 rounded border border-[#2a1c12] hover:border-yellow-600/30 transition relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                           <Sword className="w-16 h-16 text-yellow-600" />
-                        </div>
-                        <div className="flex flex-col sm:flex-row justify-between items-start mb-4 gap-2 relative z-10">
-                          <div>
-                             <h4 className="text-xl sm:text-2xl font-black text-[#e8dcc5]">{quest.role}</h4>
-                             <p className="text-yellow-600/80 text-[10px] sm:text-xs font-bold mt-1 uppercase tracking-widest">Guild: {quest.company}</p>
+                 quests.map((quest: any, index: number) => {
+                   const theme = getTacticalColor(index + 2); // offset
+                   return (
+                     <div key={quest._id} className="relative group">
+                       {/* Timeline Node */}
+                       <div className={cn("absolute -left-[30px] sm:-left-[46px] top-4 w-4 sm:w-6 h-4 sm:h-6 rounded-full bg-shell-bg border flex items-center justify-center z-10 transition-colors", theme.borderHover, theme.border, theme.glow)}>
+                         <div className={cn("w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full", theme.bg)} />
+                       </div>
+                       
+                       {/* Card */}
+                       <div className={cn("bg-shell-surface/80 backdrop-blur p-6 sm:p-8 rounded-xl border transition relative overflow-hidden", theme.border, theme.borderHover)}>
+                          <div className={cn("absolute top-0 right-0 p-4 opacity-5 pointer-events-none", theme.text)}>
+                             <Crosshair className="w-16 h-16" />
                           </div>
-                          <span className="text-[10px] font-bold border border-[#2a1c12] bg-[#070504] px-3 py-1 text-[#8a7045] uppercase tracking-widest shadow-inner">
-                             {quest.endDate ? 'COMPLETED' : 'ACTIVE'}
-                          </span>
-                        </div>
-                        <p className="text-[#a89c8a] text-sm leading-relaxed font-serif italic relative z-10">
-                          {quest.description}
-                        </p>
+                          <div className="flex flex-col sm:flex-row justify-between items-start mb-4 gap-2 relative z-10">
+                            <div>
+                               <h4 className="text-xl sm:text-2xl font-black text-shell-text">{quest.role}</h4>
+                               <p className={cn("text-[10px] sm:text-xs font-bold mt-1 uppercase tracking-widest", theme.text)}>Command: {quest.company}</p>
+                            </div>
+                            <span className={cn("text-[10px] font-bold border px-3 py-1 uppercase tracking-widest shadow-inner", quest.endDate ? 'text-shell-muted border-shell-border bg-shell-bg' : cn('bg-shell-bg', theme.text, theme.borderHover))}>
+                               {quest.endDate ? 'CONCLUDED' : 'ACTIVE'}
+                            </span>
+                          </div>
+                          <p className="text-shell-muted text-sm leading-relaxed relative z-10">
+                            {quest.description}
+                          </p>
+                          
+                          {quest.skillsUsed?.length > 0 && (
+                            <div className="mt-4 flex flex-wrap gap-2 relative z-10">
+                              {quest.skillsUsed.map((skill: string, idx: number) => (
+                                <span key={idx} className={cn("text-[10px] font-mono border px-2 py-1 rounded-sm", theme.text, theme.border, theme.bgMuted)}>
+                                  {skill}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                       </div>
                      </div>
-                   </div>
-                 ))
+                   );
+                 })
                )}
              </div>
           </div>
