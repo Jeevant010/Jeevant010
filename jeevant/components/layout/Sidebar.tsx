@@ -8,7 +8,8 @@ import {
   LayoutDashboard, Crosshair, Briefcase, Brain, Library, Box, 
   FileCog, Sword, UserCog, 
   LogOut, Monitor, Settings,
-  Menu, X, Calendar
+  Menu, X, Calendar, Compass, FileText, Award,
+  Code, Radio, Mail, Wrench
 } from "lucide-react";
 import { logout } from "@/lib/actions/auth.actions";
 
@@ -87,12 +88,19 @@ export default function Sidebar({ isExpanded, toggleSidebar, isMobile }: Sidebar
               <SidebarItem href="/dashboard" icon={<LayoutDashboard size={18} />} label="Overview" active={pathname === "/dashboard"} expanded={isExpanded} />
               <SidebarItem href="/planner/daily" icon={<Crosshair size={18} />} label="Agenda" active={pathname.includes("planner")} expanded={isExpanded} />
               <SidebarItem href="/brain" icon={<Brain size={18} />} label="Notes" active={pathname === "/brain"} expanded={isExpanded} />
+              <SidebarItem href="/career" icon={<Briefcase size={18} />} label="Career" active={pathname === "/career"} expanded={isExpanded} />
+              <SidebarItem href="/learning" icon={<Library size={18} />} label="Learning" active={pathname === "/learning"} expanded={isExpanded} />
+              <SidebarItem href="/arsenal" icon={<Wrench size={18} />} label="Arsenal" active={pathname === "/arsenal"} expanded={isExpanded} />
               
               {isExpanded && <div className="mt-4"><SectionHeader label="Public Site" /></div>}
               <SidebarItem href="/" icon={<Box size={18} />} label="Home" active={pathname === "/"} expanded={isExpanded} />
-              <SidebarItem href="/schedule" icon={<Calendar size={18} />} label="Schedule" active={pathname === "/schedule"} expanded={isExpanded} />
-              <SidebarItem href="/journey" icon={<Sword size={18} />} label="Journey" active={pathname === "/journey"} expanded={isExpanded} />
               <SidebarItem href="/about" icon={<UserCog size={18} />} label="About" active={pathname === "/about"} expanded={isExpanded} />
+              <SidebarItem href="/projects" icon={<Code size={18} />} label="Projects" active={pathname === "/projects"} expanded={isExpanded} />
+              <SidebarItem href="/journey" icon={<Sword size={18} />} label="Journey" active={pathname === "/journey"} expanded={isExpanded} />
+              <SidebarItem href="/schedule" icon={<Calendar size={18} />} label="Schedule" active={pathname === "/schedule"} expanded={isExpanded} />
+              <SidebarItem href="/research" icon={<Radio size={18} />} label="Research" active={pathname === "/research"} expanded={isExpanded} />
+              <SidebarItem href="/library" icon={<Library size={18} />} label="Library" active={pathname === "/library"} expanded={isExpanded} />
+              <SidebarItem href="/contact" icon={<Mail size={18} />} label="Contact" active={pathname === "/contact"} expanded={isExpanded} />
             </>
           ) : (
             <>
@@ -100,6 +108,9 @@ export default function Sidebar({ isExpanded, toggleSidebar, isMobile }: Sidebar
               <SidebarItem href="/cms/projects" icon={<FileCog size={18} />} label="Projects" active={pathname.includes("projects")} isCms expanded={isExpanded} />
               <SidebarItem href="/cms/rpg" icon={<Sword size={18} />} label="RPG System" active={pathname.includes("rpg")} isCms expanded={isExpanded} />
               <SidebarItem href="/cms/schedule" icon={<Calendar size={18} />} label="Schedule" active={pathname.includes("schedule")} isCms expanded={isExpanded} />
+              <SidebarItem href="/cms/expertise" icon={<Award size={18} />} label="Expertise" active={pathname.includes("expertise")} isCms expanded={isExpanded} />
+              <SidebarItem href="/cms/journey" icon={<Compass size={18} />} label="Journey" active={pathname.includes("journey")} isCms expanded={isExpanded} />
+              <SidebarItem href="/cms/resume" icon={<FileText size={18} />} label="Resume" active={pathname.includes("resume")} isCms expanded={isExpanded} />
               <SidebarItem href="/cms/profile" icon={<UserCog size={18} />} label="Identity" active={pathname.includes("profile")} isCms expanded={isExpanded} />
             </>
           )}
