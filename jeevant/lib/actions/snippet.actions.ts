@@ -20,3 +20,15 @@ export async function getSnippets() {
   const items = await Snippet.find({}).sort({ _id: -1 });
   return items.map((i: any) => ({ ...i.toObject(), _id: i._id.toString() }));
 }
+
+export async function deleteSnippet(id: string) {
+  await connectDB();
+  await Snippet.findByIdAndDelete(id);
+  revalidatePath("/arsenal");
+}
+
+export async function updateSnippet(id: string, data: { title: string, language: string, code: string }) {
+  await connectDB();
+  await Snippet.findByIdAndUpdate(id, data);
+  revalidatePath("/arsenal");
+}
