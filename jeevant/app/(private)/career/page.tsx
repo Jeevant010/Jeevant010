@@ -1,5 +1,6 @@
-import { getApplications, createApplication, updateStatus, deleteApplication } from "@/lib/actions/career.actions";
-import { Briefcase, Building2, DollarSign, MoreHorizontal, Trash2, ArrowRight } from "lucide-react";
+import { getApplications, createApplication } from "@/lib/actions/career.actions";
+import { Building2 } from "lucide-react";
+import ApplicationCard from "./ApplicationCard";
 
 export const dynamic = "force-dynamic";
 
@@ -87,33 +88,4 @@ export default async function CareerKanban() {
     </div>
   );
 }
-
-// SUB-COMPONENT FOR THE CARD
-function ApplicationCard({ app, nextStatus, color }: { app: any, nextStatus: string, color: string }) {
-  return (
-    <div className={`bg-shell-bg border-l-4 p-5 relative group transition hover:-translate-y-1 ${color}`}>
-      <div className="flex justify-between items-start mb-2">
-        <h4 className="text-xl font-bold text-shell-text uppercase">{app.company}</h4>
-        <form action={async () => { "use server"; await deleteApplication(app._id); }}>
-          <button className="text-slate-700 hover:text-red-500 transition"><Trash2 className="w-4 h-4" /></button>
-        </form>
-      </div>
-      
-      <p className="text-sm font-bold text-shell-muted mb-4 flex items-center gap-2">
-        <Briefcase className="w-3 h-3" /> {app.role}
-      </p>
-
-      <div className="flex justify-between items-end mt-4 pt-4 border-t border-white/5">
-        <span className="text-xs font-mono text-shell-muted">{new Date(app.dateApplied).toLocaleDateString()}</span>
-        
-        {nextStatus !== 'archived' && (
-          <form action={async () => { "use server"; await updateStatus(app._id, nextStatus); }}>
-            <button className="flex items-center gap-1 text-xs font-black uppercase text-shell-text bg-shell-surface px-2 py-1 hover:bg-white hover:text-black transition">
-              Advance <ArrowRight className="w-3 h-3" />
-            </button>
-          </form>
-        )}
-      </div>
-    </div>
-  )
-}
+
