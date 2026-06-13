@@ -28,6 +28,12 @@ export async function updateStatus(id: string, newStatus: string) {
   revalidatePath("/career");
 }
 
+export async function updateApplication(id: string, data: { company: string, role: string }) {
+  await connectDB();
+  await Application.findByIdAndUpdate(id, { ...data, lastUpdated: Date.now() });
+  revalidatePath("/career");
+}
+
 export async function deleteApplication(id: string) {
   await connectDB();
   await Application.findByIdAndDelete(id);
