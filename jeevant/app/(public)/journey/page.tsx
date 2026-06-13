@@ -31,7 +31,7 @@ export default async function JourneyPage() {
         <div className="relative z-10 max-w-3xl space-y-4">
           <div className="flex items-center gap-3">
              <Target className="w-5 h-5 text-shell-accent animate-pulse" />
-             <p className="text-xs font-bold uppercase tracking-[0.5em] text-shell-muted">Field Report // Operator {profile.level}</p>
+             <p className="text-xs font-bold uppercase tracking-[0.5em] text-shell-muted">Field Report // HEROCOMING {profile.level}</p>
           </div>
           <h1 className="text-4xl sm:text-6xl font-black tracking-tighter text-shell-text uppercase drop-shadow-[0_2px_10px_var(--color-shell-accent)]">
             Operations Log
