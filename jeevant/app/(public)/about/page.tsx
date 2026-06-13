@@ -51,7 +51,7 @@ export default async function AboutRPG() {
                    {profile.name} <Lock className="w-4 h-4 text-shell-accent" />
                  </h2>
                  <p className="text-shell-accent text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] mt-2 flex items-center gap-2">
-                   <Target className="w-3 h-3" /> OPERATOR_ID: {profile._id.slice(-6).toUpperCase()}
+                   <Target className="w-3 h-3" /> HEROCOMING_ID: {profile._id.slice(-6).toUpperCase()}
                  </p>
                </div>
             </div>
