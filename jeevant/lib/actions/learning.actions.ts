@@ -12,7 +12,12 @@ export async function getLearning() {
 
 export async function getPublicLearning() {
   await connectDB();
-  const items = await Learning.find({ visibility: "public" }).sort({ status: 1 });
+  const { getSession } = await import("@/lib/auth");
+  const session = await getSession();
+  const isAdmin = session && session.role === "admin";
+  
+  const query = isAdmin ? {} : { visibility: "public" };
+  const items = await Learning.find(query).sort({ status: 1 });
   return items.map((i: any) => ({ ...i.toObject(), _id: i._id.toString() }));
 }
 
