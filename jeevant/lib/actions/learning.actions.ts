@@ -40,3 +40,20 @@ export async function addLearning(formData: FormData) {
   
   revalidatePath("/learning");
 }
+
+export async function deleteLearning(id: string) {
+  await connectDB();
+  await Learning.findByIdAndDelete(id);
+  revalidatePath("/learning");
+}
+
+export async function incrementLearning(id: string) {
+  await connectDB();
+  const learning = await Learning.findById(id);
+  if (learning && learning.completedModules < learning.totalModules) {
+    const newCompleted = learning.completedModules + 1;
+    const newStatus = newCompleted >= learning.totalModules ? "completed" : "in-progress";
+    await Learning.findByIdAndUpdate(id, { completedModules: newCompleted, status: newStatus });
+    revalidatePath("/learning");
+  }
+}
