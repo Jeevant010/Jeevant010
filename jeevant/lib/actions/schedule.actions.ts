@@ -34,13 +34,19 @@ export async function getDaySchedules(dateISO: string) {
 export async function getPublicDaySchedules(dateISO: string) {
   try {
     await connectDB();
+    const { getSession } = await import("@/lib/auth");
+    const session = await getSession();
+    const isAdmin = session && session.role === "admin";
+
     const dayStart = new Date(dateISO + "T00:00:00Z");
     const dayEnd = new Date(dateISO + "T23:59:59Z");
 
-    const items = await Schedule.find({
-      visibility: "public",
-      start: { $gte: dayStart, $lte: dayEnd },
-    }).sort({ start: 1 });
+    const query: any = { start: { $gte: dayStart, $lte: dayEnd } };
+    if (!isAdmin) {
+      query.visibility = "public";
+    }
+
+    const items = await Schedule.find(query).sort({ start: 1 });
 
     return items.map((i: any) => ({ ...i.toObject(), _id: i._id.toString() }));
   } catch (error) {
