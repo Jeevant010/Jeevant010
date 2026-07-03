@@ -18,9 +18,11 @@ export default function ThemeToggle() {
 
   useEffect(() => {
     const initial = getInitialTheme();
-    setTheme(initial);
+    if (theme !== initial) {
+      setTheme(initial);
+    }
     document.documentElement.setAttribute("data-theme", initial);
-  }, []);
+  }, [theme]);
 
   const toggleTheme = () => {
     const nextTheme: Theme = theme === "dark" ? "light" : "dark";
