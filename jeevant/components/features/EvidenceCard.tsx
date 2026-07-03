@@ -2,10 +2,15 @@
 
 import { deleteNote } from "@/lib/actions/note.actions";
 import { Trash2, Paperclip, Lock } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function EvidenceCard({ note }: { note: any }) {
   const [loading, setLoading] = useState(false);
+  const [rotation, setRotation] = useState(0);
+
+  useEffect(() => {
+    setRotation(Math.random() * 4 - 2);
+  }, []);
 
   const handleDelete = async () => {
     if (!confirm("Archive this evidence permanently?")) return;
@@ -13,9 +18,6 @@ export default function EvidenceCard({ note }: { note: any }) {
     await deleteNote(note._id);
     setLoading(false);
   };
-
-  // Aesthetic: Random rotation for "scattered" look
-  const rotation = Math.random() * 4 - 2; // Random rotation between -2deg and 2deg
 
   return (
     <div 
