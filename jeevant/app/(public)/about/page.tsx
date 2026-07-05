@@ -113,13 +113,41 @@ export default async function AboutRPG() {
                        <div className={cn("w-10 h-10 rounded bg-shell-surface border flex items-center justify-center transition shrink-0 relative z-10 text-shell-muted", theme.border, theme.textHover, theme.borderHover)}>
                          <Database className="w-4 h-4" />
                        </div>
-                       <div className="relative z-10">
-                         <div className={cn("text-[10px] uppercase font-bold mb-1 tracking-widest flex items-center gap-1", theme.text)}>
-                           {item.visibility === "private" && <Lock className="w-3 h-3 text-red-500" />} {item.platform}
-                         </div>
-                         <div className={cn("text-sm sm:text-base font-bold text-shell-text transition-colors", theme.textHover)}>{item.title}</div>
-                         <p className="text-xs text-shell-muted mt-2 leading-relaxed line-clamp-2">{item.description}</p>
-                       </div>
+                        <div className="relative z-10 w-full">
+                          <div className="flex justify-between items-start gap-2 mb-1">
+                            <div className={cn("text-[10px] uppercase font-bold tracking-widest flex items-center gap-1", theme.text)}>
+                              {item.visibility === "private" && <Lock className="w-3 h-3 text-red-500" />} {item.platform}
+                            </div>
+                            {item.score && (
+                              <span className={cn("text-[10px] font-mono border px-1", theme.border, theme.text)}>SCORE: {item.score}</span>
+                            )}
+                          </div>
+                          <div className={cn("text-sm sm:text-base font-bold text-shell-text transition-colors", theme.textHover)}>{item.title}</div>
+                          
+                          {(item.issuer || item.category) && (
+                            <div className="text-[10px] text-shell-muted font-bold uppercase tracking-widest mt-1 flex gap-2">
+                              {item.issuer && <span>ISSUER: {item.issuer}</span>}
+                              {item.category && <span>CAT: {item.category}</span>}
+                            </div>
+                          )}
+
+                          <p className="text-xs text-shell-muted mt-2 leading-relaxed line-clamp-2">{item.description}</p>
+                          
+                          {(item.credentialId || item.expiryDate) && (
+                            <div className="mt-3 flex flex-wrap gap-3 border-t border-shell-border pt-2 text-[10px] font-mono text-shell-muted/70">
+                              {item.credentialId && <span>ID: {item.credentialId}</span>}
+                              {item.expiryDate && <span>EXP: {new Date(item.expiryDate).toLocaleDateString()}</span>}
+                            </div>
+                          )}
+                          
+                          {item.tags?.length > 0 && (
+                            <div className="mt-3 flex flex-wrap gap-1">
+                              {item.tags.map((tag: string, idx: number) => (
+                                <span key={idx} className={cn("text-[9px] font-bold uppercase tracking-widest border px-1", theme.border, theme.text)}>{tag}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                      </div>
                    );
                  })
@@ -167,11 +195,31 @@ export default async function AboutRPG() {
                             {quest.description}
                           </p>
                           
-                          {quest.skillsUsed?.length > 0 && (
+                          {(quest.location || quest.salary || quest.rating || quest.manager) && (
+                            <div className="mt-4 grid grid-cols-2 gap-2 text-[10px] font-mono border-t border-shell-border pt-3 text-shell-muted relative z-10">
+                              {quest.location && <div>LOC: {quest.location}</div>}
+                              {quest.salary && <div>SALARY: {quest.salary}</div>}
+                              {quest.rating && <div>RATING: {quest.rating}/5</div>}
+                              {quest.manager && <div>LEAD: {quest.manager}</div>}
+                            </div>
+                          )}
+
+                          {quest.reasonForLeaving && (
+                             <div className="mt-2 text-[10px] italic text-shell-muted/60 relative z-10">
+                               DEBRIEF: {quest.reasonForLeaving}
+                             </div>
+                          )}
+
+                          {(quest.skillsUsed?.length > 0 || quest.tags?.length > 0) && (
                             <div className="mt-4 flex flex-wrap gap-2 relative z-10">
-                              {quest.skillsUsed.map((skill: string, idx: number) => (
+                              {quest.skillsUsed?.map((skill: string, idx: number) => (
                                 <span key={idx} className={cn("text-[10px] font-mono border px-2 py-1 rounded-sm", theme.text, theme.border, theme.bgMuted)}>
                                   {skill}
+                                </span>
+                              ))}
+                              {quest.tags?.map((tag: string, idx: number) => (
+                                <span key={`tag-${idx}`} className={cn("text-[10px] font-mono border px-2 py-1 rounded-sm text-shell-muted border-shell-border")}>
+                                  #{tag}
                                 </span>
                               ))}
                             </div>
