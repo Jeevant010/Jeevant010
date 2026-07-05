@@ -1,6 +1,6 @@
 import { getProjects } from "@/lib/actions/project.action";
 import AddProjectForm from "@/components/features/AddProjectForm";
-import ProjectRow from "@/components/features/ProjectRow";
+import SortableProjectList from "@/components/features/SortableProjectList";
 import { FolderOpen, Archive } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -44,11 +44,7 @@ export default async function ProjectCMS() {
               <p>NO PROJECTS FOUND.</p>
             </div>
           ) : (
-            projects.map((p: any) => (
-              <div key={p._id} className="p-4 hover:bg-[#1a1a1a] transition group">
-                 <ProjectRow project={p} /> 
-              </div>
-            ))
+            <SortableProjectList projects={projects} />
           )}
         </div>
       </div>
