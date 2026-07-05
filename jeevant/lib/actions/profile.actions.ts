@@ -28,6 +28,14 @@ export async function updateProfile(formData: FormData) {
     console.error("Failed to parse stats JSON");
   }
 
+  const skillsRaw = formData.get("skillsExperience") as string;
+  let skillsExperience = [];
+  try {
+    skillsExperience = skillsRaw ? JSON.parse(skillsRaw) : [];
+  } catch(e) {
+    console.error("Failed to parse skillsExperience JSON");
+  }
+
   const data = {
     name: formData.get("name"),
     title: formData.get("title"),
@@ -36,6 +44,16 @@ export async function updateProfile(formData: FormData) {
     resumeLink: formData.get("resumeLink"),
     avatarUrl: formData.get("avatarUrl"),
     status: formData.get("status"),
+    bio: formData.get("bio"),
+    location: formData.get("location"),
+    email: formData.get("email"),
+    phone: formData.get("phone"),
+    linkedinUrl: formData.get("linkedinUrl"),
+    twitterUrl: formData.get("twitterUrl"),
+    website: formData.get("website"),
+    currentFocus: formData.get("currentFocus"),
+    availability: formData.get("availability"),
+    skillsExperience,
     updatedAt: new Date()
   };
 
