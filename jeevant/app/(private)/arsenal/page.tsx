@@ -1,6 +1,6 @@
 import { getSnippets, addSnippet } from "@/lib/actions/snippet.actions";
 import { Box, Plus } from "lucide-react";
-import SnippetCard from "./SnippetCard";
+import { ArsenalSortableGrid } from "@/components/features/ArsenalSortableGrid";
 
 export const dynamic = "force-dynamic";
 
@@ -44,11 +44,7 @@ export default async function ArsenalPage() {
       </div>
 
       {/* The Inventory Grid */}
-      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {snippets.map((item: any) => (
-          <SnippetCard key={item._id} item={item} />
-        ))}
-      </div>
+      <ArsenalSortableGrid initialItems={snippets} />
     </div>
   );
 }
