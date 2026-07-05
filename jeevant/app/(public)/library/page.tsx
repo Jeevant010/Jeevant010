@@ -1,12 +1,11 @@
 import { getLearning } from "@/lib/actions/learning.actions";
-import { getNotes } from "@/lib/actions/note.actions";
 import { LibraryBig, BookMarked, FileSearch2, BookOpenText, Target, Crosshair } from "lucide-react";
 import { getTacticalColor, cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function LibraryPage() {
-  const [learning, notes] = await Promise.all([getLearning(), getNotes()]);
+  const learning = await getLearning();
   const progressWidths = ["w-[0%]", "w-[20%]", "w-[40%]", "w-[60%]", "w-[80%]", "w-full"];
 
   return (
@@ -52,7 +51,7 @@ export default async function LibraryPage() {
         ))}
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[1fr_0.9fr]">
+      <section className="grid gap-6">
         <div className="rounded-xl border border-shell-border bg-shell-surface/60 backdrop-blur p-6 sm:p-8">
           <div className="flex items-center justify-between border-b border-shell-border pb-4 mb-8">
             <h2 className="text-2xl font-black text-shell-text uppercase tracking-tighter flex items-center gap-2">
@@ -61,9 +60,9 @@ export default async function LibraryPage() {
             <span className="text-[10px] uppercase tracking-[0.4em] font-bold text-shell-accent border border-shell-accent bg-shell-accent/10 px-2 py-1">Backend DB</span>
           </div>
           
-          <div className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {learning.length === 0 ? (
-              <div className="text-sm text-shell-muted italic text-center py-8">No training data found in the server.</div>
+              <div className="text-sm text-shell-muted italic text-center py-8 col-span-full">No training data found in the server.</div>
             ) : (
               learning.map((item: any, index: number) => {
                 const theme = getTacticalColor(index + 3);
@@ -78,7 +77,7 @@ export default async function LibraryPage() {
                         <div className={cn("text-sm sm:text-base font-bold uppercase transition-colors text-shell-text", theme.textHover)}>{item.title}</div>
                         <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.3em] text-shell-muted">{item.platform || "Reference"}</div>
                       </div>
-                      <span className={cn("border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.25em] bg-shell-surface", theme.text, theme.border)}>
+                      <span className={cn("border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.25em] bg-shell-surface mt-2", theme.text, theme.border)}>
                         {item.status}
                       </span>
                     </div>
@@ -87,34 +86,6 @@ export default async function LibraryPage() {
                         className={cn("h-full transition-all duration-1000", theme.bg, progressWidths[pct], theme.glow)}
                       />
                     </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-shell-border bg-shell-surface/60 backdrop-blur p-6 sm:p-8">
-          <div className="flex items-center gap-3 border-b border-shell-border pb-4 mb-8">
-            <FileSearch2 className="h-6 w-6 text-shell-accent" />
-            <h2 className="text-2xl font-black text-shell-text uppercase tracking-tighter">Decrypted Notes</h2>
-          </div>
-          
-          <div className="space-y-4">
-            {notes.length === 0 ? (
-              <div className="text-sm text-shell-muted italic text-center py-8">Awaiting decrypted inputs.</div>
-            ) : (
-              notes.slice(0, 6).map((note: any, index: number) => {
-                const theme = getTacticalColor(index + 5);
-                return (
-                  <div key={note._id} className={cn("border bg-shell-bg p-4 relative group transition-all", theme.borderHover, theme.border)}>
-                     <div className={cn("absolute top-0 right-0 w-2 h-2 border-b border-l", theme.border)} />
-                     <div className={cn("text-sm sm:text-base font-bold text-shell-text uppercase tracking-wider mb-2 transition-colors", theme.textHover)}>
-                       {note.title}
-                     </div>
-                     <p className="text-sm leading-relaxed text-shell-muted font-sans">
-                       {note.content || "Classified contents. Access level insufficient."}
-                     </p>
                   </div>
                 );
               })
