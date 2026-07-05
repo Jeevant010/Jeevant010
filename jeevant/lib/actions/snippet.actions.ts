@@ -3,7 +3,7 @@
 import connectDB from "@/lib/db";
 import { Snippet } from "@/lib/database/models";
 import { revalidatePath } from "next/cache";
-
+import { updateBulkOrder } from "./reorder.actions";
 export async function addSnippet(formData: FormData) {
   await connectDB();
   await Snippet.create({
@@ -31,4 +31,9 @@ export async function updateSnippet(id: string, data: { title: string, language:
   await connectDB();
   await Snippet.findByIdAndUpdate(id, data);
   revalidatePath("/arsenal");
+}
+
+export async function updateSnippetOrder(ids: string[]) {
+  const updates = ids.map((id, index) => ({ id, order: index }));
+  await updateBulkOrder("Snippet", updates, ["/arsenal"]);
 }
