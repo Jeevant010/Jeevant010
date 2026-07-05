@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import connectDB from "@/lib/db";
 import { Project } from "@/lib/database/models";
+import { updateBulkOrder } from "./reorder.actions";
 import { getSession } from "@/lib/auth";
 
 async function requireAuth() {
@@ -32,6 +33,16 @@ export async function createProject(formData: FormData): Promise<void> {
     const techStack = techStackRaw ? techStackRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
     const slug = title.toLowerCase().replace(/ /g, "-") + "-" + Date.now();
 
+    // New fields
+    const clientName = formData.get("clientName") as string;
+    const budget = formData.get("budget") as string;
+    const tagsRaw = formData.get("tags") as string;
+    const tags = tagsRaw ? tagsRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
+    const featured = formData.get("featured") === "on";
+    const rating = formData.get("rating") ? Number(formData.get("rating")) : undefined;
+    const platform = formData.get("platform") as string;
+    const priority = (formData.get("priority") as string) || "medium";
+
     await Project.create({
       title,
       slug,
@@ -45,6 +56,13 @@ export async function createProject(formData: FormData): Promise<void> {
       isOngoing,
       status,
       visibility,
+      clientName,
+      budget,
+      tags,
+      featured,
+      rating,
+      platform,
+      priority
     });
 
     revalidatePath("/cms/projects");
@@ -157,6 +175,16 @@ export async function updateProject(formData: FormData) {
     const visibility = (formData.get("visibility") as string) || "private";
     const techStack = techStackRaw ? techStackRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
 
+    // New fields
+    const clientName = formData.get("clientName") as string;
+    const budget = formData.get("budget") as string;
+    const tagsRaw = formData.get("tags") as string;
+    const tags = tagsRaw ? tagsRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
+    const featured = formData.get("featured") === "on";
+    const rating = formData.get("rating") ? Number(formData.get("rating")) : undefined;
+    const platform = formData.get("platform") as string;
+    const priority = (formData.get("priority") as string) || "medium";
+
     await Project.findByIdAndUpdate(id, {
       title,
       description,
@@ -169,6 +197,13 @@ export async function updateProject(formData: FormData) {
       isOngoing,
       status,
       visibility,
+      clientName,
+      budget,
+      tags,
+      featured,
+      rating,
+      platform,
+      priority
     });
 
     revalidatePath("/cms/projects");
@@ -189,6 +224,17 @@ export async function deleteProject(id: string) {
     revalidatePath("/cms/projects");
     revalidatePath("/projects");
     revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    return { success: false };
+  }
+}
+
+export async function updateProjectOrder(ids: string[]) {
+  try {
+    await requireAuth();
+    const updates = ids.map((id, index) => ({ id, order: index }));
+    await updateBulkOrder("Project", updates, ["/cms/projects", "/", "/projects"]);
     return { success: true };
   } catch (error) {
     return { success: false };
