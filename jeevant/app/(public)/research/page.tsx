@@ -1,12 +1,10 @@
 import { getNotes } from "@/lib/actions/note.actions";
-import { getLearning } from "@/lib/actions/learning.actions";
 import { BookOpen, FileText, Mic2, Search } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function ResearchPage() {
-  const [notes, learning] = await Promise.all([getNotes(), getLearning()]);
-  const progressWidths = ["w-[0%]", "w-[20%]", "w-[40%]", "w-[60%]", "w-[80%]", "w-full"];
+  const notes = await getNotes();
 
   return (
     <div className="space-y-8">
@@ -38,25 +36,27 @@ export default async function ResearchPage() {
         </div>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <section className="grid gap-6 lg:grid-cols-[1fr_300px]">
         <div className="rounded-[2rem] border border-shell-border bg-shell-surface p-6 sm:p-8">
           <div className="flex items-center justify-between border-b border-shell-border pb-4">
-            <h2 className="text-2xl font-bold text-shell-text">Research notes</h2>
-            <span className="text-xs uppercase tracking-[0.3em] text-shell-muted">From the backend</span>
+            <h2 className="text-2xl font-bold text-shell-text">Research & Notes</h2>
+            <span className="text-xs uppercase tracking-[0.3em] text-shell-muted">Archive</span>
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             {notes.length === 0 ? (
               <div className="col-span-full text-sm text-shell-muted">Add notes, summaries, or reference material from the admin area.</div>
             ) : (
-              notes.slice(0, 8).map((note: any) => (
-                <div key={note._id} className="rounded-2xl border border-shell-border bg-shell-bg/30 p-5">
-                  <div className="text-sm font-semibold text-shell-text">{note.title}</div>
-                  <p className="mt-2 line-clamp-4 text-sm leading-6 text-shell-muted">{note.content || "Use this for book notes, paper summaries, or research ideas."}</p>
+              notes.map((note: any) => (
+                <div key={note._id} className="rounded-2xl border border-shell-border bg-shell-bg/30 p-5 flex flex-col justify-between">
+                  <div>
+                    <div className="text-lg font-semibold text-shell-text">{note.title}</div>
+                    <p className="mt-3 text-sm leading-6 text-shell-muted">{note.content || "Use this for book notes, paper summaries, or research ideas."}</p>
+                  </div>
                   {note.tags?.length ? (
-                    <div className="mt-4 flex flex-wrap gap-2">
+                    <div className="mt-6 flex flex-wrap gap-2">
                       {note.tags.map((tag: string) => (
-                        <span key={tag} className="rounded-full border border-shell-border bg-shell-text/5 px-2 py-1 text-[10px] uppercase tracking-[0.25em] text-shell-muted">
-                          {tag}
+                        <span key={tag} className="rounded-full border border-shell-border bg-emerald-500/10 px-3 py-1 text-xs uppercase tracking-[0.1em] text-emerald-300">
+                          #{tag}
                         </span>
                       ))}
                     </div>
@@ -68,34 +68,13 @@ export default async function ResearchPage() {
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-[2rem] border border-shell-border bg-shell-surface p-6 sm:p-8">
-            <h2 className="text-2xl font-bold text-shell-text">Learning stack</h2>
-            <div className="mt-5 space-y-4">
-              {learning.length === 0 ? (
-                <div className="text-sm text-shell-muted">Add courses, books, or papers in the learning section.</div>
-              ) : (
-                learning.map((item: any) => (
-                  <div key={item._id} className="rounded-2xl border border-shell-border bg-shell-bg/30 p-4">
-                    <div className="text-sm font-semibold text-shell-text">{item.title}</div>
-                    <div className="mt-1 text-xs uppercase tracking-[0.25em] text-shell-muted">{item.platform || "Reference"}</div>
-                    <div className="mt-3 h-1.5 w-full rounded-full bg-shell-surface">
-                      <div
-                        className={`h-full rounded-full bg-emerald-300 ${progressWidths[Math.min(progressWidths.length - 1, Math.floor(((item.totalModules ? (item.completedModules / item.totalModules) * 100 : 0)) / 20))]}`}
-                      />
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-
           <div className="rounded-[2rem] border border-shell-border bg-gradient-to-br from-emerald-500/10 to-transparent p-6 sm:p-8">
-            <h2 className="text-2xl font-bold text-shell-text">Use this page for</h2>
-            <ul className="mt-4 space-y-3 text-sm leading-6 text-shell-muted">
-              <li>Books I have read</li>
-              <li>Papers I have reviewed</li>
-              <li>Ideas worth revisiting</li>
-              <li>Topics I want to study next</li>
+            <h2 className="text-2xl font-bold text-shell-text">Index</h2>
+            <ul className="mt-4 space-y-4 text-sm leading-6 text-shell-muted">
+              <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-400"></div> AI & Machine Learning</li>
+              <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-sky-400"></div> Web Architecture</li>
+              <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-violet-400"></div> Design Systems</li>
+              <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-amber-400"></div> Computer Science</li>
             </ul>
           </div>
         </div>
