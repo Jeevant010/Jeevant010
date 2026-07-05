@@ -1,8 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { deleteScheduleAction, updateScheduleAction } from "@/lib/actions/schedule.actions";
-import { Edit2, Trash2, X, Save } from "lucide-react";
+import { useState } from "react";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import { deleteScheduleAction, updateScheduleTime, updateScheduleAction, createSchedule } from "@/lib/actions/schedule.actions";
+import { X, Trash2, Save, MapPin, Video, Users } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 type ScheduleItem = {
   _id: string;
@@ -10,167 +15,315 @@ type ScheduleItem = {
   start: string;
   end?: string;
   notes?: string;
+  location?: string;
+  meetingLink?: string;
+  attendees?: string[];
   recurrence?: string;
+  recurrenceDays?: number[];
+  recurrenceEndDate?: string;
   isRecurring?: boolean;
   colorCode?: string;
   visibility?: string;
 };
 
 const colorMap: Record<string, string> = {
-  slate: "border-slate-700 bg-slate-500/10 text-slate-200",
-  sky: "border-sky-500/40 bg-sky-500/10 text-sky-100",
-  emerald: "border-emerald-500/40 bg-emerald-500/10 text-emerald-100",
-  amber: "border-amber-500/40 bg-amber-500/10 text-amber-100",
-  rose: "border-rose-500/40 bg-rose-500/10 text-rose-100",
-  violet: "border-violet-500/40 bg-violet-500/10 text-violet-100",
+  slate: "#475569",
+  sky: "#0ea5e9",
+  emerald: "#10b981",
+  amber: "#f59e0b",
+  rose: "#f43f5e",
+  violet: "#8b5cf6",
 };
 
-const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-function formatDate(date: Date) {
-  return date.toISOString().slice(0, 10);
-}
-
-function startOfDay(date: Date) {
-  const value = new Date(date);
-  value.setHours(0, 0, 0, 0);
-  return value;
-}
-
-function addDays(date: Date, count: number) {
-  const value = new Date(date);
-  value.setDate(value.getDate() + count);
-  return value;
-}
-
-function groupByDate(items: ScheduleItem[]) {
-  const grouped: Record<string, ScheduleItem[]> = {};
-  for (const item of items) {
-    const key = formatDate(new Date(item.start));
-    if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(item);
-  }
-  return grouped;
-}
-
 export default function AdminCalendar({ schedules }: { schedules: ScheduleItem[] }) {
-  const [mode, setMode] = useState<"day" | "week">("week");
-  const [anchorDate, setAnchorDate] = useState(new Date());
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<ScheduleItem | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [newEventDates, setNewEventDates] = useState<{ start: Date; end?: Date }>({ start: new Date() });
 
-  const grouped = useMemo(() => groupByDate(schedules), [schedules]);
-  const todayKey = formatDate(startOfDay(anchorDate));
-  const weekStart = useMemo(() => {
-    const base = startOfDay(anchorDate);
-    return addDays(base, -base.getDay());
-  }, [anchorDate]);
+  const formatDate = (date: any) => {
+    try {
+      return new Date(date).toISOString().substring(0, 10);
+    } catch (e) {
+      return "";
+    }
+  };
 
-  const visibleDays = useMemo(() => {
-    if (mode === "day") return [startOfDay(anchorDate)];
-    return Array.from({ length: 7 }, (_, index) => addDays(weekStart, index));
-  }, [anchorDate, mode, weekStart]);
+  const formatTime = (date: any) => {
+    try {
+      return new Date(date).toISOString().substring(11, 16);
+    } catch (e) {
+      return "00:00";
+    }
+  };
+
+  // Convert DB items to FullCalendar event objects
+  const events = schedules.map((item) => {
+    // If recurring, map to FullCalendar rrule or simple recurrence
+    let daysOfWeek = undefined;
+    if (item.isRecurring && item.recurrence !== "none") {
+      if (item.recurrence === "daily") daysOfWeek = [0, 1, 2, 3, 4, 5, 6];
+      if (item.recurrence === "weekly" && item.recurrenceDays?.length) daysOfWeek = item.recurrenceDays;
+      if (item.recurrence === "custom" && item.recurrenceDays?.length) daysOfWeek = item.recurrenceDays;
+      // If we couldn't parse the days, default to the start day
+      if (!daysOfWeek) daysOfWeek = [new Date(item.start).getDay()];
+    }
+
+    return {
+      id: item._id,
+      title: item.title,
+      start: item.isRecurring ? undefined : item.start,
+      end: item.isRecurring ? undefined : item.end,
+      startTime: item.isRecurring ? new Date(item.start).toLocaleTimeString("en-GB", { hour12: false }) : undefined,
+      endTime: item.isRecurring && item.end ? new Date(item.end).toLocaleTimeString("en-GB", { hour12: false }) : undefined,
+      daysOfWeek,
+      startRecur: item.isRecurring ? item.start : undefined,
+      endRecur: item.isRecurring ? item.recurrenceEndDate : undefined,
+      backgroundColor: colorMap[item.colorCode || "sky"],
+      borderColor: colorMap[item.colorCode || "sky"],
+      extendedProps: { ...item },
+    };
+  });
+
+  const handleEventClick = (clickInfo: any) => {
+    setSelectedEvent(clickInfo.event.extendedProps as ScheduleItem);
+  };
+
+  const handleDateSelect = (selectInfo: any) => {
+    setNewEventDates({ start: selectInfo.start, end: selectInfo.end });
+    setIsCreating(true);
+    let calendarApi = selectInfo.view.calendar;
+    calendarApi.unselect();
+  };
+
+  const handleEventDrop = async (dropInfo: any) => {
+    const id = dropInfo.event.id;
+    const newStart = dropInfo.event.start;
+    const newEnd = dropInfo.event.end || dropInfo.event.start;
+    await updateScheduleTime(id, newStart, newEnd);
+  };
+
+  const handleEventResize = async (resizeInfo: any) => {
+    const id = resizeInfo.event.id;
+    const newStart = resizeInfo.event.start;
+    const newEnd = resizeInfo.event.end;
+    await updateScheduleTime(id, newStart, newEnd);
+  };
 
   return (
-    <div className="rounded-[1.75rem] border border-slate-800 bg-[#111111] p-4 sm:p-6 font-mono">
-      <div className="flex flex-col gap-4 border-b border-slate-800 pb-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="text-xs uppercase tracking-[0.35em] text-shell-muted">Planner calendar</div>
-          <div className="mt-2 text-xl font-semibold text-shell-text">{mode === "day" ? "Day view" : "Week view"}</div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button onClick={() => setAnchorDate(new Date())} className="rounded-full border border-slate-700 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-shell-muted hover:border-slate-500 hover:text-shell-text">Today</button>
-          <button onClick={() => setAnchorDate(addDays(anchorDate, -1))} className="rounded-full border border-slate-700 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-shell-muted hover:border-slate-500 hover:text-shell-text">Prev</button>
-          <button onClick={() => setAnchorDate(addDays(anchorDate, 1))} className="rounded-full border border-slate-700 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-shell-muted hover:border-slate-500 hover:text-shell-text">Next</button>
-          <button onClick={() => setMode("day")} className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-wider ${mode === "day" ? "bg-sky-600 text-shell-text" : "border border-slate-700 text-shell-muted hover:border-slate-500 hover:text-shell-text"}`}>Day</button>
-          <button onClick={() => setMode("week")} className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-wider ${mode === "week" ? "bg-sky-600 text-shell-text" : "border border-slate-700 text-shell-muted hover:border-slate-500 hover:text-shell-text"}`}>Week</button>
-        </div>
-      </div>
+    <div className="rounded-[1.75rem] border border-slate-800 bg-[#111111] p-4 sm:p-6 font-mono relative">
+      
+      {/* FULL CALENDAR */}
+      <style suppressHydrationWarning>{`
+        .fc-theme-standard th { border-color: #334155; padding: 8px 0; color: #94a3b8; font-weight: normal; text-transform: uppercase; font-size: 12px; }
+        .fc-theme-standard td { border-color: #334155; }
+        .fc-day-today { background-color: rgba(14, 165, 233, 0.05) !important; }
+        .fc-event { border-radius: 4px; cursor: pointer; border: none; padding: 2px 4px; font-size: 11px; }
+        .fc-timegrid-slot { height: 3em; }
+        .fc .fc-toolbar-title { font-size: 1.25rem; font-weight: 600; color: #f1f5f9; }
+        .fc .fc-button-primary { background-color: #1e293b; border-color: #334155; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
+        .fc .fc-button-primary:not(:disabled):active, .fc .fc-button-primary:not(:disabled).fc-button-active { background-color: #0ea5e9; border-color: #0ea5e9; }
+      `}</style>
 
-      <div className="mt-5 grid gap-4">
-        {visibleDays.map((day) => {
-          const key = formatDate(day);
-          const events = grouped[key] || [];
-          return (
-            <section key={key} className="rounded-2xl border border-slate-800 bg-shell-bg/30 p-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+      <FullCalendar
+        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+        initialView="timeGridWeek"
+        headerToolbar={{
+          left: "prev,next today",
+          center: "title",
+          right: "dayGridMonth,timeGridWeek,timeGridDay",
+        }}
+        events={events}
+        editable={true}
+        selectable={true}
+        selectMirror={true}
+        dayMaxEvents={true}
+        eventClick={handleEventClick}
+        select={handleDateSelect}
+        eventDrop={handleEventDrop}
+        eventResize={handleEventResize}
+        height="80vh"
+        slotMinTime="06:00:00"
+        slotMaxTime="24:00:00"
+      />
+
+      {/* EDIT MODAL */}
+      <AnimatePresence>
+        {selectedEvent && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden"
+            >
+              <div className="flex justify-between items-center p-4 border-b border-slate-800 bg-slate-900/50">
+                <h3 className="font-bold text-lg text-shell-text">Edit Schedule</h3>
+                <button onClick={() => setSelectedEvent(null)} className="text-slate-400 hover:text-white transition">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form action={async (formData) => {
+                await updateScheduleAction(formData);
+                setSelectedEvent(null);
+              }} className="p-4 space-y-4">
+                <input type="hidden" name="id" value={selectedEvent._id} />
+                
                 <div>
-                  <div className="text-sm font-semibold text-shell-text">{weekdays[day.getDay()]}</div>
-                  <div className="text-xs uppercase tracking-[0.3em] text-shell-muted">{key}</div>
+                  <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Title</label>
+                  <input name="title" defaultValue={selectedEvent.title} required className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 mt-1 text-shell-text outline-none focus:border-blue-500" />
                 </div>
-                <div className="text-xs uppercase tracking-[0.3em] text-shell-muted">{events.length} event{events.length === 1 ? "" : "s"}</div>
-              </div>
-              <div className="mt-4 grid gap-3">
-                {events.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-slate-800 p-4 text-sm text-shell-muted">No events scheduled for this day.</div>
-                ) : (
-                  events.map((event) => {
-                    const start = new Date(event.start);
-                    const end = event.end ? new Date(event.end) : null;
-                    const tone = colorMap[event.colorCode || "sky"] || colorMap.sky;
-                    
-                    if (editingId === event._id) {
-                      return (
-                        <div key={event._id} className="rounded-xl border border-shell-accent p-4 bg-shell-surface">
-                           <div className="flex justify-between items-center mb-3">
-                             <div className="text-[10px] text-shell-accent font-bold uppercase tracking-widest">Editing Entry</div>
-                             <button onClick={() => setEditingId(null)}><X className="w-4 h-4 text-shell-muted" /></button>
-                           </div>
-                           <form action={async (formData) => {
-                             await updateScheduleAction(formData);
-                             setEditingId(null);
-                           }} className="grid grid-cols-2 gap-3">
-                             <input type="hidden" name="id" value={event._id} />
-                             <input name="title" defaultValue={event.title} className="col-span-2 bg-slate-900 border border-slate-700 text-sm p-2 text-shell-text" required />
-                             <input name="date" type="date" defaultValue={formatDate(start)} className="bg-slate-900 border border-slate-700 text-sm p-2 text-shell-text" required />
-                             <select name="colorCode" defaultValue={event.colorCode || "sky"} className="bg-slate-900 border border-slate-700 text-sm p-2 text-shell-text">
-                                <option value="sky">Sky</option><option value="emerald">Emerald</option><option value="amber">Amber</option><option value="rose">Rose</option><option value="violet">Violet</option><option value="slate">Slate</option>
-                             </select>
-                             <input name="startTime" type="time" defaultValue={start.toISOString().substring(11,16)} className="bg-slate-900 border border-slate-700 text-sm p-2 text-shell-text" required />
-                             <input name="endTime" type="time" defaultValue={end ? end.toISOString().substring(11,16) : ""} className="bg-slate-900 border border-slate-700 text-sm p-2 text-shell-text" />
-                             <input name="notes" defaultValue={event.notes} className="col-span-2 bg-slate-900 border border-slate-700 text-sm p-2 text-shell-text" placeholder="Notes" />
-                             <select name="visibility" defaultValue={event.visibility || "private"} className="bg-slate-900 border border-slate-700 text-sm p-2 text-shell-text">
-                                <option value="private">Private</option><option value="public">Public</option>
-                             </select>
-                             <div className="flex gap-2 col-span-2 mt-2">
-                               <button type="submit" className="bg-shell-accent text-shell-bg px-4 py-2 text-xs font-bold uppercase tracking-widest flex items-center gap-2"><Save className="w-3 h-3" /> Save Changes</button>
-                             </div>
-                           </form>
-                        </div>
-                      );
-                    }
 
-                    return (
-                      <div key={event._id} className={`group relative rounded-xl border p-4 ${tone} transition-all hover:brightness-110`}>
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div className="text-sm font-semibold">{event.title}</div>
-                          <div className="text-[10px] uppercase tracking-[0.3em] text-current/70">
-                            {start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                            {end ? ` - ${end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : ""}
-                          </div>
-                        </div>
-                        <div className="mt-2 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.3em] text-current/60">
-                          <span>{event.visibility === 'public' ? 'Public' : 'Private'}</span>
-                          <span>{event.isRecurring ? "Recurring" : "One-time"}</span>
-                          <span>{event.recurrence || "none"}</span>
-                        </div>
-                        
-                        {/* Hover Actions */}
-                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-                           <button onClick={() => setEditingId(event._id)} className="bg-slate-900/80 p-1.5 rounded hover:bg-slate-800 text-shell-text"><Edit2 className="w-3 h-3" /></button>
-                           <form action={async (formData) => { await deleteScheduleAction(formData); }}>
-                              <input type="hidden" name="id" value={event._id} />
-                              <button type="submit" className="bg-red-900/80 p-1.5 rounded hover:bg-red-800 text-white"><Trash2 className="w-3 h-3" /></button>
-                           </form>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Date</label>
+                    <input name="date" type="date" defaultValue={formatDate(selectedEvent.start)} required className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 mt-1 text-shell-text outline-none focus:border-blue-500" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Color</label>
+                    <select name="colorCode" defaultValue={selectedEvent.colorCode || "sky"} className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 mt-1 text-shell-text outline-none focus:border-blue-500">
+                      <option value="sky">Sky</option><option value="emerald">Emerald</option><option value="amber">Amber</option><option value="rose">Rose</option><option value="violet">Violet</option><option value="slate">Slate</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Start Time</label>
+                    <input name="startTime" type="time" defaultValue={formatTime(selectedEvent.start)} required className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 mt-1 text-shell-text outline-none focus:border-blue-500" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-widest text-slate-400">End Time</label>
+                    <input name="endTime" type="time" defaultValue={selectedEvent.end ? formatTime(selectedEvent.end) : ""} className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 mt-1 text-shell-text outline-none focus:border-blue-500" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-1"><MapPin className="w-3 h-3"/> Location</label>
+                    <input name="location" defaultValue={selectedEvent.location} className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 mt-1 text-shell-text outline-none focus:border-blue-500" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-1"><Video className="w-3 h-3"/> Meeting Link</label>
+                    <input name="meetingLink" defaultValue={selectedEvent.meetingLink} className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 mt-1 text-shell-text outline-none focus:border-blue-500" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-1"><Users className="w-3 h-3"/> Attendees</label>
+                  <input name="attendees" defaultValue={selectedEvent.attendees?.join(", ")} className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 mt-1 text-shell-text outline-none focus:border-blue-500" />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Notes</label>
+                  <textarea name="notes" defaultValue={selectedEvent.notes} rows={2} className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 mt-1 text-shell-text outline-none focus:border-blue-500" />
+                </div>
+
+                <div className="flex justify-between items-center pt-4 border-t border-slate-800">
+                  <form action={async (fd) => {
+                    await deleteScheduleAction(fd);
+                    setSelectedEvent(null);
+                  }}>
+                    <input type="hidden" name="id" value={selectedEvent._id} />
+                    <button type="submit" className="text-red-400 hover:text-red-300 flex items-center gap-2 text-sm font-bold uppercase tracking-widest px-4 py-2 border border-red-900 rounded bg-red-950/30">
+                      <Trash2 className="w-4 h-4" /> Delete
+                    </button>
+                  </form>
+
+                  <button type="submit" className="bg-blue-600 hover:bg-blue-500 text-white flex items-center gap-2 text-sm font-bold uppercase tracking-widest px-6 py-2 rounded transition">
+                    <Save className="w-4 h-4" /> Save Changes
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* CREATE MODAL */}
+        {isCreating && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden"
+            >
+              <div className="flex justify-between items-center p-4 border-b border-slate-800 bg-slate-900/50">
+                <h3 className="font-bold text-lg text-shell-text">Create Schedule</h3>
+                <button onClick={() => setIsCreating(false)} className="text-slate-400 hover:text-white transition">
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-            </section>
-          );
-        })}
-      </div>
+
+              <form action={async (formData) => {
+                await createSchedule(formData);
+                setIsCreating(false);
+              }} className="p-4 space-y-4">
+                
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Title</label>
+                  <input name="title" required placeholder="Event Name" className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 mt-1 text-shell-text outline-none focus:border-blue-500" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Date</label>
+                    <input name="date" type="date" defaultValue={formatDate(newEventDates.start)} required className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 mt-1 text-shell-text outline-none focus:border-blue-500" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Color</label>
+                    <select name="colorCode" defaultValue="sky" className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 mt-1 text-shell-text outline-none focus:border-blue-500">
+                      <option value="sky">Sky</option><option value="emerald">Emerald</option><option value="amber">Amber</option><option value="rose">Rose</option><option value="violet">Violet</option><option value="slate">Slate</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Start Time</label>
+                    <input name="startTime" type="time" defaultValue={formatTime(newEventDates.start)} required className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 mt-1 text-shell-text outline-none focus:border-blue-500" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-widest text-slate-400">End Time</label>
+                    <input name="endTime" type="time" defaultValue={newEventDates.end ? formatTime(newEventDates.end) : ""} className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 mt-1 text-shell-text outline-none focus:border-blue-500" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-1"><MapPin className="w-3 h-3"/> Location</label>
+                    <input name="location" placeholder="Conference Room A" className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 mt-1 text-shell-text outline-none focus:border-blue-500" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-1"><Video className="w-3 h-3"/> Meeting Link</label>
+                    <input name="meetingLink" placeholder="https://zoom.us/..." className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 mt-1 text-shell-text outline-none focus:border-blue-500" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-1"><Users className="w-3 h-3"/> Attendees</label>
+                  <input name="attendees" placeholder="john@example.com, jane@example.com" className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 mt-1 text-shell-text outline-none focus:border-blue-500" />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Notes</label>
+                  <textarea name="notes" placeholder="Preparation, agenda..." rows={2} className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 mt-1 text-shell-text outline-none focus:border-blue-500" />
+                </div>
+
+                <div className="flex justify-end pt-4 border-t border-slate-800">
+                  <button type="submit" className="bg-blue-600 hover:bg-blue-500 text-white flex items-center gap-2 text-sm font-bold uppercase tracking-widest px-6 py-2 rounded transition">
+                    <Save className="w-4 h-4" /> Create Event
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
