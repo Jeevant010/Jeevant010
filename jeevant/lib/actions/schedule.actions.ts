@@ -69,6 +69,20 @@ export async function createSchedule(formData: FormData) {
     const recurrence = String(formData.get("recurrence") || "none");
     const isRecurring = formData.get("isRecurring") === "on";
     const colorCode = String(formData.get("colorCode") || "sky");
+    
+    // New fields
+    const location = String(formData.get("location") || "");
+    const meetingLink = String(formData.get("meetingLink") || "");
+    const attendeesRaw = String(formData.get("attendees") || "");
+    const attendees = attendeesRaw ? attendeesRaw.split(",").map(a => a.trim()).filter(Boolean) : [];
+    const status = String(formData.get("status") || "scheduled");
+    const priority = String(formData.get("priority") || "medium");
+    const agenda = String(formData.get("agenda") || "");
+    const reminderMinutes = formData.get("reminderMinutes") ? Number(formData.get("reminderMinutes")) : undefined;
+    const isAllDay = formData.get("isAllDay") === "on";
+    const eventType = String(formData.get("eventType") || "");
+    const tagsRaw = String(formData.get("tags") || "");
+    const tags = tagsRaw ? tagsRaw.split(",").map(t => t.trim()).filter(Boolean) : [];
 
     const start = new Date(date + "T" + startTime + ":00Z");
     const end = endTime ? new Date(date + "T" + endTime + ":00Z") : undefined;
@@ -83,6 +97,16 @@ export async function createSchedule(formData: FormData) {
       recurrence,
       isRecurring,
       colorCode,
+      location,
+      meetingLink,
+      attendees,
+      status,
+      priority,
+      agenda,
+      reminderMinutes,
+      isAllDay,
+      eventType,
+      tags
     });
 
     revalidatePath("/planner/daily");
@@ -120,10 +144,27 @@ export async function updateSchedule(id: string, formData: FormData) {
     const isRecurring = formData.get("isRecurring") === "on";
     const colorCode = String(formData.get("colorCode") || "sky");
 
+    // New fields
+    const location = String(formData.get("location") || "");
+    const meetingLink = String(formData.get("meetingLink") || "");
+    const attendeesRaw = String(formData.get("attendees") || "");
+    const attendees = attendeesRaw ? attendeesRaw.split(",").map(a => a.trim()).filter(Boolean) : [];
+    const status = String(formData.get("status") || "scheduled");
+    const priority = String(formData.get("priority") || "medium");
+    const agenda = String(formData.get("agenda") || "");
+    const reminderMinutes = formData.get("reminderMinutes") ? Number(formData.get("reminderMinutes")) : undefined;
+    const isAllDay = formData.get("isAllDay") === "on";
+    const eventType = String(formData.get("eventType") || "");
+    const tagsRaw = String(formData.get("tags") || "");
+    const tags = tagsRaw ? tagsRaw.split(",").map(t => t.trim()).filter(Boolean) : [];
+
     const start = new Date(date + "T" + startTime + ":00Z");
     const end = endTime ? new Date(date + "T" + endTime + ":00Z") : undefined;
 
-    await Schedule.findByIdAndUpdate(id, { title, start, end, notes, visibility, recurrence, isRecurring, colorCode });
+    await Schedule.findByIdAndUpdate(id, { 
+      title, start, end, notes, visibility, recurrence, isRecurring, colorCode,
+      location, meetingLink, attendees, status, priority, agenda, reminderMinutes, isAllDay, eventType, tags
+    });
 
     revalidatePath("/planner/daily");
     revalidatePath("/dashboard");
