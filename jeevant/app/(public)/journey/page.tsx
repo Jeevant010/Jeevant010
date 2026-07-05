@@ -77,14 +77,17 @@ export default async function JourneyPage() {
                         
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
                            <div>
-                             <div className={cn("text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] mb-1", isOngoing ? theme.text : "text-shell-muted")}>
-                               {isOngoing ? ">> STATUS: ACTIVE" : ">> STATUS: CONCLUDED"}
+                             <div className={cn("text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] mb-1", isOngoing || quest.isCurrent ? theme.text : "text-shell-muted")}>
+                               {isOngoing || quest.isCurrent ? ">> STATUS: ACTIVE" : ">> STATUS: CONCLUDED"}
                              </div>
                              <h3 className="text-xl sm:text-2xl font-black text-shell-text uppercase">{quest.role}</h3>
-                             <h4 className={cn("text-xs sm:text-sm font-bold uppercase tracking-widest mt-1", theme.text)}>ORG: {quest.company}</h4>
+                             <h4 className={cn("text-xs sm:text-sm font-bold uppercase tracking-widest mt-1", theme.text)}>
+                               ORG: {quest.company} 
+                               {quest.website && <span className="text-shell-muted ml-2 lowercase font-normal tracking-normal">[{quest.website}]</span>}
+                             </h4>
                            </div>
-                           <div className="text-[10px] border-b border-shell-border text-shell-muted">
-                             {start.getFullYear()} - {isOngoing ? 'PRESENT' : end?.getFullYear()}
+                           <div className="text-[10px] border-b border-shell-border text-shell-muted whitespace-nowrap">
+                             {start.getFullYear()} - {isOngoing || quest.isCurrent ? 'PRESENT' : end?.getFullYear()}
                            </div>
                         </div>
                         
@@ -92,6 +95,36 @@ export default async function JourneyPage() {
                           {quest.description}
                         </p>
                         
+                        {(quest.location || quest.salary || quest.rating || quest.manager) && (
+                          <div className="mt-6 grid grid-cols-2 gap-4 text-xs font-mono border-l-2 border-shell-border pl-4 text-shell-muted">
+                            {quest.location && <div><span className="font-bold text-shell-text">LOC:</span> {quest.location}</div>}
+                            {quest.salary && <div><span className="font-bold text-shell-text">SALARY:</span> {quest.salary}</div>}
+                            {quest.rating && <div><span className="font-bold text-shell-text">RATING:</span> {quest.rating}/5</div>}
+                            {quest.manager && <div><span className="font-bold text-shell-text">LEAD:</span> {quest.manager}</div>}
+                          </div>
+                        )}
+
+                        {quest.reasonForLeaving && (
+                          <div className="mt-4 text-xs italic font-mono text-shell-muted/70">
+                            DEBRIEF: {quest.reasonForLeaving}
+                          </div>
+                        )}
+
+                        {(quest.tags?.length > 0 || quest.skillsUsed?.length > 0) && (
+                          <div className="mt-6 flex flex-wrap gap-2">
+                            {quest.skillsUsed?.map((skill: string, idx: number) => (
+                              <span key={idx} className={cn("text-[10px] font-mono border px-2 py-1 rounded-sm", theme.text, theme.border, theme.bgMuted)}>
+                                {skill}
+                              </span>
+                            ))}
+                            {quest.tags?.map((tag: string, idx: number) => (
+                              <span key={`tag-${idx}`} className={cn("text-[10px] font-mono border px-2 py-1 rounded-sm text-shell-muted border-shell-border")}>
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
                         {quest.type && (
                           <div className={cn("mt-6 inline-block border-t border-shell-border pt-2 w-full text-right text-[10px] font-bold uppercase tracking-[0.4em]", theme.text)}>
                             ATTACHMENT: {quest.type}
