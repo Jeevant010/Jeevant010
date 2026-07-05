@@ -114,6 +114,37 @@ export default function AddProjectForm() {
       {/* Advanced fields */}
       {showAdvanced && (
         <div className="space-y-3 border-t border-slate-800 pt-3 mt-3">
+          <div className="grid gap-3 md:grid-cols-4">
+             <div className="space-y-1">
+               <label className="text-xs text-shell-muted ml-1">Client Name</label>
+               <input name="clientName" placeholder="For freelance..." className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-blue-500 outline-none" />
+             </div>
+             <div className="space-y-1">
+               <label className="text-xs text-shell-muted ml-1">Budget</label>
+               <input name="budget" placeholder="$5000" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-blue-500 outline-none" />
+             </div>
+             <div className="space-y-1">
+               <label className="text-xs text-shell-muted ml-1">Platform</label>
+               <input name="platform" placeholder="Web, iOS, etc." className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-blue-500 outline-none" />
+             </div>
+             <div className="space-y-1">
+               <label className="text-xs text-shell-muted ml-1">Priority</label>
+               <select name="priority" defaultValue="medium" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-blue-500 outline-none">
+                 <option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option>
+               </select>
+             </div>
+          </div>
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="space-y-1">
+               <label className="text-xs text-shell-muted ml-1">Tags (comma separated)</label>
+               <input name="tags" placeholder="AI, SaaS, B2B" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-blue-500 outline-none" />
+             </div>
+             <div className="space-y-1">
+               <label className="text-xs text-shell-muted ml-1">Rating (1-10)</label>
+               <input name="rating" type="number" min="1" max="10" placeholder="10" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-blue-500 outline-none" />
+             </div>
+          </div>
+
           <div className="space-y-1">
             <label className="text-xs text-shell-muted ml-1">Content / Detailed Notes (Markdown)</label>
             <textarea 
@@ -122,10 +153,17 @@ export default function AddProjectForm() {
               className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-blue-500 outline-none transition h-24 resize-y"
             />
           </div>
-          <label className="flex items-center gap-2 text-xs uppercase tracking-wider text-shell-muted">
-            <input name="isOngoing" type="checkbox" className="h-4 w-4 rounded border-slate-700 bg-slate-950 text-blue-500 accent-blue-500" />
-            Ongoing project (no end date)
-          </label>
+          
+          <div className="flex items-center gap-6">
+            <label className="flex items-center gap-2 text-xs uppercase tracking-wider text-shell-muted">
+              <input name="isOngoing" type="checkbox" className="h-4 w-4 rounded border-slate-700 bg-slate-950 text-blue-500 accent-blue-500" />
+              Ongoing project (no end date)
+            </label>
+            <label className="flex items-center gap-2 text-xs uppercase tracking-wider text-shell-muted">
+              <input name="featured" type="checkbox" className="h-4 w-4 rounded border-slate-700 bg-slate-950 text-blue-500 accent-blue-500" />
+              Featured Project
+            </label>
+          </div>
         </div>
       )}
 
