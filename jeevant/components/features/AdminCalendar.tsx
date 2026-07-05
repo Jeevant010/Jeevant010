@@ -222,15 +222,15 @@ export default function AdminCalendar({ schedules }: { schedules: ScheduleItem[]
                 </div>
 
                 <div className="flex justify-between items-center pt-4 border-t border-slate-800">
-                  <form action={async (fd) => {
-                    await deleteScheduleAction(fd);
-                    setSelectedEvent(null);
-                  }}>
-                    <input type="hidden" name="id" value={selectedEvent._id} />
-                    <button type="submit" className="text-red-400 hover:text-red-300 flex items-center gap-2 text-sm font-bold uppercase tracking-widest px-4 py-2 border border-red-900 rounded bg-red-950/30">
-                      <Trash2 className="w-4 h-4" /> Delete
-                    </button>
-                  </form>
+                  <button 
+                    formAction={async (fd) => {
+                      await deleteScheduleAction(fd);
+                      setSelectedEvent(null);
+                    }}
+                    className="text-red-400 hover:text-red-300 flex items-center gap-2 text-sm font-bold uppercase tracking-widest px-4 py-2 border border-red-900 rounded bg-red-950/30"
+                  >
+                    <Trash2 className="w-4 h-4" /> Delete
+                  </button>
 
                   <button type="submit" className="bg-blue-600 hover:bg-blue-500 text-white flex items-center gap-2 text-sm font-bold uppercase tracking-widest px-6 py-2 rounded transition">
                     <Save className="w-4 h-4" /> Save Changes
