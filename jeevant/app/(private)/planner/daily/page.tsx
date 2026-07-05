@@ -1,5 +1,5 @@
 import { getDailyTasks, createTask } from "@/lib/actions/task.actions";
-import TaskItem from "@/components/features/TaskItem"; // We will reuse this, but it will need styling updates
+import { PlannerSortableList } from "@/components/features/PlannerSortableList";
 import { Calendar, Plus, Crosshair, ChevronRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -56,18 +56,7 @@ export default async function DailyPlanner() {
               <span className="w-2 h-2 bg-yellow-500 rounded-full" /> Pending Objectives ({pendingTasks.length})
             </h3>
             
-            <div className="space-y-0 border border-slate-800 bg-[#0a0a0a]">
-              {pendingTasks.length === 0 ? (
-                <div className="p-8 text-center text-shell-muted italic">NO ACTIVE THREATS. ADD OBJECTIVE.</div>
-              ) : (
-                pendingTasks.map((t: any) => (
-                  <div key={t._id} className="border-b border-slate-800 last:border-0">
-                     {/* Reusing TaskItem logic but we need to ensure it renders cleanly on dark mode */}
-                     <TaskItem task={t} />
-                  </div>
-                ))
-              )}
-            </div>
+            <PlannerSortableList initialItems={pendingTasks} />
           </div>
 
           {/* Completed Log */}
@@ -77,11 +66,7 @@ export default async function DailyPlanner() {
                 <span className="w-2 h-2 bg-green-900 rounded-full" /> Mission History
               </h3>
                <div className="space-y-0 border border-slate-800 bg-[#0a0a0a]">
-                {completedTasks.map((t: any) => (
-                  <div key={t._id} className="border-b border-slate-800 last:border-0">
-                     <TaskItem task={t} />
-                  </div>
-                ))}
+                <PlannerSortableList initialItems={completedTasks} />
               </div>
             </div>
           )}
