@@ -1,18 +1,11 @@
 import { getApplications, createApplication } from "@/lib/actions/career.actions";
 import { Building2 } from "lucide-react";
-import ApplicationCard from "./ApplicationCard";
+import { CareerBoard } from "@/components/features/CareerBoard";
 
 export const dynamic = "force-dynamic";
 
 export default async function CareerKanban() {
   const applications = await getApplications();
-
-  // Group by status
-  const columns = {
-    applied: applications.filter((a: any) => a.status === "applied"),
-    interview: applications.filter((a: any) => a.status === "interview"),
-    offer: applications.filter((a: any) => a.status === "offer"),
-  };
 
   return (
     <div className="min-h-screen bg-[#050505] text-pink-500 p-8 font-mono relative overflow-hidden -m-8">
@@ -44,46 +37,9 @@ export default async function CareerKanban() {
           </form>
         </div>
 
-        {/* KANBAN BOARD */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          
-          {/* COLUMN 1: APPLIED */}
-          <div className="bg-[#0a0a0a] border-2 border-dashed border-pink-900/30 min-h-[500px] p-4 relative">
-            <h3 className="text-2xl font-black text-shell-muted uppercase mb-6 flex items-center gap-2">
-              <span className="w-3 h-3 bg-slate-500 rotate-45" /> Initiated
-            </h3>
-            <div className="space-y-4">
-              {columns.applied.map((app: any) => (
-                <ApplicationCard key={app._id} app={app} nextStatus="interview" color="border-pink-500 shadow-[0_0_15px_rgba(236,72,153,0.15)]" />
-              ))}
-            </div>
-          </div>
+        {/* DRAG AND DROP KANBAN BOARD */}
+        <CareerBoard initialApplications={applications} />
 
-          {/* COLUMN 2: INTERVIEW */}
-          <div className="bg-[#0a0a0a] border-2 border-dashed border-yellow-900/30 min-h-[500px] p-4 relative">
-             <h3 className="text-2xl font-black text-yellow-500 uppercase mb-6 flex items-center gap-2">
-              <span className="w-3 h-3 bg-yellow-500 rotate-45" /> Engagement
-            </h3>
-            <div className="space-y-4">
-              {columns.interview.map((app: any) => (
-                <ApplicationCard key={app._id} app={app} nextStatus="offer" color="border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.15)]" />
-              ))}
-            </div>
-          </div>
-
-          {/* COLUMN 3: OFFER */}
-          <div className="bg-[#0a0a0a] border-2 border-dashed border-green-900/30 min-h-[500px] p-4 relative">
-             <h3 className="text-2xl font-black text-green-500 uppercase mb-6 flex items-center gap-2">
-              <span className="w-3 h-3 bg-green-500 rotate-45" /> Captured
-            </h3>
-            <div className="space-y-4">
-              {columns.offer.map((app: any) => (
-                <ApplicationCard key={app._id} app={app} nextStatus="archived" color="border-green-500 bg-green-900/10 shadow-[0_0_15px_rgba(34,197,94,0.15)]" />
-              ))}
-            </div>
-          </div>
-
-        </div>
       </div>
     </div>
   );
