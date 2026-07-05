@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import connectDB from "@/lib/db";
 import { Task } from "@/lib/database/models";
+import { updateBulkOrder } from "./reorder.actions";
 
 // 1. GET TASKS (For a specific date range - defaulting to "today" for now)
 export async function getDailyTasks() {
@@ -59,6 +60,29 @@ export async function deleteTask(id: string) {
   try {
     await connectDB();
     await Task.findByIdAndDelete(id);
+    revalidatePath("/planner/daily");
+    return { success: true };
+  } catch (error) {
+    return { success: false };
+  }
+}
+
+export async function updateTaskOrder(ids: string[]) {
+  const updates = ids.map((id, index) => ({ id, order: index }));
+  await updateBulkOrder("Task", updates, ["/planner/daily"]);
+}
+
+export async function updateTask(formData: FormData) {
+  try {
+    await connectDB();
+    const id = formData.get("id") as string;
+    await Task.findByIdAndUpdate(id, {
+      title: formData.get("title"),
+      dueDate: formData.get("dueDate") ? new Date(String(formData.get("dueDate"))) : undefined,
+      reminderDate: formData.get("reminderDate") ? new Date(String(formData.get("reminderDate"))) : undefined,
+      category: formData.get("category"),
+      sourceUrl: formData.get("sourceUrl"),
+    });
     revalidatePath("/planner/daily");
     return { success: true };
   } catch (error) {
