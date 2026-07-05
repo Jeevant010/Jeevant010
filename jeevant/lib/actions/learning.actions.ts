@@ -3,7 +3,7 @@
 import connectDB from "@/lib/db";
 import { Learning } from "@/lib/database/models";
 import { revalidatePath } from "next/cache";
-
+import { updateBulkOrder } from "./reorder.actions";
 export async function getLearning() {
   await connectDB();
   const items = await Learning.find({}).sort({ status: 1 });
@@ -57,3 +57,25 @@ export async function incrementLearning(id: string) {
     revalidatePath("/learning");
   }
 }
+
+export async function updateLearning(formData: FormData) {
+  await connectDB();
+  const id = formData.get("id") as string;
+  const completedModules = Number(formData.get("completedModules"));
+  const totalModules = Number(formData.get("totalModules"));
+  
+  await Learning.findByIdAndUpdate(id, {
+    title: formData.get("title"),
+    platform: formData.get("platform"),
+    url: formData.get("url"),
+    totalModules,
+    completedModules,
+    status: completedModules >= totalModules ? "completed" : "in-progress"
+  });
+  revalidatePath("/learning");
+}
+
+export async function updateLearningOrder(ids: string[]) {
+  const updates = ids.map((id, index) => ({ id, order: index }));
+  await updateBulkOrder("Learning", updates, ["/learning"]);
+}
