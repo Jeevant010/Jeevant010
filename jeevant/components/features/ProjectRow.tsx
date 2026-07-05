@@ -104,11 +104,45 @@ export default function ProjectRow({ project }: { project: any }) {
             <label className="text-xs font-bold uppercase text-shell-muted mb-1 block">End Date</label>
             <input type="date" name="endDate" defaultValue={endStr} className="w-full bg-[#121212] border border-slate-800 p-2 text-sm text-shell-text rounded" />
           </div>
+
+          {/* New Fields */}
+          <div>
+            <label className="text-xs font-bold uppercase text-shell-muted mb-1 block">Client Name</label>
+            <input name="clientName" defaultValue={project.clientName} className="w-full bg-[#121212] border border-slate-800 p-2 text-sm text-shell-text rounded" />
+          </div>
+          <div>
+            <label className="text-xs font-bold uppercase text-shell-muted mb-1 block">Budget</label>
+            <input name="budget" defaultValue={project.budget} className="w-full bg-[#121212] border border-slate-800 p-2 text-sm text-shell-text rounded" />
+          </div>
+          <div>
+            <label className="text-xs font-bold uppercase text-shell-muted mb-1 block">Platform</label>
+            <input name="platform" defaultValue={project.platform} className="w-full bg-[#121212] border border-slate-800 p-2 text-sm text-shell-text rounded" />
+          </div>
+          <div>
+            <label className="text-xs font-bold uppercase text-shell-muted mb-1 block">Priority</label>
+            <select name="priority" defaultValue={project.priority || "medium"} className="w-full bg-[#121212] border border-slate-800 p-2 text-sm text-shell-text rounded">
+              <option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs font-bold uppercase text-shell-muted mb-1 block">Tags (comma separated)</label>
+            <input name="tags" defaultValue={project.tags?.join(", ")} className="w-full bg-[#121212] border border-slate-800 p-2 text-sm text-shell-text rounded" />
+          </div>
+          <div>
+            <label className="text-xs font-bold uppercase text-shell-muted mb-1 block">Rating (1-10)</label>
+            <input name="rating" type="number" min="1" max="10" defaultValue={project.rating} className="w-full bg-[#121212] border border-slate-800 p-2 text-sm text-shell-text rounded" />
+          </div>
           
-          {/* Ongoing checkbox */}
-          <div className="col-span-2 flex items-center gap-2">
-            <input type="checkbox" name="isOngoing" defaultChecked={project.isOngoing} className="w-4 h-4 bg-[#121212] border-slate-800 accent-blue-500" />
-            <label className="text-xs font-bold uppercase text-shell-muted">Ongoing (No end date)</label>
+          {/* Checkboxes */}
+          <div className="col-span-2 flex items-center gap-6 mt-2 mb-1">
+            <div className="flex items-center gap-2">
+              <input type="checkbox" name="isOngoing" defaultChecked={project.isOngoing} className="w-4 h-4 bg-[#121212] border-slate-800 accent-blue-500" />
+              <label className="text-xs font-bold uppercase text-shell-muted">Ongoing (No end date)</label>
+            </div>
+            <div className="flex items-center gap-2">
+              <input type="checkbox" name="featured" defaultChecked={project.featured} className="w-4 h-4 bg-[#121212] border-slate-800 accent-blue-500" />
+              <label className="text-xs font-bold uppercase text-shell-muted">Featured Project</label>
+            </div>
           </div>
           
           {/* Content */}
