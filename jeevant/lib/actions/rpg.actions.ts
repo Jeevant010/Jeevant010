@@ -32,12 +32,23 @@ export async function getCharacterSheet() {
   };
 }
 
-export async function getAchievementBySlug(slug: string) {
+export async function getAchievementBySlug(slugOrId: string) {
   await connectDB();
   const session = await getSession();
   const isAdmin = session && session.role === "admin";
   
-  const query: any = { slug };
+  const query: any = { 
+    $or: [
+      { slug: slugOrId },
+      { _id: slugOrId.length === 24 ? slugOrId : null }
+    ]
+  };
+  
+  // Clean up null from _id if not a valid ObjectId to prevent Mongoose cast errors
+  if (query.$or[1]._id === null) {
+    query.$or.pop();
+  }
+
   if (!isAdmin) {
     query.visibility = "public";
   }
@@ -154,6 +165,12 @@ export async function addAchievement(formData: FormData) {
   const collaboratorsRaw = formData.get("collaborators") as string;
   const collaborators = collaboratorsRaw ? collaboratorsRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
 
+  const title = String(formData.get("title") || "");
+  let slug = formData.get("slug") as string;
+  if (!slug && title) {
+    slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  }
+
   await Achievement.create({
     title: formData.get("title"),
     platform: formData.get("platform"),
@@ -170,7 +187,7 @@ export async function addAchievement(formData: FormData) {
     isFeatured: formData.get("isFeatured") === "on",
     skills,
     tags,
-    slug: formData.get("slug"),
+    slug,
     coverImage: formData.get("coverImage"),
     githubLink: formData.get("githubLink"),
     liveLink: formData.get("liveLink"),
@@ -179,7 +196,9 @@ export async function addAchievement(formData: FormData) {
     lessonsLearned: formData.get("lessonsLearned"),
     techStack,
     gallery,
-    collaborators
+    collaborators,
+    icon: formData.get("icon") ? String(formData.get("icon")) : "trophy",
+    order: formData.get("order") ? Number(formData.get("order")) : 0
   });
   revalidatePath("/about");
   revalidatePath("/cms/rpg");
@@ -203,6 +222,12 @@ export async function updateAchievement(formData: FormData) {
   const collaboratorsRaw = formData.get("collaborators") as string;
   const collaborators = collaboratorsRaw ? collaboratorsRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
 
+  const title = String(formData.get("title") || "");
+  let slug = formData.get("slug") as string;
+  if (!slug && title) {
+    slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  }
+
   await Achievement.findByIdAndUpdate(id, {
     title: formData.get("title"),
     platform: formData.get("platform"),
@@ -219,7 +244,7 @@ export async function updateAchievement(formData: FormData) {
     isFeatured: formData.get("isFeatured") === "on",
     skills,
     tags,
-    slug: formData.get("slug"),
+    slug,
     coverImage: formData.get("coverImage"),
     githubLink: formData.get("githubLink"),
     liveLink: formData.get("liveLink"),
