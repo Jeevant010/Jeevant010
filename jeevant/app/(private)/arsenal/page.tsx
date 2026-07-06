@@ -1,6 +1,7 @@
 import { getSnippets, addSnippet } from "@/lib/actions/snippet.actions";
 import { Box, Plus } from "lucide-react";
 import { ArsenalSortableGrid } from "@/components/features/ArsenalSortableGrid";
+import AddSnippetForm from "@/components/features/AddSnippetForm";
 
 export const dynamic = "force-dynamic";
 
@@ -26,21 +27,22 @@ export default async function ArsenalPage() {
       </div>
 
       {/* Add New Item (Hidden Drawer Style) */}
-      <div className="relative z-10 mb-12 bg-[#2a2520] border-2 border-[#50453b] p-6 shadow-2xl max-w-2xl">
-        <h3 className="text-[#e0d0c0] font-bold uppercase mb-4 flex items-center gap-2">
-          <Plus className="w-5 h-5 text-green-600" /> Craft New Item
-        </h3>
-        <form action={addSnippet} className="space-y-4">
-          <div className="flex gap-4">
-             <input name="title" placeholder="ITEM NAME (e.g. Auth Hook)" required className="flex-1 bg-[#1a1816] border border-[#50453b] p-3 text-shell-text outline-none focus:border-green-600" />
-             <input name="language" placeholder="TYPE (e.g. TSX)" required className="w-32 bg-[#1a1816] border border-[#50453b] p-3 text-shell-text outline-none focus:border-green-600" />
-          </div>
-          <textarea name="code" placeholder="SOURCE CODE DATA..." required className="w-full h-32 bg-[#1a1816] border border-[#50453b] p-3 text-shell-text font-mono text-sm outline-none focus:border-green-600 resize-none custom-scrollbar" />
-          <input name="tags" placeholder="TAGS (comma separated)" className="w-full bg-[#1a1816] border border-[#50453b] p-3 text-shell-text outline-none focus:border-green-600" />
-          <button className="w-full py-3 bg-[#3a3530] border border-[#50453b] text-[#e0d0c0] font-bold uppercase hover:bg-green-800 hover:text-shell-text transition">
-            Store in Inventory
-          </button>
-        </form>
+      <AddSnippetForm />
+
+      {/* STATS BAR */}
+      <div className="relative z-10 flex gap-4 mb-8">
+        <div className="bg-[#2a2520] border-2 border-[#50453b] p-3 text-center min-w-[120px]">
+          <div className="text-[10px] uppercase font-bold text-[#8a7560]">Total Items</div>
+          <div className="text-xl font-bold text-[#e0d0c0]">{snippets.length}</div>
+        </div>
+        <div className="bg-[#2a2520] border-2 border-[#50453b] p-3 text-center min-w-[120px]">
+          <div className="text-[10px] uppercase font-bold text-[#8a7560]">High Complexity</div>
+          <div className="text-xl font-bold text-red-500">{snippets.filter((s:any) => s.complexity === 'high').length}</div>
+        </div>
+        <div className="bg-[#2a2520] border-2 border-[#50453b] p-3 text-center min-w-[120px]">
+          <div className="text-[10px] uppercase font-bold text-[#8a7560]">Ready (Not Deprecated)</div>
+          <div className="text-xl font-bold text-green-500">{snippets.filter((s:any) => !s.isDeprecated).length}</div>
+        </div>
       </div>
 
       {/* The Inventory Grid */}
