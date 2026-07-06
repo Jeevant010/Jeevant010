@@ -65,6 +65,65 @@ function SortableTaskItem({ task }: { task: any }) {
 
           <div className="grid grid-cols-2 gap-4">
              <div>
+                <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Estimated Time (mins)</label>
+                <input name="estimatedTime" type="number" defaultValue={task.estimatedTime} className="w-full bg-black border border-slate-700 text-shell-text px-3 py-2 outline-none focus:border-red-500" />
+             </div>
+             <div>
+                <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Actual Time (mins)</label>
+                <input name="actualTime" type="number" defaultValue={task.actualTime} className="w-full bg-black border border-slate-700 text-shell-text px-3 py-2 outline-none focus:border-red-500" />
+             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+             <div>
+                <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Energy Level</label>
+                <select name="energyLevel" defaultValue={task.energyLevel || "medium"} className="w-full bg-black border border-slate-700 text-shell-text px-3 py-2 outline-none focus:border-red-500">
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+             </div>
+             <div>
+                <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Assigned To</label>
+                <input name="assignedTo" defaultValue={task.assignedTo} className="w-full bg-black border border-slate-700 text-shell-text px-3 py-2 outline-none focus:border-red-500" />
+             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+               <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Tags (CSV)</label>
+               <input name="tags" defaultValue={task.tags?.join(", ")} className="w-full bg-black border border-slate-700 text-shell-text px-3 py-2 outline-none focus:border-red-500" />
+            </div>
+            <div>
+               <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Dependencies (CSV)</label>
+               <input name="dependencies" defaultValue={task.dependencies?.join(", ")} className="w-full bg-black border border-slate-700 text-shell-text px-3 py-2 outline-none focus:border-red-500" />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+             <div className="space-y-1">
+               <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Status Update</label>
+               <textarea name="statusUpdate" defaultValue={task.statusUpdate} rows={2} className="w-full bg-black border border-slate-700 text-shell-text px-3 py-1 outline-none focus:border-red-500 text-sm custom-scrollbar" />
+             </div>
+             <div className="space-y-1">
+               <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Blockers</label>
+               <textarea name="blockers" defaultValue={task.blockers} rows={2} className="w-full bg-black border border-slate-700 text-shell-text px-3 py-1 outline-none focus:border-red-500 text-sm custom-scrollbar" />
+             </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+             <div className="space-y-1">
+               <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Review Notes</label>
+               <textarea name="reviewNotes" defaultValue={task.reviewNotes} rows={2} className="w-full bg-black border border-slate-700 text-shell-text px-3 py-1 outline-none focus:border-red-500 text-sm custom-scrollbar" />
+             </div>
+             <div className="space-y-1">
+               <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Cost / Value</label>
+               <input name="cost" defaultValue={task.cost} className="w-full bg-black border border-slate-700 text-shell-text px-3 py-2 outline-none focus:border-red-500" />
+             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+             <div>
                 <label className="text-xs font-bold uppercase tracking-widest text-slate-500 flex items-center gap-1"><Calendar className="w-3 h-3"/> Due Date (Deadline)</label>
                 <input type="datetime-local" name="dueDate" defaultValue={task.dueDate ? new Date(task.dueDate).toISOString().slice(0,16) : ""} className="w-full bg-black border border-slate-700 text-shell-text px-3 py-2 outline-none focus:border-red-500 text-sm" />
              </div>
