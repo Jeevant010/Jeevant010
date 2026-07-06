@@ -129,13 +129,13 @@ export default async function HomePage() {
             {sheet.loot.slice(0, 3).map((item: any, index: number) => {
               const theme = getTacticalColor(index + 3); // offset to mix colors
               return (
-                <div key={item._id} className={cn("group/item rounded-sm border bg-shell-bg p-4 sm:p-6 transition-all hover:bg-shell-surface", theme.border, theme.borderHover)}>
+                <Link key={item._id} href={`/achievements/${item.slug || item._id}`} className={cn("group/item block rounded-sm border bg-shell-bg p-4 sm:p-6 transition-all hover:bg-shell-surface", theme.border, theme.borderHover)}>
                   <div className={cn("text-[10px] font-mono uppercase tracking-[0.3em] text-shell-muted mb-2 flex items-center gap-2 transition-colors", theme.textHover)}>
                     <Award className="w-3 h-3" /> {item.platform}
                   </div>
                   <h3 className={cn("text-lg sm:text-xl font-bold text-shell-text transition-colors", theme.textHover)}>{item.title}</h3>
                   <p className="mt-2 line-clamp-2 text-xs sm:text-sm leading-relaxed text-shell-muted/80">{item.description}</p>
-                </div>
+                </Link>
               );
             })}
             {sheet.loot.length === 0 && (
