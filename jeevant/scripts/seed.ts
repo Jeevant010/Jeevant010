@@ -42,6 +42,7 @@ const ExperienceSchema = new mongoose.Schema({
 
 const AchievementSchema = new mongoose.Schema({
   title: { type: String, required: true },
+  slug: { type: String },
   platform: { type: String },
   date: { type: Date, default: Date.now },
   proofLink: { type: String },
@@ -330,7 +331,7 @@ async function seed() {
       console.log(`   ⏭  "${a.title}" already exists, skipping.`);
       continue;
     }
-    await Achievement.create(a);
+    await Achievement.create({ ...a, slug: slug(a.title) });
     console.log(`   ✅ ${a.title}`);
   }
 
