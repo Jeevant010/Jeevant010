@@ -32,6 +32,21 @@ export async function getCharacterSheet() {
   };
 }
 
+export async function getAchievementBySlug(slug: string) {
+  await connectDB();
+  const session = await getSession();
+  const isAdmin = session && session.role === "admin";
+  
+  const query: any = { slug };
+  if (!isAdmin) {
+    query.visibility = "public";
+  }
+  
+  const achievement = await Achievement.findOne(query);
+  if (!achievement) return null;
+  return { ...achievement.toObject(), _id: achievement._id.toString() };
+}
+
 // 2. ADD QUEST (Experience)
 export async function addExperience(formData: FormData) {
   await requireAuth();
@@ -132,6 +147,12 @@ export async function addAchievement(formData: FormData) {
   const skills = skillsRaw ? skillsRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
   const tagsRaw = formData.get("tags") as string;
   const tags = tagsRaw ? tagsRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
+  const techStackRaw = formData.get("techStack") as string;
+  const techStack = techStackRaw ? techStackRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
+  const galleryRaw = formData.get("gallery") as string;
+  const gallery = galleryRaw ? galleryRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
+  const collaboratorsRaw = formData.get("collaborators") as string;
+  const collaborators = collaboratorsRaw ? collaboratorsRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
 
   await Achievement.create({
     title: formData.get("title"),
@@ -148,7 +169,17 @@ export async function addAchievement(formData: FormData) {
     expiryDate: formData.get("expiryDate") ? new Date(String(formData.get("expiryDate"))) : undefined,
     isFeatured: formData.get("isFeatured") === "on",
     skills,
-    tags
+    tags,
+    slug: formData.get("slug"),
+    coverImage: formData.get("coverImage"),
+    githubLink: formData.get("githubLink"),
+    liveLink: formData.get("liveLink"),
+    architectureDiagram: formData.get("architectureDiagram"),
+    impact: formData.get("impact"),
+    lessonsLearned: formData.get("lessonsLearned"),
+    techStack,
+    gallery,
+    collaborators
   });
   revalidatePath("/about");
   revalidatePath("/cms/rpg");
@@ -165,6 +196,13 @@ export async function updateAchievement(formData: FormData) {
   const tagsRaw = formData.get("tags") as string;
   const tags = tagsRaw ? tagsRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
 
+  const techStackRaw = formData.get("techStack") as string;
+  const techStack = techStackRaw ? techStackRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
+  const galleryRaw = formData.get("gallery") as string;
+  const gallery = galleryRaw ? galleryRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
+  const collaboratorsRaw = formData.get("collaborators") as string;
+  const collaborators = collaboratorsRaw ? collaboratorsRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
+
   await Achievement.findByIdAndUpdate(id, {
     title: formData.get("title"),
     platform: formData.get("platform"),
@@ -180,7 +218,17 @@ export async function updateAchievement(formData: FormData) {
     expiryDate: formData.get("expiryDate") ? new Date(String(formData.get("expiryDate"))) : undefined,
     isFeatured: formData.get("isFeatured") === "on",
     skills,
-    tags
+    tags,
+    slug: formData.get("slug"),
+    coverImage: formData.get("coverImage"),
+    githubLink: formData.get("githubLink"),
+    liveLink: formData.get("liveLink"),
+    architectureDiagram: formData.get("architectureDiagram"),
+    impact: formData.get("impact"),
+    lessonsLearned: formData.get("lessonsLearned"),
+    techStack,
+    gallery,
+    collaborators
   });
   revalidatePath("/about");
   revalidatePath("/cms/rpg");
