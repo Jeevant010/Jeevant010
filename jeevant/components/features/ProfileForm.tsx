@@ -17,6 +17,7 @@ function SubmitButton() {
 export default function ProfileForm({ profile }: { profile: any }) {
   const [stats, setStats] = useState<{ label: string, value: string }[]>(profile.stats || []);
   const [skills, setSkills] = useState<{ skill: string, years: number, category: string }[]>(profile.skillsExperience || []);
+  const [links, setLinks] = useState<{ platform: string, url: string }[]>(profile.socialLinks || []);
 
   const addStat = () => setStats([...stats, { label: "", value: "" }]);
   const removeStat = (index: number) => setStats(stats.filter((_, i) => i !== index));
@@ -32,6 +33,14 @@ export default function ProfileForm({ profile }: { profile: any }) {
     const newSkills = [...skills];
     (newSkills[index] as any)[field] = val;
     setSkills(newSkills);
+  };
+
+  const addLink = () => setLinks([...links, { platform: "", url: "" }]);
+  const removeLink = (index: number) => setLinks(links.filter((_, i) => i !== index));
+  const updateLink = (index: number, field: "platform" | "url", val: string) => {
+    const newLinks = [...links];
+    newLinks[index][field] = val;
+    setLinks(newLinks);
   };
 
   return (
@@ -142,6 +151,27 @@ export default function ProfileForm({ profile }: { profile: any }) {
           <div className="space-y-1">
             <label className="text-xs uppercase font-bold text-slate-500">Twitter URL</label>
             <input name="twitterUrl" defaultValue={profile.twitterUrl} className="w-full bg-[#0a0a0a] border border-slate-800 rounded p-3 text-white outline-none focus:border-emerald-500 text-sm" />
+          </div>
+        </div>
+
+        <div className="space-y-1 mt-6 border-t border-slate-800 pt-6">
+          <div className="flex justify-between items-end border-b border-slate-800 pb-2 mb-4">
+            <label className="text-xs uppercase font-bold text-slate-500 flex items-center gap-2">Dynamic Social Links ({links.length})</label>
+            <button type="button" onClick={addLink} className="text-emerald-500 hover:text-emerald-400 flex items-center gap-1 text-xs font-bold uppercase"><Plus className="w-3 h-3" /> Add Link</button>
+          </div>
+          
+          <input type="hidden" name="socialLinks" value={JSON.stringify(links)} />
+          
+          <div className="space-y-3 max-h-[200px] overflow-y-auto pr-2">
+            {links.map((link, i) => (
+              <div key={i} className="flex gap-2 items-center bg-[#0a0a0a] p-2 border border-slate-800 rounded">
+                <div className="flex-1 space-y-2">
+                  <input placeholder="Platform (e.g. Medium, YouTube)" value={link.platform} onChange={(e) => updateLink(i, "platform", e.target.value)} className="w-full bg-transparent border-b border-slate-800 text-white text-xs p-1 outline-none focus:border-emerald-500" />
+                  <input placeholder="URL" value={link.url} onChange={(e) => updateLink(i, "url", e.target.value)} className="w-full bg-transparent text-emerald-400 font-mono text-sm p-1 outline-none" />
+                </div>
+                <button type="button" onClick={() => removeLink(i)} className="text-slate-600 hover:text-red-500 p-2"><Trash2 className="w-4 h-4" /></button>
+              </div>
+            ))}
           </div>
         </div>
 
