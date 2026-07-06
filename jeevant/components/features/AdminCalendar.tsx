@@ -139,6 +139,7 @@ export default function AdminCalendar({ schedules }: { schedules: ScheduleItem[]
         dayMaxEvents={true}
         eventClick={handleEventClick}
         select={handleDateSelect}
+        selectLongPressDelay={250}
         eventDrop={handleEventDrop}
         eventResize={handleEventResize}
         height="80vh"
