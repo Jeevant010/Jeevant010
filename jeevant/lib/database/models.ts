@@ -272,6 +272,10 @@ const ProfileSchema = new Schema({
     skill: { type: String }, 
     years: { type: Number },
     category: { type: String } // e.g., 'AI', 'Web Dev'
+  }],
+  socialLinks: [{
+    platform: { type: String },
+    url: { type: String }
   }]
 });
 
