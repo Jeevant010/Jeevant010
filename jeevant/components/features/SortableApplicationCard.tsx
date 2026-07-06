@@ -121,18 +121,61 @@ export function SortableApplicationCard({ app }: { app: any }) {
           <Briefcase className="w-3 h-3 min-w-[12px]" /> {app.role}
         </p>
 
-        {(app.salary || app.deadline || app.notes || app.location || app.interviews > 0 || app.workModel) && (
-          <div className="mt-3 pt-3 border-t border-white/5 space-y-1">
-            <div className="flex flex-wrap gap-2 mb-2">
-              {app.location && <span className="text-[9px] uppercase tracking-widest bg-shell-surface px-1 border border-pink-900">{app.location}</span>}
-              {app.workModel && <span className="text-[9px] uppercase tracking-widest bg-shell-surface px-1 border border-pink-900">{app.workModel}</span>}
-              {app.interviews > 0 && <span className="text-[9px] uppercase tracking-widest bg-yellow-900/30 text-yellow-500 px-1 border border-yellow-900/50">Int: {app.interviews}</span>}
+        {(app.salary || app.deadline || app.notes || app.location || app.interviews > 0 || app.workModel || app.companyUrl || app.recruiterName || app.recruiterEmail || app.feedback || app.benefits || app.referral || app.offerDetails) && (
+          <div className="mt-3 pt-3 border-t border-white/5 space-y-2">
+            
+            {/* Tags Row */}
+            <div className="flex flex-wrap gap-2">
+              {app.location && <span className="text-[9px] uppercase tracking-widest bg-shell-surface px-2 py-0.5 border border-pink-900 text-shell-muted">{app.location}</span>}
+              {app.workModel && <span className="text-[9px] uppercase tracking-widest bg-shell-surface px-2 py-0.5 border border-pink-900 text-shell-muted">{app.workModel}</span>}
+              {app.interviews > 0 && <span className="text-[9px] uppercase tracking-widest bg-yellow-900/30 text-yellow-500 px-2 py-0.5 border border-yellow-900/50">Int: {app.interviews}</span>}
+              {app.referral && <span className="text-[9px] uppercase tracking-widest bg-blue-900/30 text-blue-400 px-2 py-0.5 border border-blue-900/50">Ref: {app.referral}</span>}
             </div>
-            {app.salary && <p className="text-xs text-green-400 flex items-center gap-1"><DollarSign className="w-3 h-3"/> {app.salary}</p>}
-            {app.deadline && <p className="text-xs text-red-400 flex items-center gap-1"><Calendar className="w-3 h-3"/> Due: {new Date(app.deadline).toLocaleDateString()}</p>}
-            {app.recruiterName && <p className="text-[10px] text-shell-muted flex items-center gap-1 mt-1">Recruiter: {app.recruiterName}</p>}
-            {app.notes && <p className="text-xs text-slate-400 flex items-start gap-1 mt-1"><FileText className="w-3 h-3 min-w-[12px] mt-[2px]"/> <span className="line-clamp-2">{app.notes}</span></p>}
-            {app.offerDetails && <p className="text-xs text-green-300 bg-green-900/20 p-1 border border-green-900/50 flex items-start gap-1 mt-1"><span className="line-clamp-2">Offer: {app.offerDetails}</span></p>}
+
+            {/* Core Info Row */}
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              {app.salary && <div className="text-green-400 flex items-center gap-1"><DollarSign className="w-3 h-3"/> {app.salary}</div>}
+              {app.deadline && <div className="text-red-400 flex items-center gap-1"><Calendar className="w-3 h-3"/> Due: {new Date(app.deadline).toLocaleDateString()}</div>}
+            </div>
+
+            {/* Links & Recruiter */}
+            <div className="flex flex-col gap-1 text-[10px] text-shell-muted">
+              {app.companyUrl && (
+                <div><span className="uppercase tracking-widest font-bold">URL:</span> <a href={app.companyUrl} target="_blank" rel="noopener" className="hover:text-shell-accent transition underline">{app.companyUrl}</a></div>
+              )}
+              {(app.recruiterName || app.recruiterEmail) && (
+                <div><span className="uppercase tracking-widest font-bold">Recruiter:</span> {app.recruiterName} {app.recruiterEmail ? `(${app.recruiterEmail})` : ""}</div>
+              )}
+            </div>
+
+            {/* Details Blocks */}
+            {app.notes && (
+              <div className="text-xs text-slate-400 bg-shell-surface/50 border border-shell-border p-2">
+                <span className="text-[9px] uppercase tracking-widest font-bold block mb-1">Notes</span>
+                <span className="whitespace-pre-wrap">{app.notes}</span>
+              </div>
+            )}
+            
+            {app.feedback && (
+              <div className="text-xs text-slate-300 bg-shell-surface/50 border border-shell-border p-2">
+                <span className="text-[9px] uppercase tracking-widest font-bold block mb-1">Feedback</span>
+                <span className="whitespace-pre-wrap">{app.feedback}</span>
+              </div>
+            )}
+
+            {app.benefits && (
+              <div className="text-xs text-blue-300 bg-blue-900/10 border border-blue-900/50 p-2">
+                <span className="text-[9px] uppercase tracking-widest font-bold block mb-1 text-blue-400">Benefits</span>
+                <span>{Array.isArray(app.benefits) ? app.benefits.join(", ") : app.benefits}</span>
+              </div>
+            )}
+            
+            {app.offerDetails && (
+              <div className="text-xs text-green-300 bg-green-900/20 border border-green-900/50 p-2">
+                <span className="text-[9px] uppercase tracking-widest font-bold block mb-1 text-green-400">Offer Details</span>
+                <span className="whitespace-pre-wrap">{app.offerDetails}</span>
+              </div>
+            )}
           </div>
         )}
 
