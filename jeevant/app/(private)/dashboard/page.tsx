@@ -26,6 +26,19 @@ export default async function Dashboard() {
   const totalLoot = achievements.length;
   const taskCompletionRate = tasks.length > 0 ? Math.round(((tasks.length - pendingTasks.length) / tasks.length) * 100) : 0;
 
+  // Upcoming deadlines
+  const upcomingDeadlines = pendingTasks
+    .filter((t: any) => t.dueDate && new Date(t.dueDate) > new Date())
+    .sort((a: any, b: any) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+    .slice(0, 3);
+
+  // Live Project Analytics
+  const liveProjects = projects.filter((p: any) => p.status === "live");
+  const liveProjectsBudget = liveProjects.reduce((acc: number, p: any) => acc + (parseInt(p.budget?.replace(/[^0-9]/g, '')) || 0), 0);
+  const averageRating = liveProjects.length > 0 
+    ? (liveProjects.reduce((acc: number, p: any) => acc + (p.rating || 0), 0) / liveProjects.length).toFixed(1) 
+    : "N/A";
+
   return (
     <div className="min-h-full bg-transparent p-4 sm:p-6 md:p-10 font-mono relative">
       <div className="relative z-10 max-w-7xl mx-auto space-y-8 sm:space-y-12">
@@ -64,10 +77,31 @@ export default async function Dashboard() {
           ))}
         </div>
 
+        {/* Impending Deadlines */}
+        {upcomingDeadlines.length > 0 && (
+          <div className="bg-red-900/10 border border-red-900/50 p-4 sm:p-6 relative group overflow-hidden">
+             <div className="flex items-center gap-2 mb-4">
+               <ShieldAlert className="w-5 h-5 text-red-500 animate-pulse" />
+               <h3 className="text-red-500 font-bold uppercase tracking-[0.2em] text-sm">Impending Deadlines</h3>
+             </div>
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+               {upcomingDeadlines.map((task: any) => (
+                 <div key={task._id} className="bg-[#0a0a0f]/80 border border-red-900/30 p-4 relative overflow-hidden group/alert hover:border-red-500/50 transition">
+                   <div className="absolute top-0 right-0 p-2 opacity-10">
+                     <Clock className="w-8 h-8 text-red-500" />
+                   </div>
+                   <div className="text-[10px] uppercase font-bold text-red-400 tracking-widest mb-1">{new Date(task.dueDate).toLocaleString()}</div>
+                   <div className="text-sm font-bold text-white line-clamp-1">{task.title}</div>
+                 </div>
+               ))}
+             </div>
+          </div>
+        )}
+
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 h-full">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 sm:gap-8 h-full">
           {/* Mission Monitor */}
-          <div className="lg:col-span-2 cut-corners-reverse bg-[#0a0a0f]/80 backdrop-blur-xl border border-shell-border p-6 sm:p-8 relative flex flex-col h-full shadow-2xl group hover:border-blue-500/50 transition-colors">
+          <div className="xl:col-span-2 cut-corners-reverse bg-[#0a0a0f]/80 backdrop-blur-xl border border-shell-border p-6 sm:p-8 relative flex flex-col h-full shadow-2xl group hover:border-blue-500/50 transition-colors">
             
             <h3 className="text-blue-500 font-bold uppercase tracking-widest mb-6 flex items-center gap-3 text-xs sm:text-sm">
               <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" /> Current Primary Objective
@@ -77,7 +111,7 @@ export default async function Dashboard() {
               {currentObjective}
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-auto">
               <div className="space-y-4">
                 <h4 className="text-[10px] font-bold text-shell-muted uppercase tracking-[0.3em] border-b border-shell-border pb-2">Recent Intel (Notes)</h4>
                 <div className="space-y-3">
@@ -90,6 +124,25 @@ export default async function Dashboard() {
                     </Link>
                   ))}
                   {notes.length === 0 && <p className="text-xs text-shell-muted italic font-sans">No recent intel.</p>}
+                </div>
+              </div>
+              
+              {/* Live Project Analytics */}
+              <div className="space-y-4">
+                <h4 className="text-[10px] font-bold text-shell-muted uppercase tracking-[0.3em] border-b border-shell-border pb-2 flex items-center gap-2"><Briefcase className="w-3 h-3"/> Live Projects</h4>
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="bg-black/40 border border-shell-border p-3 flex justify-between items-center">
+                    <span className="text-[9px] text-shell-muted uppercase tracking-widest">Active Live</span>
+                    <span className="text-sm font-bold text-emerald-400">{liveProjects.length}</span>
+                  </div>
+                  <div className="bg-black/40 border border-shell-border p-3 flex justify-between items-center">
+                    <span className="text-[9px] text-shell-muted uppercase tracking-widest">Est. Budget</span>
+                    <span className="text-sm font-bold text-amber-400">${liveProjectsBudget.toLocaleString()}</span>
+                  </div>
+                  <div className="bg-black/40 border border-shell-border p-3 flex justify-between items-center">
+                    <span className="text-[9px] text-shell-muted uppercase tracking-widest">Avg. Rating</span>
+                    <span className="text-sm font-bold text-sky-400">{averageRating}/10</span>
+                  </div>
                 </div>
               </div>
               
