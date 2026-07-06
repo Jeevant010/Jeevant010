@@ -27,7 +27,8 @@ export async function addSnippet(formData: FormData) {
     securityNotes: formData.get("securityNotes"),
     isDeprecated: formData.get("isDeprecated") === "on",
     dependencies,
-    relatedSnippets
+    relatedSnippets,
+    order: formData.get("order") ? Number(formData.get("order")) : 0
   });
   revalidatePath("/arsenal");
 }
