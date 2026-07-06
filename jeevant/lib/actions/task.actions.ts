@@ -29,10 +29,25 @@ export async function createTask(formData: FormData): Promise<void> {
     await connectDB();
     const title = formData.get("title");
     
+    const tagsRaw = formData.get("tags") as string;
+    const tags = tagsRaw ? tagsRaw.split(",").map(t => t.trim()).filter(Boolean) : [];
+    const dependenciesRaw = formData.get("dependencies") as string;
+    const dependencies = dependenciesRaw ? dependenciesRaw.split(",").map(d => d.trim()).filter(Boolean) : [];
+
     await Task.create({
       title,
       scope: "daily",
-      isCompleted: false
+      isCompleted: false,
+      estimatedTime: formData.get("estimatedTime") ? Number(formData.get("estimatedTime")) : undefined,
+      actualTime: formData.get("actualTime") ? Number(formData.get("actualTime")) : undefined,
+      energyLevel: formData.get("energyLevel") || "medium",
+      statusUpdate: formData.get("statusUpdate"),
+      blockers: formData.get("blockers"),
+      reviewNotes: formData.get("reviewNotes"),
+      assignedTo: formData.get("assignedTo"),
+      cost: formData.get("cost"),
+      tags,
+      dependencies
     });
 
     revalidatePath("/planner/daily");
@@ -76,12 +91,27 @@ export async function updateTask(formData: FormData) {
   try {
     await connectDB();
     const id = formData.get("id") as string;
+    const tagsRaw = formData.get("tags") as string;
+    const tags = tagsRaw ? tagsRaw.split(",").map(t => t.trim()).filter(Boolean) : [];
+    const dependenciesRaw = formData.get("dependencies") as string;
+    const dependencies = dependenciesRaw ? dependenciesRaw.split(",").map(d => d.trim()).filter(Boolean) : [];
+
     await Task.findByIdAndUpdate(id, {
       title: formData.get("title"),
       dueDate: formData.get("dueDate") ? new Date(String(formData.get("dueDate"))) : undefined,
       reminderDate: formData.get("reminderDate") ? new Date(String(formData.get("reminderDate"))) : undefined,
       category: formData.get("category"),
       sourceUrl: formData.get("sourceUrl"),
+      estimatedTime: formData.get("estimatedTime") ? Number(formData.get("estimatedTime")) : undefined,
+      actualTime: formData.get("actualTime") ? Number(formData.get("actualTime")) : undefined,
+      energyLevel: formData.get("energyLevel") || "medium",
+      statusUpdate: formData.get("statusUpdate"),
+      blockers: formData.get("blockers"),
+      reviewNotes: formData.get("reviewNotes"),
+      assignedTo: formData.get("assignedTo"),
+      cost: formData.get("cost"),
+      tags,
+      dependencies
     });
     revalidatePath("/planner/daily");
     return { success: true };
