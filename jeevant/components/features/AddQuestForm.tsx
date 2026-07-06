@@ -61,6 +61,17 @@ export function AddQuestForm() {
         </div>
       </div>
       
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1">
+          <label className="text-xs text-shell-muted ml-1">Logo URL</label>
+          <input name="logoUrl" placeholder="https://..." className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-blue-500 outline-none transition" />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs text-shell-muted ml-1">Tags (CSV)</label>
+          <input name="tags" placeholder="frontend, leadership" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-blue-500 outline-none transition" />
+        </div>
+      </div>
+      
       <div className="grid gap-3 md:grid-cols-5">
          <div className="md:col-span-1 space-y-1">
           <label className="text-xs text-shell-muted ml-1">Salary</label>
