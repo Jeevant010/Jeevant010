@@ -111,7 +111,7 @@ export function SortableApplicationCard({ app }: { app: any }) {
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start mb-1">
           <h4 className="text-lg font-bold text-shell-text uppercase truncate pr-2">{app.company}</h4>
-          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
             <button onClick={() => setIsEditing(true)} className="text-slate-500 hover:text-blue-500 transition"><Edit2 className="w-4 h-4" /></button>
             <button onClick={() => deleteApplication(app._id)} className="text-slate-500 hover:text-red-500 transition"><Trash2 className="w-4 h-4" /></button>
           </div>
