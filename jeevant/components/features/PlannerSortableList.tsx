@@ -153,18 +153,18 @@ function SortableTaskItem({ task }: { task: any }) {
 
   return (
     <div ref={setNodeRef} style={style} className={`flex items-stretch group border-b border-slate-800 last:border-0 transition-colors ${completed ? 'bg-slate-900/30' : 'bg-[#0a0a0a] hover:bg-[#111]'}`}>
-      <div {...attributes} {...listeners} className="w-8 flex items-center justify-center cursor-grab active:cursor-grabbing text-slate-700 hover:text-slate-400 transition relative z-20">
+      <div {...attributes} {...listeners} className="w-8 flex items-center justify-center cursor-grab active:cursor-grabbing text-slate-700 hover:text-slate-400 transition relative z-20 shrink-0">
         <GripVertical className="w-4 h-4" />
       </div>
 
-      <div className="flex-1 p-4 flex flex-col justify-center gap-2">
+      <div className="flex-1 p-4 flex flex-col justify-center gap-2 min-w-0">
         <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-3 w-full max-w-[85%]">
             <button onClick={handleToggle} className={`mt-0.5 w-5 h-5 flex-shrink-0 rounded-full border flex items-center justify-center transition ${completed ? 'bg-green-500 border-green-500' : 'border-slate-500 hover:border-red-500'}`}>
               {completed && <Check className="w-3 h-3 text-black font-bold" />}
             </button>
-            <div>
-              <span className={`text-base font-bold ${completed ? 'line-through text-slate-600' : isOverdue ? 'text-red-400' : 'text-slate-200'}`}>
+            <div className="flex-1 min-w-0">
+              <span className={`text-base font-bold block truncate ${completed ? 'line-through text-slate-600' : isOverdue ? 'text-red-400' : 'text-slate-200'}`}>
                 {task.title}
               </span>
               <div className="flex flex-wrap items-center gap-2 mt-1">
@@ -189,7 +189,7 @@ function SortableTaskItem({ task }: { task: any }) {
             </div>
           </div>
           
-          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition">
+          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition shrink-0">
             <button onClick={() => setIsEditing(true)} className="text-slate-500 hover:text-blue-400 transition p-1">
               <Edit2 className="w-4 h-4" />
             </button>
@@ -198,6 +198,70 @@ function SortableTaskItem({ task }: { task: any }) {
             </button>
           </div>
         </div>
+
+        {/* Advanced Info Section */}
+        {(!completed || task.statusUpdate || task.reviewNotes) && (
+          <div className="pl-8 space-y-3 mt-2">
+            {(task.estimatedTime || task.actualTime || task.energyLevel || task.assignedTo || task.cost) && (
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-[10px] font-mono text-slate-500 bg-slate-900/50 p-2 border border-slate-800 rounded">
+                {task.estimatedTime && <div><span className="font-bold text-slate-400 uppercase">Est:</span> {task.estimatedTime}m</div>}
+                {task.actualTime && <div><span className="font-bold text-slate-400 uppercase">Actual:</span> {task.actualTime}m</div>}
+                {task.energyLevel && <div><span className="font-bold text-slate-400 uppercase">Energy:</span> {task.energyLevel}</div>}
+                {task.assignedTo && <div><span className="font-bold text-slate-400 uppercase">Assign:</span> {task.assignedTo}</div>}
+                {task.cost && <div><span className="font-bold text-slate-400 uppercase">Cost:</span> {task.cost}</div>}
+              </div>
+            )}
+
+            {(task.statusUpdate || task.blockers || task.reviewNotes) && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                {task.statusUpdate && (
+                  <div className="bg-slate-900 border border-slate-800 p-2">
+                    <span className="text-[9px] uppercase tracking-widest font-bold text-blue-400/70 block mb-1">Status Update</span>
+                    <div className="text-slate-400 whitespace-pre-wrap">{task.statusUpdate}</div>
+                  </div>
+                )}
+                {task.blockers && (
+                  <div className="bg-red-900/10 border border-red-900/30 p-2">
+                    <span className="text-[9px] uppercase tracking-widest font-bold text-red-500/70 block mb-1">Blockers</span>
+                    <div className="text-red-400/80 whitespace-pre-wrap">{task.blockers}</div>
+                  </div>
+                )}
+                {task.reviewNotes && (
+                  <div className="bg-slate-900 border border-slate-800 p-2 sm:col-span-2">
+                    <span className="text-[9px] uppercase tracking-widest font-bold text-green-500/70 block mb-1">Review Notes</span>
+                    <div className="text-slate-400 whitespace-pre-wrap">{task.reviewNotes}</div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {(task.dependencies?.length > 0 || task.tags?.length > 0) && (
+              <div className="flex flex-col gap-1 mt-2">
+                {task.dependencies?.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[9px] uppercase tracking-widest font-bold text-slate-600">Deps:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {task.dependencies.map((dep: string, i: number) => (
+                        <span key={i} className="text-[10px] px-1.5 py-0.5 bg-slate-900 text-slate-400 border border-slate-700/50">{dep}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {task.tags?.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[9px] uppercase tracking-widest font-bold text-slate-600">Tags:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {task.tags.map((tag: string, i: number) => (
+                        <span key={i} className="text-[10px] px-1.5 py-0.5 text-slate-500 border border-slate-800/50 border-dashed">#{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
       </div>
     </div>
   );
