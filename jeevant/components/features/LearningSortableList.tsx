@@ -117,7 +117,7 @@ function SortableItem({ item }: { item: any }) {
 
   return (
     <div ref={setNodeRef} style={style} className="bg-shell-bg border border-green-900 p-4 flex items-center gap-4 hover:border-green-500 transition group relative">
-      <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-green-900 hover:text-green-500 p-1">
+      <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-green-900 hover:text-green-500 p-1 relative z-20">
         <GripVertical className="w-5 h-5" />
       </div>
 
