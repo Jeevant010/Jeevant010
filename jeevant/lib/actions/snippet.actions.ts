@@ -6,11 +6,28 @@ import { revalidatePath } from "next/cache";
 import { updateBulkOrder } from "./reorder.actions";
 export async function addSnippet(formData: FormData) {
   await connectDB();
+  const tagsRaw = formData.get("tags") as string;
+  const tags = tagsRaw ? tagsRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
+  const dependenciesRaw = formData.get("dependencies") as string;
+  const dependencies = dependenciesRaw ? dependenciesRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
+  const relatedSnippetsRaw = formData.get("relatedSnippets") as string;
+  const relatedSnippets = relatedSnippetsRaw ? relatedSnippetsRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
+
   await Snippet.create({
     title: formData.get("title"),
     language: formData.get("language"),
     code: formData.get("code"),
-    tags: (formData.get("tags") as string).split(","),
+    tags,
+    description: formData.get("description"),
+    useCase: formData.get("useCase"),
+    complexity: formData.get("complexity") || "medium",
+    author: formData.get("author"),
+    lastTestedVersion: formData.get("lastTestedVersion"),
+    performanceNotes: formData.get("performanceNotes"),
+    securityNotes: formData.get("securityNotes"),
+    isDeprecated: formData.get("isDeprecated") === "on",
+    dependencies,
+    relatedSnippets
   });
   revalidatePath("/arsenal");
 }
@@ -27,9 +44,33 @@ export async function deleteSnippet(id: string) {
   revalidatePath("/arsenal");
 }
 
-export async function updateSnippet(id: string, data: { title: string, language: string, code: string }) {
+export async function updateSnippet(formData: FormData) {
   await connectDB();
-  await Snippet.findByIdAndUpdate(id, data);
+  const id = formData.get("id") as string;
+
+  const tagsRaw = formData.get("tags") as string;
+  const tags = tagsRaw ? tagsRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
+  const dependenciesRaw = formData.get("dependencies") as string;
+  const dependencies = dependenciesRaw ? dependenciesRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
+  const relatedSnippetsRaw = formData.get("relatedSnippets") as string;
+  const relatedSnippets = relatedSnippetsRaw ? relatedSnippetsRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
+
+  await Snippet.findByIdAndUpdate(id, {
+    title: formData.get("title"),
+    language: formData.get("language"),
+    code: formData.get("code"),
+    tags,
+    description: formData.get("description"),
+    useCase: formData.get("useCase"),
+    complexity: formData.get("complexity") || "medium",
+    author: formData.get("author"),
+    lastTestedVersion: formData.get("lastTestedVersion"),
+    performanceNotes: formData.get("performanceNotes"),
+    securityNotes: formData.get("securityNotes"),
+    isDeprecated: formData.get("isDeprecated") === "on",
+    dependencies,
+    relatedSnippets
+  });
   revalidatePath("/arsenal");
 }
 
