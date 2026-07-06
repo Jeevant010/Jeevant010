@@ -151,7 +151,7 @@ export function SortableSnippetCard({ item }: { item: any }) {
       </div>
 
       {/* Hover Overlay Action */}
-      <div className="absolute top-10 bottom-0 left-0 right-0 z-10 bg-shell-bg/90 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute top-10 bottom-0 left-0 right-0 z-10 bg-shell-bg/90 flex items-center justify-center gap-4 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
          <button onClick={handleCopy} className="p-3 bg-white text-black rounded-full hover:scale-110 transition" title="Copy Code">
            <Copy className="w-6 h-6" />
          </button>
