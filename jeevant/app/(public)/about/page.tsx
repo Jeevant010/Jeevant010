@@ -1,5 +1,6 @@
 import { getCharacterSheet } from "@/lib/actions/rpg.actions";
 import { getProfile } from "@/lib/actions/profile.actions";
+import Link from "next/link";
 import { 
   Shield, 
   Map, 
@@ -108,8 +109,8 @@ export default async function AboutRPG() {
                  loot.map((item: any, index: number) => {
                    const theme = getTacticalColor(index);
                    return (
-                     <div key={item._id} className={cn("bg-shell-bg/50 p-4 sm:p-5 rounded border flex items-start gap-4 transition group/item relative overflow-hidden", theme.border, theme.borderHover)}>
-                       <div className={cn("absolute inset-0 opacity-0 group-hover/item:opacity-100 transition-opacity bg-gradient-to-r to-transparent", theme.text.replace("text-", "from-").replace("500", "500/5"))} />
+                     <Link key={item._id} href={`/achievements/${item.slug || item._id}`} className={cn("bg-shell-bg/50 p-4 sm:p-5 rounded border flex items-start gap-4 transition group/item relative overflow-hidden hover:-translate-y-1 shadow-lg", theme.border, theme.borderHover)}>
+                       <div className={cn("absolute inset-0 opacity-0 group-hover/item:opacity-100 transition-opacity bg-gradient-to-r to-transparent pointer-events-none", theme.text.replace("text-", "from-").replace("500", "500/5"))} />
                        <div className={cn("w-10 h-10 rounded bg-shell-surface border flex items-center justify-center transition shrink-0 relative z-10 text-shell-muted", theme.border, theme.textHover, theme.borderHover)}>
                          <Database className="w-4 h-4" />
                        </div>
@@ -148,7 +149,7 @@ export default async function AboutRPG() {
                             </div>
                           )}
                         </div>
-                     </div>
+                     </Link>
                    );
                  })
                )}
