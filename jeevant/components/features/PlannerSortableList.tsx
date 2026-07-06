@@ -189,7 +189,7 @@ function SortableTaskItem({ task }: { task: any }) {
             </div>
           </div>
           
-          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition shrink-0">
+          <div className="flex items-center gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition shrink-0">
             <button onClick={() => setIsEditing(true)} className="text-slate-500 hover:text-blue-400 transition p-1">
               <Edit2 className="w-4 h-4" />
             </button>
