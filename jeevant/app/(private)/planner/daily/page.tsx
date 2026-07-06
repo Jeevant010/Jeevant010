@@ -1,5 +1,6 @@
 import { getDailyTasks, createTask } from "@/lib/actions/task.actions";
 import { PlannerSortableList } from "@/components/features/PlannerSortableList";
+import { AddTaskForm } from "@/components/features/AddTaskForm";
 import { Calendar, Plus, Crosshair, ChevronRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -34,21 +35,7 @@ export default async function DailyPlanner() {
         <div className="lg:col-span-2 space-y-8">
           
           {/* Input Field */}
-          <form action={createTask} className="relative">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-              <ChevronRight className="w-5 h-5 text-red-500" />
-            </div>
-            <input 
-              name="title"
-              required
-              autoComplete="off"
-              placeholder="ENTER NEW OBJECTIVE..." 
-              className="w-full bg-[#0a0a0a] border-b-2 border-slate-800 text-shell-text pl-12 pr-16 py-6 text-lg focus:border-red-600 focus:outline-none placeholder-slate-700 font-bold transition-colors"
-            />
-            <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 text-shell-muted hover:text-shell-text transition">
-              <span className="text-xs font-bold uppercase border border-slate-700 px-2 py-1">Execute</span>
-            </button>
-          </form>
+          <AddTaskForm />
 
           {/* Pending Objectives */}
           <div>
