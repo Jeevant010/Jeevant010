@@ -5,7 +5,7 @@ import {
   DndContext,
   closestCenter,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor, TouchSensor,
   useSensor,
   useSensors,
   DragEndEvent,
@@ -72,7 +72,8 @@ export default function SortableList({ items, modelName, renderItem, revalidateP
   const [isSaving, setIsSaving] = useState(false);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
