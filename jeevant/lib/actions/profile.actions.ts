@@ -36,6 +36,14 @@ export async function updateProfile(formData: FormData) {
     console.error("Failed to parse skillsExperience JSON");
   }
 
+  const socialLinksRaw = formData.get("socialLinks") as string;
+  let socialLinks = [];
+  try {
+    socialLinks = socialLinksRaw ? JSON.parse(socialLinksRaw) : [];
+  } catch(e) {
+    console.error("Failed to parse socialLinks JSON");
+  }
+
   const data = {
     name: formData.get("name"),
     title: formData.get("title"),
@@ -54,6 +62,7 @@ export async function updateProfile(formData: FormData) {
     currentFocus: formData.get("currentFocus"),
     availability: formData.get("availability"),
     skillsExperience,
+    socialLinks,
     updatedAt: new Date()
   };
 
