@@ -116,18 +116,14 @@ function SortableItem({ item }: { item: any }) {
   }
 
   return (
-    <div ref={setNodeRef} style={style} className="bg-shell-bg border border-green-900 p-4 flex items-center gap-4 hover:border-green-500 transition group relative">
-      <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-green-900 hover:text-green-500 p-1 relative z-20">
+    <div ref={setNodeRef} style={style} className="bg-shell-bg border border-green-900 p-4 flex flex-col sm:flex-row gap-4 hover:border-green-500 transition group relative">
+      <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-green-900 hover:text-green-500 p-1 relative z-20 shrink-0">
         <GripVertical className="w-5 h-5" />
       </div>
 
-      <div className="p-3 bg-green-900/20 border border-green-800 text-green-400 group-hover:text-shell-text transition-colors">
-        <Code className="w-6 h-6" />
-      </div>
-      
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start mb-1">
-          <div className="flex items-center gap-2 max-w-[70%]">
+          <div className="flex flex-wrap items-center gap-2 max-w-[80%]">
             <h3 className="font-bold text-lg text-shell-text group-hover:text-green-300 truncate">{item.title}</h3>
             {item.platform && <span className="px-2 py-0.5 bg-green-900/30 text-green-500 text-[10px] uppercase font-bold border border-green-900/50 whitespace-nowrap">{item.platform}</span>}
           </div>
@@ -139,7 +135,8 @@ function SortableItem({ item }: { item: any }) {
           </div>
         </div>
         
-        <div className="flex justify-between items-center mt-2">
+        {/* Progress Bar */}
+        <div className="flex justify-between items-center mt-2 mb-4 border-b border-green-900/30 pb-4">
           <div className="w-full max-w-[80%] pr-4">
             <div className="flex justify-between mb-1">
               <span className="text-[10px] text-green-700 uppercase tracking-widest font-bold">Progress ({item.completedModules}/{item.totalModules})</span>
@@ -164,6 +161,46 @@ function SortableItem({ item }: { item: any }) {
             )}
           </div>
         </div>
+
+        {/* Detailed Info (New) */}
+        {(item.instructor || item.difficulty || item.rating || item.price || item.startDate) && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px] font-mono text-green-700 mb-3 bg-shell-surface/50 p-2 border border-green-900/50">
+            {item.instructor && <div><span className="font-bold text-green-900 uppercase">Instructor:</span> <span className="text-green-500">{item.instructor}</span></div>}
+            {item.difficulty && <div><span className="font-bold text-green-900 uppercase">Difficulty:</span> <span className="text-green-500 uppercase">{item.difficulty}</span></div>}
+            {item.rating && <div><span className="font-bold text-green-900 uppercase">Rating:</span> <span className="text-green-500">{item.rating}/10</span></div>}
+            {item.price && <div><span className="font-bold text-green-900 uppercase">Price:</span> <span className="text-green-500">{item.price}</span></div>}
+            {item.startDate && <div><span className="font-bold text-green-900 uppercase">Start:</span> <span className="text-green-500">{new Date(item.startDate).toLocaleDateString()}</span></div>}
+            {item.endDate && <div><span className="font-bold text-green-900 uppercase">End:</span> <span className="text-green-500">{new Date(item.endDate).toLocaleDateString()}</span></div>}
+          </div>
+        )}
+
+        <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-widest mb-3">
+          {item.url && (
+            <a href={item.url} target="_blank" rel="noopener" className="text-blue-400 hover:text-blue-300 border border-blue-900/50 px-2 py-1 bg-blue-900/10 transition">Course Link ↗</a>
+          )}
+          {item.certificateUrl && (
+            <a href={item.certificateUrl} target="_blank" rel="noopener" className="text-yellow-400 hover:text-yellow-300 border border-yellow-900/50 px-2 py-1 bg-yellow-900/10 transition">Certificate ↗</a>
+          )}
+          {item.notesRef && (
+            <span className="text-purple-400 border border-purple-900/50 px-2 py-1 bg-purple-900/10">Ref: {item.notesRef}</span>
+          )}
+        </div>
+
+        {item.review && (
+          <div className="bg-shell-surface/50 border border-green-900/50 p-3 mb-3">
+            <span className="text-[9px] uppercase tracking-widest font-bold text-green-700 block mb-1">Review & Notes</span>
+            <div className="text-xs text-green-500/80 whitespace-pre-wrap font-sans">{item.review}</div>
+          </div>
+        )}
+
+        {item.skillsGained?.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            <span className="text-[9px] uppercase tracking-widest font-bold text-green-700 self-center mr-2">Skills:</span>
+            {item.skillsGained.map((skill: string, i: number) => (
+              <span key={i} className="text-[10px] px-1.5 py-0.5 bg-green-900/20 text-green-500 border border-green-900/50">{skill}</span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
