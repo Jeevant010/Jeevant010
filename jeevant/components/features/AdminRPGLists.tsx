@@ -115,7 +115,7 @@ function QuestItem({ quest }: { quest: any }) {
                 </span>
               </div>
             </div>
-            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
               <button onClick={() => setEditingId(quest._id)} className="text-[#8a7045] hover:text-yellow-500"><Edit2 className="w-4 h-4" /></button>
               <form action={deleteExperience}>
                 <input type="hidden" name="id" value={quest._id} />
@@ -335,7 +335,7 @@ function LootItem({ item }: { item: any }) {
                 )}
               </div>
             </div>
-            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
               <button onClick={() => setEditingId(item._id)} className="text-[#8a7045] hover:text-blue-400"><Edit2 className="w-4 h-4" /></button>
               <form action={deleteAchievement}>
                 <input type="hidden" name="id" value={item._id} />
