@@ -1,5 +1,6 @@
 import { getLearning, addLearning, deleteLearning, incrementLearning } from "@/lib/actions/learning.actions";
 import { LearningSortableList } from "@/components/features/LearningSortableList";
+import { AddLearningForm } from "@/components/features/AddLearningForm";
 import { Terminal, Code, Check, Trash2, Plus } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -27,23 +28,7 @@ export default async function LearningMatrix() {
         </div>
 
         {/* Add New Upload Form */}
-        <form action={addLearning} className="bg-green-900/10 border border-green-500/30 p-6 mb-12 flex flex-wrap gap-4 items-end">
-          <div className="flex-1 min-w-[200px]">
-            <label className="text-xs text-green-700 uppercase">Skill / Course Name</label>
-            <input name="title" required className="w-full bg-shell-bg border border-green-800 text-green-400 px-3 py-2 focus:border-green-400 outline-none" />
-          </div>
-          <div className="w-32">
-             <label className="text-xs text-green-700 uppercase">Total Modules</label>
-             <input name="totalModules" type="number" required className="w-full bg-shell-bg border border-green-800 text-green-400 px-3 py-2 focus:border-green-400 outline-none" />
-          </div>
-          <div className="w-32">
-             <label className="text-xs text-green-700 uppercase">Completed</label>
-             <input name="completedModules" type="number" required className="w-full bg-shell-bg border border-green-800 text-green-400 px-3 py-2 focus:border-green-400 outline-none" />
-          </div>
-          <button className="bg-green-600 text-black font-bold px-6 py-2 hover:bg-green-500 transition">
-            INITIATE
-          </button>
-        </form>
+        <AddLearningForm />
 
         {/* The Grid */}
         <LearningSortableList initialItems={items} />
