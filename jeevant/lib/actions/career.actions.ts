@@ -12,12 +12,26 @@ export async function getApplications() {
 
 export async function createApplication(formData: FormData) {
   await connectDB();
+  const benefitsRaw = formData.get("benefits") as string;
+  const benefits = benefitsRaw ? benefitsRaw.split(",").map(b => b.trim()).filter(Boolean) : [];
+
   await Application.create({
     company: formData.get("company"),
     role: formData.get("role"),
     salary: formData.get("salary"),
-    status: "applied",
-    notes: ""
+    status: formData.get("status") || "applied",
+    notes: formData.get("notes") || "",
+    recruiterName: formData.get("recruiterName"),
+    recruiterEmail: formData.get("recruiterEmail"),
+    companyUrl: formData.get("companyUrl"),
+    location: formData.get("location"),
+    workModel: formData.get("workModel") || "remote",
+    interviews: formData.get("interviews") ? Number(formData.get("interviews")) : 0,
+    feedback: formData.get("feedback"),
+    offerDetails: formData.get("offerDetails"),
+    referral: formData.get("referral"),
+    deadline: formData.get("deadline") ? new Date(String(formData.get("deadline"))) : undefined,
+    benefits
   });
   revalidatePath("/career");
 }
