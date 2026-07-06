@@ -29,13 +29,26 @@ export async function addLearning(formData: FormData) {
   const completedModules = Number(formData.get("completedModules"));
   const visibility = String(formData.get("visibility") || "private");
   
+  const skillsGainedRaw = formData.get("skillsGained") as string;
+  const skillsGained = skillsGainedRaw ? skillsGainedRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
+
   await Learning.create({ 
     title, 
     platform, 
     totalModules, 
     completedModules, 
     visibility,
-    status: completedModules >= totalModules ? "completed" : "in-progress" 
+    status: completedModules >= totalModules ? "completed" : "in-progress",
+    instructor: formData.get("instructor"),
+    rating: formData.get("rating") ? Number(formData.get("rating")) : undefined,
+    certificateUrl: formData.get("certificateUrl"),
+    startDate: formData.get("startDate") ? new Date(String(formData.get("startDate"))) : undefined,
+    endDate: formData.get("endDate") ? new Date(String(formData.get("endDate"))) : undefined,
+    price: formData.get("price"),
+    difficulty: formData.get("difficulty") || "beginner",
+    review: formData.get("review"),
+    notesRef: formData.get("notesRef"),
+    skillsGained
   });
   
   revalidatePath("/learning");
@@ -64,13 +77,26 @@ export async function updateLearning(formData: FormData) {
   const completedModules = Number(formData.get("completedModules"));
   const totalModules = Number(formData.get("totalModules"));
   
+  const skillsGainedRaw = formData.get("skillsGained") as string;
+  const skillsGained = skillsGainedRaw ? skillsGainedRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
+
   await Learning.findByIdAndUpdate(id, {
     title: formData.get("title"),
     platform: formData.get("platform"),
     url: formData.get("url"),
     totalModules,
     completedModules,
-    status: completedModules >= totalModules ? "completed" : "in-progress"
+    status: completedModules >= totalModules ? "completed" : "in-progress",
+    instructor: formData.get("instructor"),
+    rating: formData.get("rating") ? Number(formData.get("rating")) : undefined,
+    certificateUrl: formData.get("certificateUrl"),
+    startDate: formData.get("startDate") ? new Date(String(formData.get("startDate"))) : undefined,
+    endDate: formData.get("endDate") ? new Date(String(formData.get("endDate"))) : undefined,
+    price: formData.get("price"),
+    difficulty: formData.get("difficulty") || "beginner",
+    review: formData.get("review"),
+    notesRef: formData.get("notesRef"),
+    skillsGained
   });
   revalidatePath("/learning");
 }
