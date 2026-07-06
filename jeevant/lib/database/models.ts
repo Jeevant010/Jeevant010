@@ -38,6 +38,16 @@ const TaskSchema = new Schema({
   sourceUrl: { type: String },
   category: { type: String },
   createdAt: { type: Date, default: Date.now },
+  estimatedTime: { type: Number }, // in minutes
+  actualTime: { type: Number }, // in minutes
+  energyLevel: { type: String, enum: ["low", "medium", "high"], default: "medium" },
+  tags: [{ type: String }],
+  dependencies: [{ type: String }],
+  statusUpdate: { type: String },
+  blockers: { type: String },
+  reviewNotes: { type: String },
+  assignedTo: { type: String },
+  cost: { type: String },
 });
 
 // --- 3. BRAIN NOTE SCHEMA (Second Brain) ---
@@ -49,6 +59,16 @@ const NoteSchema = new Schema({
   isPinned: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+  author: { type: String },
+  sourceUrl: { type: String },
+  rating: { type: Number, min: 1, max: 10 },
+  summary: { type: String },
+  references: [{ type: String }],
+  category: { type: String },
+  status: { type: String, enum: ["draft", "review", "published"], default: "draft" },
+  coverImage: { type: String },
+  isPublished: { type: Boolean, default: false },
+  wordCount: { type: Number, default: 0 },
 });
 
 // --- 4. LEARNING SCHEMA (Course Tracker) ---
@@ -62,6 +82,16 @@ const LearningSchema = new Schema({
   status: { type: String, enum: ["not-started", "in-progress", "completed"], default: "not-started" },
   type: { type: String, enum: ["book", "paper", "course", "guide"], default: "course" },
   order: { type: Number, default: 0 },
+  instructor: { type: String },
+  rating: { type: Number, min: 1, max: 10 },
+  certificateUrl: { type: String },
+  startDate: { type: Date },
+  endDate: { type: Date },
+  price: { type: String },
+  skillsGained: [{ type: String }],
+  difficulty: { type: String, enum: ["beginner", "intermediate", "advanced"], default: "beginner" },
+  review: { type: String },
+  notesRef: { type: String },
 });
 
 // ... (Keep Project, Task, Note, Learning schemas from before)
@@ -106,7 +136,17 @@ const AchievementSchema = new Schema({
   importance: { type: String, enum: ["low", "medium", "high"], default: "medium" },
   tags: [{ type: String }],
   expiryDate: { type: Date },
-  isFeatured: { type: Boolean, default: false }
+  isFeatured: { type: Boolean, default: false },
+  slug: { type: String },
+  coverImage: { type: String },
+  gallery: [{ type: String }],
+  techStack: [{ type: String }],
+  githubLink: { type: String },
+  liveLink: { type: String },
+  architectureDiagram: { type: String },
+  impact: { type: String },
+  collaborators: [{ type: String }],
+  lessonsLearned: { type: String },
 });
 
 // --- 7. CERTIFICATE SCHEMA ---
@@ -158,7 +198,17 @@ const ApplicationSchema = new Schema({
   order: { type: Number, default: 0 },
   deadline: { type: Date },
   dateApplied: { type: Date, default: Date.now },
-  lastUpdated: { type: Date, default: Date.now }
+  lastUpdated: { type: Date, default: Date.now },
+  recruiterName: { type: String },
+  recruiterEmail: { type: String },
+  companyUrl: { type: String },
+  location: { type: String },
+  workModel: { type: String, enum: ["remote", "hybrid", "onsite"], default: "remote" },
+  interviews: { type: Number, default: 0 },
+  feedback: { type: String },
+  offerDetails: { type: String },
+  benefits: [{ type: String }],
+  referral: { type: String },
 });
 
 
@@ -182,7 +232,17 @@ const SnippetSchema = new Schema({
   tags: [{ type: String }],
   folder: { type: String, default: "General" },
   order: { type: Number, default: 0 },
-  isCopied: { type: Number, default: 0 } // Track how many times it was useful
+  isCopied: { type: Number, default: 0 },
+  description: { type: String },
+  useCase: { type: String },
+  complexity: { type: String, enum: ["low", "medium", "high"], default: "medium" },
+  author: { type: String },
+  lastTestedVersion: { type: String },
+  dependencies: [{ type: String }],
+  relatedSnippets: [{ type: String }],
+  performanceNotes: { type: String },
+  securityNotes: { type: String },
+  isDeprecated: { type: Boolean, default: false },
 });
 
 
@@ -215,6 +275,18 @@ const ProfileSchema = new Schema({
   }]
 });
 
+// --- 12. RESUME SCHEMA ---
+const ResumeSchema = new Schema({
+  title: { type: String, required: true },
+  domain: { type: String, required: true },
+  content: { type: String },
+  pdfUrl: { type: String },
+  skills: [{ type: String }],
+  isPrimary: { type: Boolean, default: false },
+  layoutTheme: { type: String, enum: ["tactical", "minimal", "creative"], default: "tactical" },
+  createdAt: { type: Date, default: Date.now }
+});
+
 export const Profile = models.Profile || model("Profile", ProfileSchema);
 export const Snippet = models.Snippet || model("Snippet", SnippetSchema);
 export const Message = models.Message || model("Message", MessageSchema);
@@ -228,3 +300,4 @@ export const Task = models.Task || model("Task", TaskSchema);
 export const Note = models.Note || model("Note", NoteSchema);
 export const Learning = models.Learning || model("Learning", LearningSchema);
 export const Schedule = models.Schedule || model("Schedule", ScheduleSchema);
+export const Resume = models.Resume || model("Resume", ResumeSchema);
