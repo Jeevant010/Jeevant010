@@ -62,8 +62,23 @@ export async function createNote(formData: FormData): Promise<void> {
             .map((t) => t.trim())
             .filter(Boolean)
         : [];
+        
+    const referencesRaw = formData.get("references");
+    const references = typeof referencesRaw === "string" && referencesRaw.trim().length > 0 ? referencesRaw.split(",").map((r) => r.trim()).filter(Boolean) : [];
 
-    await Note.create({ title, content, tags, visibility, isPinned: false });
+    await Note.create({ 
+      title, content, tags, visibility, isPinned: false,
+      author: formData.get("author"),
+      sourceUrl: formData.get("sourceUrl"),
+      rating: formData.get("rating") ? Number(formData.get("rating")) : undefined,
+      summary: formData.get("summary"),
+      references,
+      category: formData.get("category"),
+      status: formData.get("status") || "draft",
+      coverImage: formData.get("coverImage"),
+      isPublished: formData.get("isPublished") === "true",
+      wordCount: formData.get("wordCount") ? Number(formData.get("wordCount")) : 0
+    });
 
     revalidatePath("/brain");
     revalidatePath("/research");
@@ -102,12 +117,25 @@ export async function updateNote(id: string, formData: FormData) {
             .filter(Boolean)
         : [];
 
+    const referencesRaw = formData.get("references");
+    const references = typeof referencesRaw === "string" && referencesRaw.trim().length > 0 ? referencesRaw.split(",").map((r) => r.trim()).filter(Boolean) : [];
+
     await Note.findByIdAndUpdate(id, { 
       title, 
       content, 
       tags, 
       visibility, 
-      updatedAt: Date.now() 
+      updatedAt: Date.now(),
+      author: formData.get("author"),
+      sourceUrl: formData.get("sourceUrl"),
+      rating: formData.get("rating") ? Number(formData.get("rating")) : undefined,
+      summary: formData.get("summary"),
+      references,
+      category: formData.get("category"),
+      status: formData.get("status") || "draft",
+      coverImage: formData.get("coverImage"),
+      isPublished: formData.get("isPublished") === "true",
+      wordCount: formData.get("wordCount") ? Number(formData.get("wordCount")) : 0
     });
     
     revalidatePath("/brain");
