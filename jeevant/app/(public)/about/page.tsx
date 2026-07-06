@@ -132,7 +132,33 @@ export default async function AboutRPG() {
                             </div>
                           )}
 
-                          <p className="text-xs text-shell-muted mt-2 leading-relaxed line-clamp-2">{item.description}</p>
+                          <p className="text-xs text-shell-muted mt-2 leading-relaxed whitespace-pre-wrap">{item.description}</p>
+                          
+                          {(item.impact || item.lessonsLearned) && (
+                            <div className="mt-3 flex flex-col gap-2">
+                              {item.impact && (
+                                <div className="bg-shell-bg/50 border border-shell-border p-2 rounded">
+                                  <span className={cn("text-[9px] uppercase tracking-widest font-bold block mb-1", theme.text)}>Impact</span>
+                                  <div className="text-xs text-shell-muted whitespace-pre-wrap">{item.impact}</div>
+                                </div>
+                              )}
+                              {item.lessonsLearned && (
+                                <div className="bg-shell-bg/50 border border-shell-border p-2 rounded">
+                                  <span className={cn("text-[9px] uppercase tracking-widest font-bold block mb-1", theme.text)}>Lessons Learned</span>
+                                  <div className="text-xs text-shell-muted whitespace-pre-wrap">{item.lessonsLearned}</div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {(item.gallery?.length > 0 || item.coverImage) && (
+                             <div className="flex gap-2 overflow-x-auto mt-3 pb-1">
+                               {item.coverImage && <img src={item.coverImage} className="h-16 w-16 object-cover rounded border border-shell-border" alt="Cover" />}
+                               {item.gallery?.map((url: string, i: number) => (
+                                 <img key={i} src={url} className="h-16 w-16 object-cover rounded border border-shell-border" alt={`Gallery ${i}`} />
+                               ))}
+                             </div>
+                          )}
                           
                           {(item.credentialId || item.expiryDate) && (
                             <div className="mt-3 flex flex-wrap gap-3 border-t border-shell-border pt-2 text-[10px] font-mono text-shell-muted/70">
@@ -140,11 +166,29 @@ export default async function AboutRPG() {
                               {item.expiryDate && <span>EXP: {new Date(item.expiryDate).toLocaleDateString()}</span>}
                             </div>
                           )}
+
+                          <div className="flex flex-wrap gap-2 text-[9px] font-bold uppercase tracking-widest mt-3">
+                            {item.proofLink && (
+                              <div onClick={e => e.preventDefault()}><a href={item.proofLink} target="_blank" rel="noopener" onClick={e=>e.stopPropagation()} className={cn("border px-2 py-1 transition", theme.border, theme.text, theme.bgMuted, theme.textHover)}>Proof ↗</a></div>
+                            )}
+                            {item.githubLink && (
+                              <div onClick={e => e.preventDefault()}><a href={item.githubLink} target="_blank" rel="noopener" onClick={e=>e.stopPropagation()} className="text-slate-300 hover:text-white border border-slate-600 px-2 py-1 bg-slate-800 transition">Source ↗</a></div>
+                            )}
+                            {item.liveLink && (
+                              <div onClick={e => e.preventDefault()}><a href={item.liveLink} target="_blank" rel="noopener" onClick={e=>e.stopPropagation()} className="text-emerald-400 hover:text-emerald-300 border border-emerald-400/30 px-2 py-1 bg-emerald-400/5 transition">Live ↗</a></div>
+                            )}
+                            {item.architectureDiagram && (
+                              <div onClick={e => e.preventDefault()}><a href={item.architectureDiagram} target="_blank" rel="noopener" onClick={e=>e.stopPropagation()} className="text-purple-400 hover:text-purple-300 border border-purple-400/30 px-2 py-1 bg-purple-400/5 transition">Arch Diagram ↗</a></div>
+                            )}
+                          </div>
                           
-                          {item.tags?.length > 0 && (
+                          {(item.tags?.length > 0 || item.skills?.length > 0 || item.techStack?.length > 0) && (
                             <div className="mt-3 flex flex-wrap gap-1">
-                              {item.tags.map((tag: string, idx: number) => (
-                                <span key={idx} className={cn("text-[9px] font-bold uppercase tracking-widest border px-1", theme.border, theme.text)}>{tag}</span>
+                              {[...(item.skills || []), ...(item.techStack || [])].map((skill: string, idx: number) => (
+                                <span key={`skill-${idx}`} className={cn("text-[9px] font-bold uppercase tracking-widest border px-1", theme.border, theme.text)}>{skill}</span>
+                              ))}
+                              {item.tags?.map((tag: string, idx: number) => (
+                                <span key={`tag-${idx}`} className={cn("text-[9px] font-bold uppercase tracking-widest border px-1 border-dashed border-shell-border text-shell-muted")}>#{tag}</span>
                               ))}
                             </div>
                           )}
@@ -186,15 +230,27 @@ export default async function AboutRPG() {
                           <div className="flex flex-col sm:flex-row justify-between items-start mb-4 gap-2 relative z-10">
                             <div>
                                <h4 className="text-xl sm:text-2xl font-black text-shell-text">{quest.role}</h4>
-                               <p className={cn("text-[10px] sm:text-xs font-bold mt-1 uppercase tracking-widest", theme.text)}>Command: {quest.company}</p>
+                               <p className={cn("text-[10px] sm:text-xs font-bold mt-1 uppercase tracking-widest flex items-center gap-2", theme.text)}>
+                                 Command: {quest.company}
+                                 {quest.website && <a href={quest.website} target="_blank" rel="noopener" className="text-shell-muted hover:text-shell-text underline lowercase">[{quest.website}]</a>}
+                               </p>
                             </div>
                             <span className={cn("text-[10px] font-bold border px-3 py-1 uppercase tracking-widest shadow-inner", quest.endDate ? 'text-shell-muted border-shell-border bg-shell-bg' : cn('bg-shell-bg', theme.text, theme.borderHover))}>
                                {quest.endDate ? 'CONCLUDED' : 'ACTIVE'}
                             </span>
                           </div>
-                          <p className="text-shell-muted text-sm leading-relaxed relative z-10">
+                          <p className="text-shell-muted text-sm leading-relaxed relative z-10 whitespace-pre-wrap">
                             {quest.description}
                           </p>
+
+                          {quest.achievements?.length > 0 && (
+                            <div className="mt-4 bg-shell-bg/50 border border-shell-border p-3 rounded relative z-10">
+                               <span className={cn("font-bold uppercase tracking-widest text-[9px] block mb-2 border-b border-shell-border pb-1", theme.text)}>Key Achievements</span>
+                               <ul className="list-disc list-inside text-xs text-shell-muted space-y-1">
+                                 {quest.achievements.map((ach: string, i: number) => <li key={i}>{ach}</li>)}
+                               </ul>
+                            </div>
+                          )}
                           
                           {(quest.location || quest.salary || quest.rating || quest.manager) && (
                             <div className="mt-4 grid grid-cols-2 gap-2 text-[10px] font-mono border-t border-shell-border pt-3 text-shell-muted relative z-10">
