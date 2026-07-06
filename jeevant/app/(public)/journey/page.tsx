@@ -94,6 +94,15 @@ export default async function JourneyPage() {
                         <p className="mt-6 text-sm sm:text-base text-shell-muted/90 font-sans leading-relaxed whitespace-pre-wrap">
                           {quest.description}
                         </p>
+
+                        {quest.achievements?.length > 0 && (
+                          <div className="mt-6 bg-shell-surface/30 border border-shell-border p-4 rounded">
+                             <span className={cn("font-bold uppercase tracking-widest text-[10px] block mb-3 border-b border-shell-border pb-2", theme.text)}>Key Achievements</span>
+                             <ul className="list-disc list-inside text-sm text-shell-muted space-y-2 font-sans">
+                               {quest.achievements.map((ach: string, i: number) => <li key={i}>{ach}</li>)}
+                             </ul>
+                          </div>
+                        )}
                         
                         {(quest.location || quest.salary || quest.rating || quest.manager) && (
                           <div className="mt-6 grid grid-cols-2 gap-4 text-xs font-mono border-l-2 border-shell-border pl-4 text-shell-muted">
