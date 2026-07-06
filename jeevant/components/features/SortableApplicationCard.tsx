@@ -104,7 +104,7 @@ export function SortableApplicationCard({ app }: { app: any }) {
 
   return (
     <div ref={setNodeRef} style={style} className={`bg-shell-bg border-l-4 p-4 relative group transition flex gap-2 ${color}`}>
-      <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-shell-muted hover:text-white pt-1">
+      <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-shell-muted hover:text-white pt-1 relative z-20">
         <GripVertical className="w-4 h-4" />
       </div>
       
