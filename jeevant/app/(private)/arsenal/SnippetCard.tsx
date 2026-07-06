@@ -15,7 +15,12 @@ export default function SnippetCard({ item }: { item: any }) {
   };
 
   const handleSave = async () => {
-    await updateSnippet(item._id, { title, language, code });
+    const formData = new FormData();
+    formData.append("id", item._id);
+    formData.append("title", title);
+    formData.append("language", language);
+    formData.append("code", code);
+    await updateSnippet(formData);
     setIsEditing(false);
   };
 
