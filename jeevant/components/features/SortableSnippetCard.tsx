@@ -95,7 +95,7 @@ export function SortableSnippetCard({ item }: { item: any }) {
   return (
     <div ref={setNodeRef} style={style} className="group bg-[#221e1a] border-2 border-[#403530] hover:border-[#e0d0c0] transition-colors p-1 relative overflow-hidden h-64 flex flex-col">
       {/* Header */}
-      <div className="bg-[#302822] p-2 flex justify-between items-center border-b border-[#403530]">
+      <div className="bg-[#302822] p-2 flex justify-between items-center border-b border-[#403530] relative z-20">
         <div className="flex items-center gap-2 max-w-[80%]">
           <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-[#8a7560] hover:text-[#e0d0c0]">
             <GripHorizontal className="w-4 h-4" />
@@ -120,7 +120,7 @@ export function SortableSnippetCard({ item }: { item: any }) {
       </div>
 
       {/* Hover Overlay Action */}
-      <div className="absolute inset-0 bg-shell-bg/80 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute top-10 bottom-0 left-0 right-0 z-10 bg-shell-bg/90 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
          <button onClick={handleCopy} className="p-3 bg-white text-black rounded-full hover:scale-110 transition" title="Copy Code">
            <Copy className="w-6 h-6" />
          </button>
