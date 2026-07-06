@@ -250,7 +250,7 @@ function ChatBubble({ note, isEditing, onEditStart, onEditCancel }: { note: any,
     <div className="w-full max-w-3xl ml-auto bg-shell-surface/80 border border-shell-border p-5 group hover:border-shell-accent/50 transition-colors">
       <div className="flex justify-between items-start mb-3">
         <h3 className="text-sm font-bold text-shell-text uppercase tracking-wider">{note.title}</h3>
-        <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
            <button onClick={handleToggleVis} disabled={loading} title={note.visibility === 'public' ? "Make Private" : "Make Public"} className={`text-xs flex items-center gap-1 uppercase tracking-widest ${note.visibility === 'public' ? 'text-green-400' : 'text-amber-500'}`}>
              {note.visibility === 'public' ? <><Globe className="w-3 h-3" /> Public</> : <><Lock className="w-3 h-3" /> Private</>}
            </button>
