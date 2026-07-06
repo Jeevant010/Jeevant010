@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -153,7 +153,7 @@ function SortableTaskItem({ task }: { task: any }) {
 
   return (
     <div ref={setNodeRef} style={style} className={`flex items-stretch group border-b border-slate-800 last:border-0 transition-colors ${completed ? 'bg-slate-900/30' : 'bg-[#0a0a0a] hover:bg-[#111]'}`}>
-      <div {...attributes} {...listeners} className="w-8 flex items-center justify-center cursor-grab active:cursor-grabbing text-slate-700 hover:text-slate-400 transition">
+      <div {...attributes} {...listeners} className="w-8 flex items-center justify-center cursor-grab active:cursor-grabbing text-slate-700 hover:text-slate-400 transition relative z-20">
         <GripVertical className="w-4 h-4" />
       </div>
 
@@ -171,12 +171,12 @@ function SortableTaskItem({ task }: { task: any }) {
                 <span className={`text-[10px] uppercase tracking-widest font-bold ${priorityColor}`}>[{task.priority}]</span>
                 <span className="text-[10px] uppercase tracking-widest text-slate-500 border border-slate-800 px-1">{task.category}</span>
                 {task.dueDate && (
-                  <span className={`text-[10px] uppercase tracking-widest font-bold flex items-center gap-1 ${isOverdue ? 'text-red-500' : 'text-slate-400'}`}>
-                    <Calendar className="w-3 h-3"/> {new Date(task.dueDate).toLocaleString()}
+                  <span className={`text-[10px] uppercase tracking-widest font-bold flex items-center gap-1 px-1.5 py-0.5 border ${isOverdue ? 'text-red-500 border-red-500 bg-red-900/20' : 'text-amber-400 border-amber-500/50 bg-amber-900/20'}`}>
+                    <Calendar className="w-3 h-3"/> {isOverdue ? "OVERDUE:" : "DUE:"} {new Date(task.dueDate).toLocaleString()}
                   </span>
                 )}
                 {task.reminderDate && (
-                  <span className="text-[10px] uppercase tracking-widest font-bold text-amber-500 flex items-center gap-1">
+                  <span className="text-[10px] uppercase tracking-widest font-bold text-sky-400 flex items-center gap-1 px-1.5 py-0.5 border border-sky-500/50 bg-sky-900/20">
                     <Clock className="w-3 h-3"/> Alert: {new Date(task.reminderDate).toLocaleString()}
                   </span>
                 )}
@@ -205,6 +205,10 @@ function SortableTaskItem({ task }: { task: any }) {
 
 export function PlannerSortableList({ initialItems }: { initialItems: any[] }) {
   const [items, setItems] = useState(initialItems);
+
+  useEffect(() => {
+    setItems(initialItems);
+  }, [initialItems]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
