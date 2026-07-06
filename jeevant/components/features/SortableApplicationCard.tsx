@@ -9,10 +9,20 @@ import { deleteApplication, updateApplication } from "@/lib/actions/career.actio
 export function SortableApplicationCard({ app }: { app: any }) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    company: app.company,
-    role: app.role,
+    company: app.company || "",
+    role: app.role || "",
     salary: app.salary || "",
     notes: app.notes || "",
+    recruiterName: app.recruiterName || "",
+    recruiterEmail: app.recruiterEmail || "",
+    companyUrl: app.companyUrl || "",
+    location: app.location || "",
+    workModel: app.workModel || "remote",
+    interviews: app.interviews || 0,
+    feedback: app.feedback || "",
+    offerDetails: app.offerDetails || "",
+    benefits: app.benefits?.join(", ") || "",
+    referral: app.referral || "",
     deadline: app.deadline ? new Date(app.deadline).toISOString().substring(0, 10) : ""
   });
 
@@ -49,14 +59,39 @@ export function SortableApplicationCard({ app }: { app: any }) {
             <input value={formData.company} onChange={e => setFormData({ ...formData, company: e.target.value })} className="bg-shell-surface border border-pink-900 text-shell-text px-2 py-1 outline-none font-bold uppercase w-1/2 text-sm" placeholder="COMPANY" />
             <input value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} className="bg-shell-surface border border-pink-900 text-shell-text px-2 py-1 outline-none font-bold w-1/2 text-sm" placeholder="ROLE" />
           </div>
-          
-          <label className="text-[10px] text-shell-muted font-bold uppercase tracking-widest mt-1">Salary & Deadline</label>
+
           <div className="flex gap-2">
-             <input value={formData.salary} onChange={e => setFormData({ ...formData, salary: e.target.value })} className="bg-shell-surface border border-pink-900 text-shell-text px-2 py-1 outline-none w-1/2 text-sm" placeholder="Salary (e.g. 15 LPA)" />
-             <input type="date" value={formData.deadline} onChange={e => setFormData({ ...formData, deadline: e.target.value })} className="bg-shell-surface border border-pink-900 text-shell-text px-2 py-1 outline-none w-1/2 text-sm" />
+            <input value={formData.companyUrl} onChange={e => setFormData({ ...formData, companyUrl: e.target.value })} className="bg-shell-surface border border-pink-900 text-shell-text px-2 py-1 outline-none w-1/2 text-sm" placeholder="Company URL" />
+            <input value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} className="bg-shell-surface border border-pink-900 text-shell-text px-2 py-1 outline-none w-1/2 text-sm" placeholder="Location" />
+          </div>
+          
+          <label className="text-[10px] text-shell-muted font-bold uppercase tracking-widest mt-1">Salary, Deadline, Work Model</label>
+          <div className="flex gap-2">
+             <input value={formData.salary} onChange={e => setFormData({ ...formData, salary: e.target.value })} className="bg-shell-surface border border-pink-900 text-shell-text px-2 py-1 outline-none w-1/3 text-sm" placeholder="Salary" />
+             <input type="date" value={formData.deadline} onChange={e => setFormData({ ...formData, deadline: e.target.value })} className="bg-shell-surface border border-pink-900 text-shell-text px-2 py-1 outline-none w-1/3 text-sm" />
+             <select value={formData.workModel} onChange={e => setFormData({ ...formData, workModel: e.target.value })} className="bg-shell-surface border border-pink-900 text-shell-text px-2 py-1 outline-none w-1/3 text-sm">
+                <option value="remote">Remote</option>
+                <option value="hybrid">Hybrid</option>
+                <option value="onsite">On-site</option>
+             </select>
           </div>
 
-          <label className="text-[10px] text-shell-muted font-bold uppercase tracking-widest mt-1">Notes</label>
+          <label className="text-[10px] text-shell-muted font-bold uppercase tracking-widest mt-1">Recruiter & Interviews</label>
+          <div className="flex gap-2">
+            <input value={formData.recruiterName} onChange={e => setFormData({ ...formData, recruiterName: e.target.value })} className="bg-shell-surface border border-pink-900 text-shell-text px-2 py-1 outline-none w-1/3 text-sm" placeholder="Recruiter Name" />
+            <input value={formData.recruiterEmail} onChange={e => setFormData({ ...formData, recruiterEmail: e.target.value })} className="bg-shell-surface border border-pink-900 text-shell-text px-2 py-1 outline-none w-1/3 text-sm" placeholder="Recruiter Email" />
+            <input type="number" value={formData.interviews} onChange={e => setFormData({ ...formData, interviews: Number(e.target.value) })} className="bg-shell-surface border border-pink-900 text-shell-text px-2 py-1 outline-none w-1/3 text-sm" placeholder="# Interviews" />
+          </div>
+
+          <label className="text-[10px] text-shell-muted font-bold uppercase tracking-widest mt-1">Feedback, Referral, Benefits</label>
+          <div className="flex gap-2">
+             <input value={formData.feedback} onChange={e => setFormData({ ...formData, feedback: e.target.value })} className="bg-shell-surface border border-pink-900 text-shell-text px-2 py-1 outline-none w-1/3 text-sm" placeholder="Feedback..." />
+             <input value={formData.referral} onChange={e => setFormData({ ...formData, referral: e.target.value })} className="bg-shell-surface border border-pink-900 text-shell-text px-2 py-1 outline-none w-1/3 text-sm" placeholder="Referral" />
+             <input value={formData.benefits} onChange={e => setFormData({ ...formData, benefits: e.target.value })} className="bg-shell-surface border border-pink-900 text-shell-text px-2 py-1 outline-none w-1/3 text-sm" placeholder="Benefits CSV" />
+          </div>
+
+          <label className="text-[10px] text-shell-muted font-bold uppercase tracking-widest mt-1">Offer Details & Notes</label>
+          <input value={formData.offerDetails} onChange={e => setFormData({ ...formData, offerDetails: e.target.value })} className="bg-shell-surface border border-pink-900 text-shell-text px-2 py-1 outline-none w-full text-sm mb-1" placeholder="Offer Details..." />
           <textarea value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} className="bg-shell-surface border border-pink-900 text-shell-text px-2 py-1 outline-none w-full text-sm min-h-[60px]" placeholder="Interview notes, links..." />
         </div>
         <div className="flex justify-end gap-2 pt-2 border-t border-white/5">
@@ -86,11 +121,18 @@ export function SortableApplicationCard({ app }: { app: any }) {
           <Briefcase className="w-3 h-3 min-w-[12px]" /> {app.role}
         </p>
 
-        {(app.salary || app.deadline || app.notes) && (
+        {(app.salary || app.deadline || app.notes || app.location || app.interviews > 0 || app.workModel) && (
           <div className="mt-3 pt-3 border-t border-white/5 space-y-1">
+            <div className="flex flex-wrap gap-2 mb-2">
+              {app.location && <span className="text-[9px] uppercase tracking-widest bg-shell-surface px-1 border border-pink-900">{app.location}</span>}
+              {app.workModel && <span className="text-[9px] uppercase tracking-widest bg-shell-surface px-1 border border-pink-900">{app.workModel}</span>}
+              {app.interviews > 0 && <span className="text-[9px] uppercase tracking-widest bg-yellow-900/30 text-yellow-500 px-1 border border-yellow-900/50">Int: {app.interviews}</span>}
+            </div>
             {app.salary && <p className="text-xs text-green-400 flex items-center gap-1"><DollarSign className="w-3 h-3"/> {app.salary}</p>}
             {app.deadline && <p className="text-xs text-red-400 flex items-center gap-1"><Calendar className="w-3 h-3"/> Due: {new Date(app.deadline).toLocaleDateString()}</p>}
+            {app.recruiterName && <p className="text-[10px] text-shell-muted flex items-center gap-1 mt-1">Recruiter: {app.recruiterName}</p>}
             {app.notes && <p className="text-xs text-slate-400 flex items-start gap-1 mt-1"><FileText className="w-3 h-3 min-w-[12px] mt-[2px]"/> <span className="line-clamp-2">{app.notes}</span></p>}
+            {app.offerDetails && <p className="text-xs text-green-300 bg-green-900/20 p-1 border border-green-900/50 flex items-start gap-1 mt-1"><span className="line-clamp-2">Offer: {app.offerDetails}</span></p>}
           </div>
         )}
 
