@@ -49,7 +49,7 @@ function SortableItem({ id, children }: SortableItemProps) {
       <div 
         {...attributes} 
         {...listeners} 
-        className="absolute left-0 top-1/2 -translate-y-1/2 -ml-6 cursor-grab active:cursor-grabbing text-shell-muted hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity p-2 z-20"
+        className="absolute left-0 top-1/2 -translate-y-1/2 -ml-6 cursor-grab active:cursor-grabbing text-shell-muted hover:text-blue-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity p-2 z-20"
       >
         <GripVertical className="w-5 h-5" />
       </div>
