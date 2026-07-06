@@ -127,7 +127,7 @@ function SortableItem({ item }: { item: any }) {
             <h3 className="font-bold text-lg text-shell-text group-hover:text-green-300 truncate">{item.title}</h3>
             {item.platform && <span className="px-2 py-0.5 bg-green-900/30 text-green-500 text-[10px] uppercase font-bold border border-green-900/50 whitespace-nowrap">{item.platform}</span>}
           </div>
-          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
             <button onClick={() => setIsEditing(true)} className="text-slate-500 hover:text-blue-500 transition"><Edit2 className="w-4 h-4" /></button>
             <form action={async () => { await deleteLearning(item._id); }}>
               <button type="submit" className="text-slate-500 hover:text-red-500 transition"><Trash2 className="w-4 h-4" /></button>
