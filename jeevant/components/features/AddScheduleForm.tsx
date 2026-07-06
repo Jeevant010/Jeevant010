@@ -18,9 +18,21 @@ function SubmitButton() {
   );
 }
 
+import { useState } from "react";
+
 export default function AddScheduleForm() {
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
   return (
-    <form action={createSchedule} className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 mb-6 grid grid-cols-1 md:grid-cols-6 gap-3">
+    <form action={createSchedule} className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 mb-6 relative">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-xs font-bold uppercase tracking-widest text-shell-muted">Create Event</h3>
+        <button type="button" onClick={() => setShowAdvanced(!showAdvanced)} className="text-xs text-blue-500 hover:text-blue-400">
+          {showAdvanced ? "Basic Mode" : "Advanced Mode"}
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
       <div className="md:col-span-2 space-y-1">
         <label htmlFor="sch-title" className="text-xs text-shell-muted ml-1">Title</label>
         <input id="sch-title" name="title" required placeholder="Meeting / Focus block" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text" />
@@ -81,8 +93,48 @@ export default function AddScheduleForm() {
         Mark as recurring
       </label>
 
-      <div className="md:col-span-6 flex justify-end">
+      {showAdvanced && (
+        <div className="md:col-span-6 border-t border-slate-800 pt-4 mt-2 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+             <div className="space-y-1">
+               <label className="text-xs text-shell-muted ml-1">Location</label>
+               <input name="location" placeholder="Office / Room" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text" />
+             </div>
+             <div className="space-y-1">
+               <label className="text-xs text-shell-muted ml-1">Meeting Link</label>
+               <input name="meetingLink" placeholder="Zoom/Meet URL" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text" />
+             </div>
+             <div className="space-y-1">
+               <label className="text-xs text-shell-muted ml-1">Priority</label>
+               <select name="priority" defaultValue="medium" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text">
+                 <option value="low">Low</option>
+                 <option value="medium">Medium</option>
+                 <option value="high">High</option>
+               </select>
+             </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+             <div className="space-y-1">
+               <label className="text-xs text-shell-muted ml-1">Attendees (CSV)</label>
+               <input name="attendees" placeholder="john@doe.com, team" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text" />
+             </div>
+             <div className="space-y-1">
+               <label className="text-xs text-shell-muted ml-1">Reminder Alert (Minutes before)</label>
+               <input name="reminderMinutes" type="number" placeholder="15" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text" />
+             </div>
+          </div>
+
+          <div className="space-y-1">
+             <label className="text-xs text-shell-muted ml-1">Agenda / Outline</label>
+             <textarea name="agenda" placeholder="Agenda items..." className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text h-20 resize-none" />
+          </div>
+        </div>
+      )}
+
+      <div className="md:col-span-6 flex justify-end mt-4">
         <SubmitButton />
+      </div>
       </div>
     </form>
   );
