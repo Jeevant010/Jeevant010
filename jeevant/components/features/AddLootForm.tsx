@@ -24,9 +24,13 @@ export function AddLootForm() {
       <h3 className="text-sm font-bold text-shell-muted uppercase tracking-widest">Add New Loot (Achievement/Certificate)</h3>
       
       <div className="grid gap-3 md:grid-cols-6">
-        <div className="md:col-span-2 space-y-1">
+        <div className="md:col-span-1 space-y-1">
           <label className="text-xs text-shell-muted ml-1">Title *</label>
           <input name="title" required placeholder="e.g. AWS Solutions Architect" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-amber-500 outline-none transition" />
+        </div>
+        <div className="md:col-span-1 space-y-1">
+          <label className="text-xs text-shell-muted ml-1">URL Slug</label>
+          <input name="slug" placeholder="e.g. aws-solutions-architect" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-amber-500 outline-none transition" />
         </div>
         <div className="md:col-span-2 space-y-1">
           <label className="text-xs text-shell-muted ml-1">Platform / Category</label>
@@ -91,6 +95,51 @@ export function AddLootForm() {
         <div className="space-y-1">
           <label className="text-xs text-shell-muted ml-1">Tags (comma separated)</label>
           <textarea name="tags" placeholder="Cloud Computing, Architecture..." className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-amber-500 outline-none transition h-20 resize-y" />
+        </div>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1">
+          <label className="text-xs text-shell-muted ml-1">Impact (Markdown)</label>
+          <textarea name="impact" placeholder="How did this impact you or your organization?" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-amber-500 outline-none transition h-20 resize-y" />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs text-shell-muted ml-1">Lessons Learned (Markdown)</label>
+          <textarea name="lessonsLearned" placeholder="What did you learn?" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-amber-500 outline-none transition h-20 resize-y" />
+        </div>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1">
+          <label className="text-xs text-shell-muted ml-1">Skills (comma separated)</label>
+          <textarea name="skills" placeholder="React, Node.js..." className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-amber-500 outline-none transition h-12 resize-y" />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs text-shell-muted ml-1">Tech Stack (comma separated)</label>
+          <textarea name="techStack" placeholder="TypeScript, Next.js..." className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-amber-500 outline-none transition h-12 resize-y" />
+        </div>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1">
+          <label className="text-xs text-shell-muted ml-1">Github Link</label>
+          <input name="githubLink" placeholder="https://github.com/..." className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-amber-500 outline-none transition" />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs text-shell-muted ml-1">Live Link</label>
+          <input name="liveLink" placeholder="https://..." className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-amber-500 outline-none transition" />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs text-shell-muted ml-1">Cover Image URL</label>
+          <input name="coverImage" placeholder="https://..." className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-amber-500 outline-none transition" />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs text-shell-muted ml-1">Arch Diagram URL</label>
+          <input name="architectureDiagram" placeholder="https://..." className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-amber-500 outline-none transition" />
+        </div>
+        <div className="md:col-span-2 space-y-1">
+          <label className="text-xs text-shell-muted ml-1">Gallery URLs (comma separated)</label>
+          <input name="gallery" placeholder="https://..., https://..." className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-amber-500 outline-none transition" />
         </div>
       </div>
       
