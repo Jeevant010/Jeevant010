@@ -93,9 +93,9 @@ export function SortableSnippetCard({ item }: { item: any }) {
   }
 
   return (
-    <div ref={setNodeRef} style={style} className="group bg-[#221e1a] border-2 border-[#403530] hover:border-[#e0d0c0] transition-colors p-1 relative overflow-hidden h-64 flex flex-col">
+    <div ref={setNodeRef} style={style} className="group bg-[#221e1a] border-2 border-[#403530] hover:border-[#e0d0c0] transition-colors p-1 relative overflow-hidden h-[380px] flex flex-col custom-scrollbar overflow-y-auto">
       {/* Header */}
-      <div className="bg-[#302822] p-2 flex justify-between items-center border-b border-[#403530] relative z-20">
+      <div className="bg-[#302822] p-2 flex justify-between items-center border-b border-[#403530] relative z-20 shrink-0">
         <div className="flex items-center gap-2 max-w-[80%]">
           <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-[#8a7560] hover:text-[#e0d0c0]">
             <GripHorizontal className="w-4 h-4" />
@@ -106,17 +106,48 @@ export function SortableSnippetCard({ item }: { item: any }) {
       </div>
 
       {/* Code Preview */}
-      <div className="flex-1 bg-[#100e0c] p-3 overflow-hidden relative">
-         <pre className="text-[10px] font-mono text-green-500/80 leading-tight whitespace-pre-wrap break-all">
-           {item.code.substring(0, 300)}...
+      <div className="bg-[#100e0c] p-3 overflow-hidden relative shrink-0 border-b border-[#403530]">
+         <pre className="text-[10px] font-mono text-green-500/80 leading-tight whitespace-pre-wrap break-all h-28 overflow-y-auto custom-scrollbar">
+           {item.code}
          </pre>
-         <div className="absolute inset-0 bg-gradient-to-t from-[#100e0c] via-transparent to-transparent" />
          
-         <div className="absolute bottom-2 left-2 right-2 flex flex-wrap gap-1 z-10">
+         <div className="flex flex-wrap gap-1 mt-2 relative z-10">
            {item.complexity && <span className="text-[8px] uppercase tracking-widest bg-[#221e1a] border border-[#403530] text-[#8a7560] px-1">{item.complexity}</span>}
            {item.estimatedTimeSaved && <span className="text-[8px] uppercase tracking-widest bg-green-900/30 border border-green-900/50 text-green-400 px-1">-{item.estimatedTimeSaved}m saved</span>}
            {item.rating && <span className="text-[8px] uppercase tracking-widest bg-yellow-900/30 border border-yellow-900/50 text-yellow-500 px-1">★ {item.rating}</span>}
          </div>
+      </div>
+
+      {/* Details (New fields) */}
+      <div className="p-3 flex-1 flex flex-col gap-2 bg-[#1c1815]">
+        {item.description && (
+          <p className="text-[10px] text-[#8a7560] mb-1">{item.description}</p>
+        )}
+        
+        <div className="grid grid-cols-2 gap-2 text-[9px] font-mono text-[#8a7560]">
+          {item.category && <div><span className="font-bold text-[#e0d0c0]">CAT:</span> {item.category}</div>}
+          {item.author && <div><span className="font-bold text-[#e0d0c0]">AUTHOR:</span> {item.author}</div>}
+        </div>
+        
+        {item.sourceUrl && (
+          <div className="text-[9px] font-mono text-[#8a7560] truncate">
+            <span className="font-bold text-[#e0d0c0]">SRC:</span> <a href={item.sourceUrl} target="_blank" rel="noopener" className="hover:text-[#e0d0c0] underline">{item.sourceUrl}</a>
+          </div>
+        )}
+        
+        {item.dependencies?.length > 0 && (
+          <div className="text-[9px] font-mono text-[#8a7560]">
+            <span className="font-bold text-[#e0d0c0]">DEPS:</span> {item.dependencies.join(", ")}
+          </div>
+        )}
+        
+        {item.tags?.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-auto pt-2">
+            {item.tags.map((tag: string, i: number) => (
+              <span key={i} className="text-[9px] uppercase tracking-widest bg-[#302822] text-[#8a7560] px-1">#{tag}</span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Hover Overlay Action */}
