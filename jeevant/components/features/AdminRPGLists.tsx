@@ -168,9 +168,13 @@ function LootItem({ item }: { item: any }) {
           </div>
           
           <div className="grid grid-cols-2 gap-3">
-            <div className="col-span-2">
+            <div className="col-span-1">
               <label className="text-xs text-blue-400/70 uppercase tracking-widest block mb-1">Title *</label>
               <input name="title" defaultValue={item.title} className="w-full bg-[#2a2420] text-[#e8dcc5] p-2 text-sm border border-[#4a3c30] rounded" required />
+            </div>
+            <div className="col-span-1">
+              <label className="text-xs text-blue-400/70 uppercase tracking-widest block mb-1">URL Slug</label>
+              <input name="slug" defaultValue={item.slug} className="w-full bg-[#2a2420] text-[#e8dcc5] p-2 text-sm border border-[#4a3c30] rounded" placeholder="my-achievement" />
             </div>
             <div>
               <label className="text-xs text-blue-400/70 uppercase tracking-widest block mb-1">Platform / Category</label>
@@ -225,6 +229,28 @@ function LootItem({ item }: { item: any }) {
               <label className="text-xs text-blue-400/70 uppercase tracking-widest block mb-1">Tags (comma separated)</label>
               <input name="tags" defaultValue={item.tags?.join(", ")} className="w-full bg-[#2a2420] text-[#e8dcc5] p-2 text-sm border border-[#4a3c30] rounded" />
             </div>
+            
+            <div>
+              <label className="text-xs text-blue-400/70 uppercase tracking-widest block mb-1">Github Link</label>
+              <input name="githubLink" defaultValue={item.githubLink} className="w-full bg-[#2a2420] text-[#e8dcc5] p-2 text-sm border border-[#4a3c30] rounded" />
+            </div>
+            <div>
+              <label className="text-xs text-blue-400/70 uppercase tracking-widest block mb-1">Live Link</label>
+              <input name="liveLink" defaultValue={item.liveLink} className="w-full bg-[#2a2420] text-[#e8dcc5] p-2 text-sm border border-[#4a3c30] rounded" />
+            </div>
+            <div>
+              <label className="text-xs text-blue-400/70 uppercase tracking-widest block mb-1">Cover Image URL</label>
+              <input name="coverImage" defaultValue={item.coverImage} className="w-full bg-[#2a2420] text-[#e8dcc5] p-2 text-sm border border-[#4a3c30] rounded" />
+            </div>
+            <div>
+              <label className="text-xs text-blue-400/70 uppercase tracking-widest block mb-1">Arch Diagram URL</label>
+              <input name="architectureDiagram" defaultValue={item.architectureDiagram} className="w-full bg-[#2a2420] text-[#e8dcc5] p-2 text-sm border border-[#4a3c30] rounded" />
+            </div>
+            <div className="col-span-2">
+              <label className="text-xs text-blue-400/70 uppercase tracking-widest block mb-1">Gallery URLs (comma separated)</label>
+              <input name="gallery" defaultValue={item.gallery?.join(", ")} className="w-full bg-[#2a2420] text-[#e8dcc5] p-2 text-sm border border-[#4a3c30] rounded" />
+            </div>
+            
             <div className="flex items-center gap-2 mt-6">
               <input type="checkbox" name="isFeatured" defaultChecked={item.isFeatured} className="w-4 h-4 bg-[#2a2420] border-[#4a3c30]" />
               <label className="text-xs text-blue-400/70 uppercase tracking-widest">Featured</label>
@@ -232,12 +258,27 @@ function LootItem({ item }: { item: any }) {
           </div>
           
           <div>
-            <label className="text-xs text-blue-400/70 uppercase tracking-widest block mb-1">Description</label>
-            <textarea name="description" defaultValue={item.description} className="w-full bg-[#2a2420] text-[#e8dcc5] p-2 text-sm h-20 border border-[#4a3c30] resize-y rounded" />
+            <label className="text-xs text-blue-400/70 uppercase tracking-widest block mb-1">Description (Markdown)</label>
+            <textarea name="description" defaultValue={item.description} className="w-full bg-[#2a2420] text-[#e8dcc5] p-2 text-sm h-16 border border-[#4a3c30] resize-y rounded" />
           </div>
           <div>
-            <label className="text-xs text-blue-400/70 uppercase tracking-widest block mb-1">Skills (comma separated)</label>
-            <textarea name="skills" defaultValue={item.skills?.join(", ")} className="w-full bg-[#2a2420] text-[#e8dcc5] p-2 text-sm h-12 border border-[#4a3c30] resize-y rounded" />
+            <label className="text-xs text-blue-400/70 uppercase tracking-widest block mb-1">Impact (Markdown)</label>
+            <textarea name="impact" defaultValue={item.impact} className="w-full bg-[#2a2420] text-[#e8dcc5] p-2 text-sm h-16 border border-[#4a3c30] resize-y rounded" />
+          </div>
+          <div>
+            <label className="text-xs text-blue-400/70 uppercase tracking-widest block mb-1">Lessons Learned (Markdown)</label>
+            <textarea name="lessonsLearned" defaultValue={item.lessonsLearned} className="w-full bg-[#2a2420] text-[#e8dcc5] p-2 text-sm h-16 border border-[#4a3c30] resize-y rounded" />
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-blue-400/70 uppercase tracking-widest block mb-1">Skills (comma separated)</label>
+              <textarea name="skills" defaultValue={item.skills?.join(", ")} className="w-full bg-[#2a2420] text-[#e8dcc5] p-2 text-sm h-12 border border-[#4a3c30] resize-y rounded" />
+            </div>
+            <div>
+              <label className="text-xs text-blue-400/70 uppercase tracking-widest block mb-1">Tech Stack (comma separated)</label>
+              <textarea name="techStack" defaultValue={item.techStack?.join(", ")} className="w-full bg-[#2a2420] text-[#e8dcc5] p-2 text-sm h-12 border border-[#4a3c30] resize-y rounded" />
+            </div>
           </div>
           
           <button type="submit" className="bg-blue-500 text-black px-4 py-2 text-xs font-bold uppercase flex items-center gap-2 rounded"><Save className="w-3 h-3"/> Save</button>
