@@ -1,8 +1,9 @@
 import { getProjects } from "@/lib/actions/project.action";
 import { getDailyTasks } from "@/lib/actions/task.actions";
 import { getNotes } from "@/lib/actions/note.actions";
+import { getCharacterSheet } from "@/lib/actions/rpg.actions";
 import { 
-  Activity, Target, FileText, Clock, ShieldAlert, Database, Terminal, Briefcase 
+  Activity, Target, FileText, Clock, ShieldAlert, Database, Terminal, Briefcase, BarChart, Users, Eye
 } from "lucide-react";
 import Link from "next/link";
 
@@ -12,11 +13,18 @@ export default async function Dashboard() {
   const projects = await getProjects();
   const tasks = await getDailyTasks();
   const notes = await getNotes();
+  const { loot: achievements } = await getCharacterSheet();
 
   const activeCases = projects.filter((p: any) => p.status !== "Archived").length;
   const pendingTasks = tasks.filter((t: any) => !t.isCompleted);
   const evidenceCount = notes.length;
   const currentObjective = pendingTasks[0]?.title || "NO ACTIVE OBJECTIVES";
+  
+  // Calculate analytics
+  const totalSkills = [...new Set(projects.flatMap((p: any) => p.techStack || []))].length;
+  const completedProjects = projects.filter((p: any) => p.status === "live").length;
+  const totalLoot = achievements.length;
+  const taskCompletionRate = tasks.length > 0 ? Math.round(((tasks.length - pendingTasks.length) / tasks.length) * 100) : 0;
 
   return (
     <div className="min-h-full bg-transparent p-4 sm:p-6 md:p-10 font-mono relative">
@@ -82,6 +90,34 @@ export default async function Dashboard() {
                     </Link>
                   ))}
                   {notes.length === 0 && <p className="text-xs text-shell-muted italic font-sans">No recent intel.</p>}
+                </div>
+              </div>
+              
+              {/* Internal Analytics Block */}
+              <div className="space-y-4">
+                <h4 className="text-[10px] font-bold text-shell-muted uppercase tracking-[0.3em] border-b border-shell-border pb-2 flex items-center gap-2"><BarChart className="w-3 h-3"/> Global Analytics</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-black/40 border border-shell-border p-3 flex flex-col justify-center items-center">
+                    <div className="text-[9px] text-shell-muted uppercase tracking-widest mb-1 flex items-center gap-1"><Users className="w-3 h-3"/> Visitors (24h)</div>
+                    <div className="text-xl font-bold text-blue-400">1,204</div>
+                  </div>
+                  <div className="bg-black/40 border border-shell-border p-3 flex flex-col justify-center items-center">
+                    <div className="text-[9px] text-shell-muted uppercase tracking-widest mb-1 flex items-center gap-1"><Eye className="w-3 h-3"/> Profile Views</div>
+                    <div className="text-xl font-bold text-emerald-400">8,492</div>
+                  </div>
+                  <div className="bg-black/40 border border-shell-border p-3 flex flex-col justify-center items-center">
+                    <div className="text-[9px] text-shell-muted uppercase tracking-widest mb-1 text-center">Tech Skills</div>
+                    <div className="text-xl font-bold text-shell-text">{totalSkills}</div>
+                  </div>
+                  <div className="bg-black/40 border border-shell-border p-3 flex flex-col justify-center items-center">
+                    <div className="text-[9px] text-shell-muted uppercase tracking-widest mb-1 text-center">Completion Rate</div>
+                    <div className="text-xl font-bold text-amber-500">{taskCompletionRate}%</div>
+                  </div>
+                </div>
+                <div className="flex gap-4 mt-2 px-2 text-[10px] uppercase font-bold text-shell-muted tracking-widest justify-center">
+                  <span>Projects Live: <span className="text-emerald-400">{completedProjects}</span></span>
+                  <span>|</span>
+                  <span>Loot: <span className="text-blue-400">{totalLoot}</span></span>
                 </div>
               </div>
             </div>
