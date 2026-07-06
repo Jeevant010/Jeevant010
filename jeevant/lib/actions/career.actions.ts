@@ -31,7 +31,8 @@ export async function createApplication(formData: FormData) {
     offerDetails: formData.get("offerDetails"),
     referral: formData.get("referral"),
     deadline: formData.get("deadline") ? new Date(String(formData.get("deadline"))) : undefined,
-    benefits
+    benefits,
+    order: formData.get("order") ? Number(formData.get("order")) : 0
   });
   revalidatePath("/career");
 }
