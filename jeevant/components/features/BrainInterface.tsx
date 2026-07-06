@@ -2,12 +2,13 @@
 
 import { useState, useRef, useEffect } from "react";
 import { createNote, deleteNote, updateNote, toggleNoteVisibility } from "@/lib/actions/note.actions";
-import { Send, Hash, Search, Trash2, Edit2, Globe, Lock, Save, X } from "lucide-react";
+import { Send, Hash, Search, Trash2, Edit2, Globe, Lock, Save, X, ChevronDown, ChevronUp } from "lucide-react";
 
 export default function BrainInterface({ initialNotes }: { initialNotes: any[] }) {
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -29,7 +30,7 @@ export default function BrainInterface({ initialNotes }: { initialNotes: any[] }
   }, [filteredNotes.length, editingId]);
 
   return (
-    <div className="flex h-[calc(100vh-6rem)] -m-8 bg-shell-bg overflow-hidden border-t border-shell-border font-mono">
+    <div className="flex h-full w-full bg-shell-bg overflow-hidden font-mono">
       
       {/* SIDEBAR: Tags / Chat History */}
       <div className="w-64 border-r border-shell-border bg-shell-surface/50 hidden md:flex flex-col">
@@ -97,39 +98,54 @@ export default function BrainInterface({ initialNotes }: { initialNotes: any[] }
         {/* INPUT DOCK */}
         <div className="p-4 shrink-0 bg-shell-surface border-t border-shell-border">
           <form action={createNote} className="max-w-4xl mx-auto flex flex-col gap-3">
-            <div className="flex-1 bg-shell-bg border border-shell-border focus-within:border-shell-accent transition-colors p-2 flex flex-col gap-2">
-               <div className="grid grid-cols-2 gap-2">
-                 <input name="title" placeholder="Log Title..." required className="bg-transparent border-b border-shell-border/50 text-shell-text text-sm font-bold px-2 py-1 outline-none" />
-                 <input name="category" placeholder="Category" className="bg-transparent border-b border-shell-border/50 text-shell-text text-sm px-2 py-1 outline-none" />
-               </div>
-               <textarea name="content" placeholder="Type your thoughts, code, or research here (Markdown)..." required className="bg-transparent text-sm text-shell-text placeholder-shell-muted px-2 py-1 outline-none resize-none h-16 custom-scrollbar w-full" />
-               <textarea name="summary" placeholder="Summary..." className="bg-transparent text-sm text-shell-text placeholder-shell-muted px-2 py-1 outline-none resize-none h-10 custom-scrollbar w-full border-b border-shell-border/50" />
+            <div className="flex-1 bg-shell-bg border border-shell-border focus-within:border-shell-accent transition-colors p-3 flex flex-col gap-3">
                
-               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 px-2">
-                 <input name="author" placeholder="Author/Source" className="bg-transparent text-xs text-shell-muted outline-none border-b border-shell-border/30" />
-                 <input name="sourceUrl" placeholder="Source URL" className="bg-transparent text-xs text-shell-muted outline-none border-b border-shell-border/30" />
-                 <input name="rating" type="number" min="1" max="10" placeholder="Rating (1-10)" className="bg-transparent text-xs text-shell-muted outline-none border-b border-shell-border/30" />
-                 <input name="coverImage" placeholder="Cover Image URL" className="bg-transparent text-xs text-shell-muted outline-none border-b border-shell-border/30" />
+               <div className="flex justify-between items-center mb-1">
+                 <input name="title" placeholder="Log Title..." required className="flex-1 bg-transparent border-b border-shell-border/50 text-shell-text text-lg font-bold px-2 py-1 outline-none focus:border-shell-accent" />
+                 <button 
+                   type="button" 
+                   onClick={() => setShowAdvanced(!showAdvanced)}
+                   className="text-[10px] uppercase tracking-widest text-shell-muted hover:text-shell-text ml-4 flex items-center gap-1"
+                 >
+                   {showAdvanced ? <><ChevronUp className="w-3 h-3"/> Simple</> : <><ChevronDown className="w-3 h-3"/> Advanced</>}
+                 </button>
                </div>
 
-               <div className="flex justify-between items-center px-2 mt-2">
-                 <div className="flex flex-col gap-1 w-1/2">
-                   <input name="tags" placeholder="tags, comma, separated" defaultValue={activeTag ? activeTag : ""} className="bg-transparent text-xs text-shell-accent outline-none w-full" />
-                   <input name="references" placeholder="References (CSV)" className="bg-transparent text-xs text-shell-muted outline-none w-full" />
-                 </div>
-                 <div className="flex flex-col gap-2 items-end">
-                   <div className="flex gap-2">
-                     <select name="status" className="bg-shell-bg text-xs text-shell-muted border border-shell-border outline-none p-1">
-                       <option value="draft">Draft</option>
-                       <option value="review">Review</option>
-                       <option value="published">Published</option>
-                     </select>
-                     <select name="visibility" className="bg-shell-bg text-xs text-shell-muted border border-shell-border outline-none p-1">
-                       <option value="private">Private</option>
-                       <option value="public">Public</option>
-                     </select>
+               <textarea name="content" placeholder="Type your thoughts, code, or research here (Markdown)..." required className="bg-transparent text-sm text-shell-text placeholder-shell-muted px-2 py-2 outline-none resize-none h-32 custom-scrollbar w-full border-b border-shell-border/50 focus:border-shell-accent" />
+               
+               {showAdvanced && (
+                 <div className="space-y-3 pt-2 animate-in fade-in slide-in-from-top-2">
+                   <div className="grid grid-cols-2 gap-2">
+                     <input name="category" placeholder="Category" className="bg-transparent border-b border-shell-border/50 text-shell-text text-sm px-2 py-1 outline-none" />
+                     <input name="author" placeholder="Author/Source" className="bg-transparent text-xs text-shell-muted outline-none border-b border-shell-border/30 px-2 py-1" />
                    </div>
-                   <button type="submit" className="bg-shell-text text-shell-bg px-6 py-1 font-bold hover:bg-shell-accent transition-colors flex items-center justify-center text-sm w-full">
+                   
+                   <textarea name="summary" placeholder="Summary..." className="bg-transparent text-sm text-shell-text placeholder-shell-muted px-2 py-1 outline-none resize-none h-16 custom-scrollbar w-full border-b border-shell-border/50" />
+                   
+                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2 px-2">
+                     <input name="sourceUrl" placeholder="Source URL" className="bg-transparent text-xs text-shell-muted outline-none border-b border-shell-border/30 py-1" />
+                     <input name="rating" type="number" min="1" max="10" placeholder="Rating (1-10)" className="bg-transparent text-xs text-shell-muted outline-none border-b border-shell-border/30 py-1" />
+                     <input name="coverImage" placeholder="Cover Image URL" className="bg-transparent text-xs text-shell-muted outline-none border-b border-shell-border/30 py-1" />
+                   </div>
+                 </div>
+               )}
+
+               <div className="flex flex-col md:flex-row justify-between items-end md:items-center px-2 mt-2 gap-4">
+                 <div className="flex flex-col gap-2 w-full md:w-1/2">
+                   <input name="tags" placeholder="tags, comma, separated" defaultValue={activeTag ? activeTag : ""} className="bg-transparent text-xs text-shell-accent outline-none w-full border-b border-shell-border/50 py-1 focus:border-shell-accent" />
+                   {showAdvanced && <input name="references" placeholder="References (CSV)" className="bg-transparent text-xs text-shell-muted outline-none w-full border-b border-shell-border/50 py-1" />}
+                 </div>
+                 <div className="flex flex-wrap gap-2 items-center justify-end w-full md:w-auto">
+                   <select name="status" className="bg-shell-bg text-xs text-shell-muted border border-shell-border outline-none p-1.5 focus:border-shell-accent">
+                     <option value="draft">Draft</option>
+                     <option value="review">Review</option>
+                     <option value="published">Published</option>
+                   </select>
+                   <select name="visibility" className="bg-shell-bg text-xs text-shell-muted border border-shell-border outline-none p-1.5 focus:border-shell-accent">
+                     <option value="private">Private</option>
+                     <option value="public">Public</option>
+                   </select>
+                   <button type="submit" className="bg-shell-text text-shell-bg px-6 py-1.5 font-bold hover:bg-shell-accent transition-colors flex items-center justify-center text-sm w-full md:w-auto mt-2 md:mt-0">
                      <Send className="w-4 h-4 mr-2" /> SUBMIT LOG
                    </button>
                  </div>
