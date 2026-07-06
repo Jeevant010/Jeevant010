@@ -70,22 +70,67 @@ export default async function LibraryPage() {
                 
                 return (
                   <div key={item._id} className={cn("border bg-shell-bg p-5 relative overflow-hidden group transition-all", theme.borderHover, theme.border)}>
-                    <div className={cn("absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-r to-transparent", theme.text.replace("text-", "from-").replace("500", "500/5"))} />
+                    <div className={cn("absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-r to-transparent pointer-events-none", theme.text.replace("text-", "from-").replace("500", "500/5"))} />
                     
                     <div className="flex flex-wrap items-start justify-between gap-2 relative z-10">
                       <div>
-                        <div className={cn("text-sm sm:text-base font-bold uppercase transition-colors text-shell-text", theme.textHover)}>{item.title}</div>
-                        <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.3em] text-shell-muted">{item.platform || "Reference"}</div>
+                        <div className={cn("text-sm sm:text-base font-bold uppercase transition-colors text-shell-text", theme.textHover)}>
+                          {item.url ? <a href={item.url} target="_blank" rel="noopener" className="hover:underline">{item.title}</a> : item.title}
+                        </div>
+                        <div className="mt-1 flex items-center gap-2">
+                           <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-shell-muted">{item.platform || "Reference"}</span>
+                           {item.instructor && <span className={cn("text-[10px] uppercase tracking-widest font-bold", theme.text)}>// {item.instructor}</span>}
+                        </div>
                       </div>
                       <span className={cn("border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.25em] bg-shell-surface mt-2", theme.text, theme.border)}>
-                        {item.status}
+                        {item.totalModules && item.completedModules >= item.totalModules ? "COMPLETED" : "IN PROGRESS"}
                       </span>
                     </div>
-                    <div className="mt-6 h-1.5 w-full bg-shell-surface border border-shell-border relative z-10 overflow-hidden">
+                    
+                    <div className="mt-4 flex justify-between items-center text-[10px] uppercase tracking-widest font-bold relative z-10">
+                       <span className="text-shell-muted">Progress ({item.completedModules}/{item.totalModules})</span>
+                       <span className={theme.text}>{Math.round((item.completedModules / item.totalModules) * 100) || 0}%</span>
+                    </div>
+                    <div className="mt-1 h-1.5 w-full bg-shell-surface border border-shell-border relative z-10 overflow-hidden">
                       <div
                         className={cn("h-full transition-all duration-1000", theme.bg, progressWidths[pct], theme.glow)}
                       />
                     </div>
+
+                    {(item.difficulty || item.rating || item.price || item.startDate) && (
+                      <div className="mt-4 grid grid-cols-2 gap-2 text-[10px] font-mono border-t border-shell-border pt-3 text-shell-muted relative z-10">
+                        {item.difficulty && <div><span className="font-bold text-shell-text">DIFF:</span> {item.difficulty}</div>}
+                        {item.rating && <div><span className="font-bold text-shell-text">RATING:</span> {item.rating}/10</div>}
+                        {item.price && <div><span className="font-bold text-shell-text">PRICE:</span> {item.price}</div>}
+                        {item.startDate && <div><span className="font-bold text-shell-text">START:</span> {new Date(item.startDate).toLocaleDateString()}</div>}
+                      </div>
+                    )}
+
+                    {item.review && (
+                      <div className="mt-4 bg-shell-bg/50 border border-shell-border p-3 rounded relative z-10">
+                        <span className={cn("text-[9px] uppercase tracking-widest font-bold block mb-2", theme.text)}>Review & Notes</span>
+                        <div className="text-xs text-shell-muted whitespace-pre-wrap font-sans leading-relaxed">{item.review}</div>
+                      </div>
+                    )}
+
+                    {(item.certificateUrl || item.notesRef) && (
+                      <div className="flex flex-wrap gap-2 text-[9px] font-bold uppercase tracking-widest mt-4 relative z-10">
+                        {item.certificateUrl && (
+                          <div onClick={e => e.preventDefault()}><a href={item.certificateUrl} target="_blank" rel="noopener" onClick={e=>e.stopPropagation()} className={cn("border px-2 py-1 transition", theme.border, theme.text, theme.bgMuted, theme.textHover)}>Certificate ↗</a></div>
+                        )}
+                        {item.notesRef && (
+                          <span className="text-shell-muted border border-shell-border px-2 py-1 bg-shell-surface/50">Ref: {item.notesRef}</span>
+                        )}
+                      </div>
+                    )}
+
+                    {item.skillsGained?.length > 0 && (
+                      <div className="mt-4 flex flex-wrap gap-1 relative z-10">
+                        {item.skillsGained.map((skill: string, idx: number) => (
+                          <span key={idx} className={cn("text-[9px] font-bold uppercase tracking-widest border px-1", theme.border, theme.text)}>{skill}</span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 );
               })
