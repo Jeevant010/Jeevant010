@@ -44,10 +44,14 @@ export default function ProjectRow({ project }: { project: any }) {
         <input type="hidden" name="id" value={project._id} />
         
         <div className="grid grid-cols-2 gap-3">
-          {/* Title */}
-          <div className="col-span-2">
+          {/* Title & Slug */}
+          <div className="col-span-1">
             <label className="text-xs font-bold uppercase text-shell-muted mb-1 block">Project Title *</label>
             <input name="title" defaultValue={project.title} className="w-full bg-[#121212] border border-slate-800 p-2 text-sm text-shell-text rounded" required />
+          </div>
+          <div className="col-span-1">
+            <label className="text-xs font-bold uppercase text-shell-muted mb-1 block">URL Slug</label>
+            <input name="slug" defaultValue={project.slug} className="w-full bg-[#121212] border border-slate-800 p-2 text-sm text-shell-text rounded" placeholder="my-project-name" />
           </div>
           
           {/* Description */}
@@ -143,6 +147,26 @@ export default function ProjectRow({ project }: { project: any }) {
               <input type="checkbox" name="featured" defaultChecked={project.featured} className="w-4 h-4 bg-[#121212] border-slate-800 accent-blue-500" />
               <label className="text-xs font-bold uppercase text-shell-muted">Featured Project</label>
             </div>
+          </div>
+          
+          {/* Advanced Media Fields */}
+          <div className="col-span-2">
+            <label className="text-xs font-bold uppercase text-shell-muted mb-1 block">Gallery URLs (comma separated)</label>
+            <input name="gallery" defaultValue={project.gallery?.join(", ")} placeholder="https://..., https://..." className="w-full bg-[#121212] border border-slate-800 p-2 text-sm text-shell-text rounded" />
+          </div>
+          <div className="col-span-2">
+            <label className="text-xs font-bold uppercase text-shell-muted mb-1 block">Architecture Diagram URL</label>
+            <input name="architectureDiagram" defaultValue={project.architectureDiagram} placeholder="https://..." className="w-full bg-[#121212] border border-slate-800 p-2 text-sm text-shell-text rounded" />
+          </div>
+          
+          {/* Advanced Content */}
+          <div className="col-span-2">
+            <label className="text-xs font-bold uppercase text-shell-muted mb-1 block">Impact / Key Results (Markdown)</label>
+            <textarea name="impact" defaultValue={project.impact} placeholder="How did this project impact users/business?" className="w-full bg-[#121212] border border-slate-800 p-2 text-sm text-shell-text h-16 rounded resize-y" />
+          </div>
+          <div className="col-span-2">
+            <label className="text-xs font-bold uppercase text-shell-muted mb-1 block">Lessons Learned (Markdown)</label>
+            <textarea name="lessonsLearned" defaultValue={project.lessonsLearned} placeholder="What did you learn?" className="w-full bg-[#121212] border border-slate-800 p-2 text-sm text-shell-text h-16 rounded resize-y" />
           </div>
           
           {/* Content */}
