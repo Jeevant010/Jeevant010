@@ -37,12 +37,20 @@ export default function AddProjectForm() {
 
       {/* Row 1: Essential fields */}
       <div className="grid gap-3 md:grid-cols-6">
-        <div className="md:col-span-2 space-y-1">
+        <div className="md:col-span-1 space-y-1">
           <label className="text-xs text-shell-muted ml-1">Project Name *</label>
           <input 
             name="title" 
             required 
             placeholder="e.g. EcoSort AI" 
+            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-blue-500 outline-none transition"
+          />
+        </div>
+        <div className="md:col-span-1 space-y-1">
+          <label className="text-xs text-shell-muted ml-1">URL Slug</label>
+          <input 
+            name="slug" 
+            placeholder="eco-sort-ai" 
             className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-blue-500 outline-none transition"
           />
         </div>
@@ -142,6 +150,28 @@ export default function AddProjectForm() {
              <div className="space-y-1">
                <label className="text-xs text-shell-muted ml-1">Rating (1-10)</label>
                <input name="rating" type="number" min="1" max="10" placeholder="10" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-blue-500 outline-none" />
+             </div>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="space-y-1">
+               <label className="text-xs text-shell-muted ml-1">Gallery URLs (comma separated)</label>
+               <input name="gallery" placeholder="https://..., https://..." className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-blue-500 outline-none" />
+             </div>
+             <div className="space-y-1">
+               <label className="text-xs text-shell-muted ml-1">Architecture Diagram URL</label>
+               <input name="architectureDiagram" placeholder="https://..." className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-blue-500 outline-none" />
+             </div>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="space-y-1">
+               <label className="text-xs text-shell-muted ml-1">Impact (Markdown)</label>
+               <textarea name="impact" placeholder="Impact description..." className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-blue-500 outline-none transition h-16 resize-y" />
+             </div>
+             <div className="space-y-1">
+               <label className="text-xs text-shell-muted ml-1">Lessons Learned (Markdown)</label>
+               <textarea name="lessonsLearned" placeholder="What I learned..." className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-shell-text text-sm focus:border-blue-500 outline-none transition h-16 resize-y" />
              </div>
           </div>
 
