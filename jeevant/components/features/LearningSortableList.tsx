@@ -52,6 +52,60 @@ function SortableItem({ item }: { item: any }) {
             </div>
           </div>
 
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div>
+              <label className="text-[10px] text-green-700 uppercase tracking-widest font-bold">Instructor</label>
+              <input name="instructor" defaultValue={item.instructor} className="w-full bg-shell-surface border border-green-900 text-green-400 px-2 py-1 outline-none text-sm" />
+            </div>
+            <div>
+              <label className="text-[10px] text-green-700 uppercase tracking-widest font-bold">Rating (1-10)</label>
+              <input name="rating" type="number" min="1" max="10" defaultValue={item.rating} className="w-full bg-shell-surface border border-green-900 text-green-400 px-2 py-1 outline-none text-sm" />
+            </div>
+            <div>
+              <label className="text-[10px] text-green-700 uppercase tracking-widest font-bold">Start Date</label>
+              <input type="date" name="startDate" defaultValue={item.startDate ? new Date(item.startDate).toISOString().substring(0, 10) : ""} className="w-full bg-shell-surface border border-green-900 text-green-400 px-2 py-1 outline-none text-sm" />
+            </div>
+            <div>
+              <label className="text-[10px] text-green-700 uppercase tracking-widest font-bold">End Date</label>
+              <input type="date" name="endDate" defaultValue={item.endDate ? new Date(item.endDate).toISOString().substring(0, 10) : ""} className="w-full bg-shell-surface border border-green-900 text-green-400 px-2 py-1 outline-none text-sm" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div>
+              <label className="text-[10px] text-green-700 uppercase tracking-widest font-bold">Price</label>
+              <input name="price" defaultValue={item.price} className="w-full bg-shell-surface border border-green-900 text-green-400 px-2 py-1 outline-none text-sm" />
+            </div>
+            <div>
+              <label className="text-[10px] text-green-700 uppercase tracking-widest font-bold">Difficulty</label>
+              <select name="difficulty" defaultValue={item.difficulty || "beginner"} className="w-full bg-shell-surface border border-green-900 text-green-400 px-2 py-1 outline-none text-sm">
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+            </div>
+            <div className="col-span-2">
+              <label className="text-[10px] text-green-700 uppercase tracking-widest font-bold">Certificate URL</label>
+              <input name="certificateUrl" defaultValue={item.certificateUrl} className="w-full bg-shell-surface border border-green-900 text-green-400 px-2 py-1 outline-none text-sm" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-[10px] text-green-700 uppercase tracking-widest font-bold">Skills Gained (CSV)</label>
+              <input name="skillsGained" defaultValue={item.skillsGained?.join(", ")} className="w-full bg-shell-surface border border-green-900 text-green-400 px-2 py-1 outline-none text-sm" />
+            </div>
+            <div>
+              <label className="text-[10px] text-green-700 uppercase tracking-widest font-bold">Notes Ref</label>
+              <input name="notesRef" defaultValue={item.notesRef} className="w-full bg-shell-surface border border-green-900 text-green-400 px-2 py-1 outline-none text-sm" />
+            </div>
+          </div>
+
+          <div>
+             <label className="text-[10px] text-green-700 uppercase tracking-widest font-bold">Review</label>
+             <textarea name="review" defaultValue={item.review} rows={2} className="w-full bg-shell-surface border border-green-900 text-green-400 px-2 py-1 outline-none text-sm custom-scrollbar" />
+          </div>
+
           <div className="flex justify-end gap-2 pt-2 border-t border-green-900/50">
             <button type="button" onClick={() => setIsEditing(false)} className="text-red-400 hover:text-red-300 px-3 py-1 bg-red-900/20 text-xs font-bold uppercase transition"><X className="w-3 h-3 inline mr-1" /> Cancel</button>
             <button type="submit" className="text-green-400 hover:text-green-300 px-3 py-1 bg-green-900/20 text-xs font-bold uppercase transition"><Check className="w-3 h-3 inline mr-1" /> Save</button>
