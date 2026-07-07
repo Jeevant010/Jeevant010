@@ -84,8 +84,8 @@ export async function createSchedule(formData: FormData) {
     const tagsRaw = String(formData.get("tags") || "");
     const tags = tagsRaw ? tagsRaw.split(",").map(t => t.trim()).filter(Boolean) : [];
 
-    const start = new Date(date + "T" + startTime + ":00Z");
-    const end = endTime ? new Date(date + "T" + endTime + ":00Z") : undefined;
+    const start = new Date(date + "T" + startTime + ":00");
+    const end = endTime ? new Date(date + "T" + endTime + ":00") : undefined;
 
     await Schedule.create({
       title,
@@ -158,8 +158,8 @@ export async function updateSchedule(id: string, formData: FormData) {
     const tagsRaw = String(formData.get("tags") || "");
     const tags = tagsRaw ? tagsRaw.split(",").map(t => t.trim()).filter(Boolean) : [];
 
-    const start = new Date(date + "T" + startTime + ":00Z");
-    const end = endTime ? new Date(date + "T" + endTime + ":00Z") : undefined;
+    const start = new Date(date + "T" + startTime + ":00");
+    const end = endTime ? new Date(date + "T" + endTime + ":00") : undefined;
 
     await Schedule.findByIdAndUpdate(id, { 
       title, start, end, notes, visibility, recurrence, isRecurring, colorCode,
