@@ -83,9 +83,12 @@ export default async function AboutRPG() {
                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-shell-text uppercase tracking-tighter">
                  Operational Dossier
                </h1>
-               <p className="text-shell-accent font-bold mt-2 font-mono text-[10px] sm:text-xs tracking-[0.3em] uppercase">
+               <p className="text-shell-accent font-bold mt-2 font-mono text-[10px] sm:text-xs tracking-[0.3em] uppercase mb-4">
                  // SYS.RECORD.ACTIVE // SECURITY_CLEARANCE: AUTHORIZED
                </p>
+               <a href="https://drive.google.com/drive/folders/16xnzxrQ4MwNEOYGxwbJMX4DX8fkjWZZ2?usp=sharing" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 border border-cyan-500/30 bg-shell-bg/50 text-xs font-bold uppercase tracking-widest text-cyan-500 transition hover:border-cyan-400 hover:text-cyan-400 rounded-sm">
+                  View Certificates
+               </a>
             </div>
             <div className="hidden md:block">
               <Database className="w-12 h-12 text-shell-accent opacity-20" />
