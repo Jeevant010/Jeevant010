@@ -39,6 +39,11 @@ export default async function JourneyPage() {
           <p className="text-base sm:text-lg leading-relaxed text-shell-muted border-l-4 border-shell-accent pl-4 font-sans">
             Detailed accounts of previous engagements, acquired skills, and chronological trace routes of all deployments.
           </p>
+          <div className="pt-2">
+             <a href="https://drive.google.com/drive/folders/16xnzxrQ4MwNEOYGxwbJMX4DX8fkjWZZ2?usp=sharing" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 border border-cyan-500/30 bg-shell-bg/50 text-xs font-bold uppercase tracking-widest text-cyan-500 transition hover:border-cyan-400 hover:text-cyan-400 rounded-sm">
+                View Certificates
+             </a>
+          </div>
         </div>
       </section>
 
