@@ -49,13 +49,16 @@ export default async function HomePage() {
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-6">
+            <div className="flex flex-col sm:flex-row gap-4 pt-6 flex-wrap">
               <Link href="/projects" className="flex items-center justify-center gap-2 bg-shell-text px-6 py-4 text-sm font-black uppercase tracking-widest text-shell-bg transition hover:opacity-80 hover:shadow-[0_0_20px_var(--color-cinematic-glow)] rounded-sm">
                 View Archives <ArrowRight className="h-4 w-4" />
               </Link>
               <Link href="/about" className="flex items-center justify-center gap-2 border border-shell-muted/30 bg-shell-bg/50 px-6 py-4 text-sm font-bold uppercase tracking-widest text-shell-muted transition hover:border-shell-accent hover:text-shell-accent rounded-sm">
                 Access Dossier <Fingerprint className="h-4 w-4" />
               </Link>
+              <a href="https://drive.google.com/drive/folders/16xnzxrQ4MwNEOYGxwbJMX4DX8fkjWZZ2?usp=sharing" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 border border-cyan-500/30 bg-shell-bg/50 px-6 py-4 text-sm font-bold uppercase tracking-widest text-cyan-500 transition hover:border-cyan-400 hover:text-cyan-400 rounded-sm">
+                Certificates <Award className="h-4 w-4" />
+              </a>
             </div>
           </div>
 
