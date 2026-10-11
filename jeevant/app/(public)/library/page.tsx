@@ -1,143 +1,26 @@
-import { getLearning } from "@/lib/actions/learning.actions";
-import { LibraryBig, BookMarked, FileSearch2, BookOpenText, Target, Crosshair } from "lucide-react";
-import { getTacticalColor, cn } from "@/lib/utils";
+import { CV } from "@/lib/catalog/cv";
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-static";
 
-export default async function LibraryPage() {
-  const learning = await getLearning();
-  const progressWidths = ["w-[0%]", "w-[20%]", "w-[40%]", "w-[60%]", "w-[80%]", "w-full"];
-
+export default function LibraryPage() {
   return (
-    <div className="space-y-12 sm:space-y-16 font-mono relative sm:-m-8 p-4 sm:p-8 transition-colors">
-      
-      {/* TACTICAL BACKGROUND */}
-      <div className="fixed inset-0 z-[-1] bg-background pointer-events-none transition-colors duration-500">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10 mix-blend-screen" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--color-shell-accent),transparent_60%),radial-gradient(circle_at_bottom_left,rgba(6,182,212,0.05),transparent_50%)] opacity-20" />
-        <div className="absolute left-0 top-0 w-full h-full bg-mindplace-grid [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+    <div className="relative">
+      <div className="pointer-events-none absolute inset-0 stage-grid opacity-50" />
+      <div className="relative mx-auto max-w-[900px] px-5 py-16 sm:px-8 sm:py-24">
+        <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--stage-signal)]">Library</p>
+        <h1 className="mt-4 font-serif text-6xl leading-[0.9] tracking-[-0.045em]">What the resumes say was read.</h1>
+        <p className="mt-6 text-base leading-7 text-[var(--stage-muted)]">
+          These are the books and papers named on the AI resume, not a padded shelf.
+        </p>
+        <ol className="mt-12 space-y-4">
+          {CV.reading.map((title, index) => (
+            <li key={title} className="stage-panel stage-rise flex gap-4 p-6" style={{ animationDelay: `${index * 70}ms` }}>
+              <span className="font-serif text-3xl text-[var(--stage-signal)]">{String(index + 1).padStart(2, "0")}</span>
+              <span className="text-lg leading-8">{title}</span>
+            </li>
+          ))}
+        </ol>
       </div>
-
-      <section className="relative overflow-hidden border border-shell-border bg-shell-surface/80 backdrop-blur p-8 sm:p-16 shadow-[0_0_50px_var(--color-cinematic-glow)] group rounded-xl">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-shell-accent/10 to-transparent h-[200%] w-full animate-scan pointer-events-none" />
-
-        <div className="max-w-3xl space-y-4 relative z-10">
-          <div className="flex items-center gap-3">
-             <Target className="w-5 h-5 text-shell-accent animate-pulse" />
-             <p className="text-xs font-bold uppercase tracking-[0.5em] text-shell-muted">Data Core // Library</p>
-          </div>
-          <h1 className="text-4xl sm:text-6xl font-black tracking-tighter text-shell-text uppercase drop-shadow-[0_2px_10px_var(--color-shell-accent)]">
-            Intelligence Archives
-          </h1>
-          <p className="text-base sm:text-lg leading-relaxed text-shell-muted border-l-4 border-shell-accent pl-4 font-sans">
-            Classified reading materials, acquired operational knowledge, and the manuals that dictate combat strategies.
-          </p>
-        </div>
-      </section>
-
-      <section className="grid gap-6 lg:grid-cols-3">
-        {[
-          { icon: LibraryBig, title: "Reading List", desc: "Long-form intelligence briefs and classified texts.", color: getTacticalColor(0) },
-          { icon: BookMarked, title: "Tracked Training", desc: "Combat courses, VR simulations, and tactical drills.", color: getTacticalColor(1) },
-          { icon: BookOpenText, title: "Field Notes", desc: "Scribbled takeaways and essential intel drops.", color: getTacticalColor(2) },
-        ].map((item, i) => (
-          <div key={i} className={cn("rounded-sm border bg-shell-surface/60 backdrop-blur p-6 group transition-colors", item.color.borderHover)}>
-            <div className={cn("w-12 h-12 flex items-center justify-center border bg-shell-bg mb-4 transition-colors", item.color.textHover, item.color.border)}>
-               <item.icon className={cn("w-6 h-6", item.color.text)} />
-            </div>
-            <h2 className="text-xl font-bold text-shell-text uppercase tracking-wider">{item.title}</h2>
-            <p className="mt-2 text-sm leading-6 text-shell-muted font-sans">{item.desc}</p>
-          </div>
-        ))}
-      </section>
-
-      <section className="grid gap-6">
-        <div className="rounded-xl border border-shell-border bg-shell-surface/60 backdrop-blur p-6 sm:p-8">
-          <div className="flex items-center justify-between border-b border-shell-border pb-4 mb-8">
-            <h2 className="text-2xl font-black text-shell-text uppercase tracking-tighter flex items-center gap-2">
-               <Crosshair className="w-6 h-6 text-shell-accent" /> Training Catalog
-            </h2>
-            <span className="text-[10px] uppercase tracking-[0.4em] font-bold text-shell-accent border border-shell-accent bg-shell-accent/10 px-2 py-1">Backend DB</span>
-          </div>
-          
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {learning.length === 0 ? (
-              <div className="text-sm text-shell-muted italic text-center py-8 col-span-full">No training data found in the server.</div>
-            ) : (
-              learning.map((item: any, index: number) => {
-                const theme = getTacticalColor(index + 3);
-                const pct = Math.min(progressWidths.length - 1, Math.floor(((item.totalModules ? (item.completedModules / item.totalModules) * 100 : 0)) / 20));
-                
-                return (
-                  <div key={item._id} className={cn("border bg-shell-bg p-5 relative overflow-hidden group transition-all", theme.borderHover, theme.border)}>
-                    <div className={cn("absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-r to-transparent pointer-events-none", theme.text.replace("text-", "from-").replace("500", "500/5"))} />
-                    
-                    <div className="flex flex-wrap items-start justify-between gap-2 relative z-10">
-                      <div>
-                        <div className={cn("text-sm sm:text-base font-bold uppercase transition-colors text-shell-text", theme.textHover)}>
-                          {item.url ? <a href={item.url} target="_blank" rel="noopener" className="hover:underline">{item.title}</a> : item.title}
-                        </div>
-                        <div className="mt-1 flex items-center gap-2">
-                           <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-shell-muted">{item.platform || "Reference"}</span>
-                           {item.instructor && <span className={cn("text-[10px] uppercase tracking-widest font-bold", theme.text)}>// {item.instructor}</span>}
-                        </div>
-                      </div>
-                      <span className={cn("border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.25em] bg-shell-surface mt-2", theme.text, theme.border)}>
-                        {item.totalModules && item.completedModules >= item.totalModules ? "COMPLETED" : "IN PROGRESS"}
-                      </span>
-                    </div>
-                    
-                    <div className="mt-4 flex justify-between items-center text-[10px] uppercase tracking-widest font-bold relative z-10">
-                       <span className="text-shell-muted">Progress ({item.completedModules}/{item.totalModules})</span>
-                       <span className={theme.text}>{Math.round((item.completedModules / item.totalModules) * 100) || 0}%</span>
-                    </div>
-                    <div className="mt-1 h-1.5 w-full bg-shell-surface border border-shell-border relative z-10 overflow-hidden">
-                      <div
-                        className={cn("h-full transition-all duration-1000", theme.bg, progressWidths[pct], theme.glow)}
-                      />
-                    </div>
-
-                    {(item.difficulty || item.rating || item.price || item.startDate) && (
-                      <div className="mt-4 grid grid-cols-2 gap-2 text-[10px] font-mono border-t border-shell-border pt-3 text-shell-muted relative z-10">
-                        {item.difficulty && <div><span className="font-bold text-shell-text">DIFF:</span> {item.difficulty}</div>}
-                        {item.rating && <div><span className="font-bold text-shell-text">RATING:</span> {item.rating}/10</div>}
-                        {item.price && <div><span className="font-bold text-shell-text">PRICE:</span> {item.price}</div>}
-                        {item.startDate && <div><span className="font-bold text-shell-text">START:</span> {new Date(item.startDate).toLocaleDateString()}</div>}
-                      </div>
-                    )}
-
-                    {item.review && (
-                      <div className="mt-4 bg-shell-bg/50 border border-shell-border p-3 rounded relative z-10">
-                        <span className={cn("text-[9px] uppercase tracking-widest font-bold block mb-2", theme.text)}>Review & Notes</span>
-                        <div className="text-xs text-shell-muted whitespace-pre-wrap font-sans leading-relaxed">{item.review}</div>
-                      </div>
-                    )}
-
-                    {(item.certificateUrl || item.notesRef) && (
-                      <div className="flex flex-wrap gap-2 text-[9px] font-bold uppercase tracking-widest mt-4 relative z-10">
-                        {item.certificateUrl && (
-                          <div onClick={e => e.preventDefault()}><a href={item.certificateUrl} target="_blank" rel="noopener" onClick={e=>e.stopPropagation()} className={cn("border px-2 py-1 transition", theme.border, theme.text, theme.bgMuted, theme.textHover)}>Certificate ↗</a></div>
-                        )}
-                        {item.notesRef && (
-                          <span className="text-shell-muted border border-shell-border px-2 py-1 bg-shell-surface/50">Ref: {item.notesRef}</span>
-                        )}
-                      </div>
-                    )}
-
-                    {item.skillsGained?.length > 0 && (
-                      <div className="mt-4 flex flex-wrap gap-1 relative z-10">
-                        {item.skillsGained.map((skill: string, idx: number) => (
-                          <span key={idx} className={cn("text-[9px] font-bold uppercase tracking-widest border px-1", theme.border, theme.text)}>{skill}</span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
