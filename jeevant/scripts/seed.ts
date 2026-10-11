@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import path from "path";
+import { PUBLIC_WORK } from "../lib/catalog/public-work";
 
 // Load .env.local
 dotenv.config({ path: path.resolve(__dirname, "../.env.local") });
@@ -309,6 +310,31 @@ async function seed() {
     }
     await Project.create({ ...p, slug: slug(p.title) });
     console.log(`   ✅ ${p.title}`);
+  }
+
+  console.log(`\n🔗 Syncing ${PUBLIC_WORK.length} public GitHub repositories...`);
+  for (const item of PUBLIC_WORK) {
+    const existing = await Project.findOne({
+      $or: [{ slug: item.slug }, { repoLink: item.repo }],
+    });
+    const payload = {
+      title: item.title,
+      slug: item.slug,
+      description: item.description,
+      content: item.detail,
+      techStack: item.stack,
+      repoLink: item.repo,
+      visibility: "public",
+      status: item.featured ? "live" : "building",
+    };
+    if (existing) {
+      Object.assign(existing, payload);
+      await existing.save();
+      console.log(`   ↻  ${item.title}`);
+    } else {
+      await Project.create(payload);
+      console.log(`   ✅ ${item.title}`);
+    }
   }
 
   // ─── Experiences ───
