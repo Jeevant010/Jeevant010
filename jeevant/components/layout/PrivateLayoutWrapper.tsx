@@ -30,7 +30,7 @@ export default function PrivateLayoutWrapper({
 
   return (
     // APP SHELL: The Mind Place OS
-    <div className="flex h-screen w-full bg-[color:var(--mindplace-bg)] overflow-hidden text-shell-text relative font-mono">
+    <div className="flex h-dvh w-full bg-[color:var(--mindplace-bg)] overflow-hidden text-shell-text relative font-mono">
       
       {/* Mind Place FX */}
       <div className="absolute inset-0 bg-mindplace-grid opacity-30 pointer-events-none z-0" />
