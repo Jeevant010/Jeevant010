@@ -70,6 +70,9 @@ Important repo reality:
 - `/cms/expertise` achievements editor
 - `/cms/resume` resume/profile editor
 - `/cms/rpg` legacy content/editor area
+- `/voice` voice inbox (speech → AI drafts → Gmail/Calendar/Studio)
+- `/studio` content studio (write once, distribute to every channel)
+- `/integrations` automation wiring, connection status, and channel tests
 - `/brain`, `/learning`, `/career`, `/planner/daily`, `/arsenal` for internal organization and content workflows
 
 ## 5. Data Layer
@@ -90,6 +93,9 @@ All persistent data lives in `lib/database/models.ts`.
 - `Snippet`
 - `Profile`
 - `Schedule`
+- `VoiceCapture`
+- `ContentPost`
+- `Setting`
 
 ### Key schema responsibilities
 
@@ -305,3 +311,50 @@ If you need one short version of the current architecture:
 - The repo is intentionally leaning toward a custom cyberpunk terminal UI rather than a standard SaaS dashboard.
 
 This file should be treated as the canonical architecture summary for the project.
+
+---
+
+## 15. Automation Layer (Voice / Studio / Integrations)
+
+This is a self-contained subsystem added on top of the CMS. Full setup guide:
+[`docs/AUTOMATION.md`](./docs/AUTOMATION.md). Env template: [`.env.example`](./.env.example).
+
+### Principles
+
+- No paid services. Groq + Gemini free tiers, Telegram Bot API, self-hosted n8n.
+- Every adapter is optional. Missing credentials produce a **local fallback**, never a crash.
+- Secrets stay in `.env.local`. The `Setting` collection only holds non-secret config.
+
+### Integration adapters (`lib/integrations/`)
+
+- `whisper.ts` — Groq Whisper transcription (`GROQ_API_KEY`).
+- `gemini.ts` — drafting engine with rotating `GEMINI_API_KEYS`; retries the next key on 429/403/5xx; heuristic fallback when unconfigured.
+- `google.ts` — shared OAuth refresh-token helper.
+- `gmail.ts` — creates real Gmail drafts.
+- `calendar.ts` — creates Google Calendar events; caller falls back to `Schedule`.
+- `channels.ts` — distribution: n8n webhook → direct API → share link → manual.
+- `config.ts` — env defaults merged with `Setting` overrides.
+- `types.ts` — shared contracts.
+
+### Data flow
+
+1. `POST /api/voice` (admin-only) stores a `VoiceCapture`, transcribes, drafts, and persists all artifacts.
+2. The user reviews/edits in `/voice`, then optionally pushes to Gmail, locks calendar blocks, creates tasks, or promotes a draft into a `ContentPost`.
+3. `/studio` dispatches `ContentPost`s to selected channels and records a `dispatch[]` log per attempt.
+4. `/api/cron/dispatch` publishes `queued` posts whose `scheduledAt` has passed.
+
+### Models
+
+- `VoiceCapture` — transcript, intent, `drafts[]`, `calendarBlocks[]`, `taskSuggestions[]`, `simulated`, provider metadata.
+- `ContentPost` — master body, channels, status (`draft|queued|published|failed`), `scheduledAt`, `dispatch[]` log.
+- `Setting` — key/value non-secret runtime config editable from `/integrations`.
+
+### Route protection
+
+`proxy.ts` protects `/voice`, `/studio`, and `/integrations` alongside the existing private zones.
+
+### Notes and limits
+
+- LinkedIn/X/WhatsApp/Reddit/YouTube do not expose free silent-posting APIs; the app returns share-intent links or copy-ready drafts. n8n removes that limitation.
+- Gmail *reading* for the overnight digest requires a read scope; without it the digest uses the `Message` collection.
+- Audio blobs are not persisted (transcript only) to avoid DB/filesystem bloat.
