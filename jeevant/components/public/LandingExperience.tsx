@@ -22,7 +22,7 @@ export default function LandingExperience({ profile }: { profile: { name?: strin
   const lanes = laneCounts();
   const [active, setActive] = useState(0);
   const [whisper, setWhisper] = useState(0);
-  const [counts, setCounts] = useState({ repos: 0, scenes: 0, marks: 0 });
+  const [counts, setCounts] = useState({ repos: 0, featured: 0, awards: 0 });
   const name = profile?.name?.split(" ")[0] || "Jeevant";
   const spotlight = featured[active] ?? featured[0];
   const marquee = useMemo(() => PUBLIC_WORK.map((item) => item.title).join("   ·   "), []);
@@ -36,8 +36,8 @@ export default function LandingExperience({ profile }: { profile: { name?: strin
       const t = Math.min(1, (now - start) / 1200);
       setCounts({
         repos: Math.round(PUBLIC_WORK.length * t),
-        scenes: Math.round(featured.length * t),
-        marks: Math.round(CV.marks.length * t),
+        featured: Math.round(featured.length * t),
+        awards: Math.round(CV.marks.length * t),
       });
       if (t < 1) frame = requestAnimationFrame(tick);
     };
@@ -67,7 +67,13 @@ export default function LandingExperience({ profile }: { profile: { name?: strin
           <p key={whisper} className="film-wipe mt-4 text-2xl font-medium tracking-[-0.03em] text-[var(--stage-signal)] sm:text-4xl">
             {WHISPERS[whisper]}
           </p>
-          <p className="mt-6 max-w-xl text-base leading-7 text-[var(--stage-muted)]">
+          <div className="mt-6 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.18em]">
+            <span className="rounded-full border border-[var(--stage-signal)] px-3 py-1 text-[var(--stage-signal)]">
+              Founder · {CV.company.name.split(" (")[0]}
+            </span>
+            <span className="text-[var(--stage-muted)]">SSIP 2.0 grantee · AI/ML lead, GDG IIIT Surat</span>
+          </div>
+          <p className="mt-4 max-w-xl text-base leading-7 text-[var(--stage-muted)]">
             {PUBLIC_WORK.length} original repositories, {CV.roles.length} roles from the resumes, and one rule under the title: finish the scene you are in.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
@@ -79,8 +85,8 @@ export default function LandingExperience({ profile }: { profile: { name?: strin
           <div className="mt-10 grid max-w-lg grid-cols-3 gap-3">
             {[
               [counts.repos, "repos"],
-              [counts.scenes, "scenes"],
-              [counts.marks, "marks"],
+              [counts.featured, "featured"],
+              [counts.awards, "awards"],
             ].map(([value, label]) => (
               <div key={String(label)} className="stage-panel px-4 py-3">
                 <div className="font-serif text-4xl">{value}</div>
@@ -157,7 +163,7 @@ export default function LandingExperience({ profile }: { profile: { name?: strin
         </div>
         <RevealOnScroll>
           <div className="flex flex-wrap gap-2">
-            {PUBLIC_WORK.map((item, index) => (
+            {PUBLIC_WORK.filter((item) => item.lane !== "Lab").slice(0, 24).map((item, index) => (
               <Link
                 key={item.slug}
                 href={`/projects/${item.slug}`}
