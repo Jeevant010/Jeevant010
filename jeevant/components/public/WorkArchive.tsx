@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { PUBLIC_WORK, WORK_LANES, type WorkLane } from "@/lib/catalog/public-work";
+import PageHeader from "@/components/ui/PageHeader";
 
 export default function WorkArchive() {
   const [lane, setLane] = useState<WorkLane | "All">("All");
@@ -22,15 +23,15 @@ export default function WorkArchive() {
     <div className="relative">
       <div className="pointer-events-none absolute inset-0 stage-grid opacity-70" />
       <div className="relative mx-auto max-w-[1400px] px-5 py-16 sm:px-8 sm:py-20">
-        <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--stage-signal)]">Public record</p>
-        <div className="mt-4 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <h1 className="max-w-3xl font-serif text-6xl leading-[0.9] tracking-[-0.045em] sm:text-7xl">
-            The repos, with the story the README actually tells.
-          </h1>
-          <p className="max-w-sm text-sm leading-6 text-[var(--stage-muted)]">
-            {PUBLIC_WORK.length} original repositories from Jeevant010. Cards link to a dossier, then to GitHub. No embedded previews, because those pages refuse to load inside the site.
-          </p>
-        </div>
+        <PageHeader
+          eyebrow="Public record"
+          title="The repos, with the story the README actually tells."
+          aside={
+            <p className="max-w-sm text-sm leading-6 text-[var(--stage-muted)]">
+              {PUBLIC_WORK.length} original repositories from Jeevant010. Cards link to a dossier, then to GitHub. No embedded previews, because those pages refuse to load inside the site.
+            </p>
+          }
+        />
 
         <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap gap-2">
