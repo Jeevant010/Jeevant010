@@ -9,7 +9,7 @@ import {
   FileCog, Sword, UserCog, 
   LogOut, Monitor, Settings,
   Menu, X, Calendar, Compass, FileText, Award,
-  Code, Radio, Mail, Wrench
+  Code, Radio, Mail, Wrench, Mic, PenLine, Plug
 } from "lucide-react";
 import { logout } from "@/lib/actions/auth.actions";
 
@@ -84,7 +84,12 @@ export default function Sidebar({ isExpanded, toggleSidebar, isMobile }: Sidebar
         <div className="flex flex-col gap-1">
           {mode === "VIEW" ? (
             <>
-              {isExpanded && <SectionHeader label="Private Tools" />}
+              {isExpanded && <SectionHeader label="Comm Center" />}
+              <SidebarItem href="/voice" icon={<Mic size={18} />} label="Voice Inbox" active={pathname === "/voice"} expanded={isExpanded} />
+              <SidebarItem href="/studio" icon={<PenLine size={18} />} label="Studio" active={pathname === "/studio"} expanded={isExpanded} />
+              <SidebarItem href="/integrations" icon={<Plug size={18} />} label="Integrations" active={pathname === "/integrations"} expanded={isExpanded} />
+
+              {isExpanded && <div className="mt-4"><SectionHeader label="Private Tools" /></div>}
               <SidebarItem href="/dashboard" icon={<LayoutDashboard size={18} />} label="Overview" active={pathname === "/dashboard"} expanded={isExpanded} />
               <SidebarItem href="/planner/daily" icon={<Crosshair size={18} />} label="Agenda" active={pathname.includes("planner")} expanded={isExpanded} />
               <SidebarItem href="/brain" icon={<Brain size={18} />} label="Notes" active={pathname === "/brain"} expanded={isExpanded} />
