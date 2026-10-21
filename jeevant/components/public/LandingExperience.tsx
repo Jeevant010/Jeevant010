@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, Github } from "lucide-react";
 import { PUBLIC_WORK, laneCounts, type PublicWork } from "@/lib/catalog/public-work";
 import { CV } from "@/lib/catalog/cv";
+import RevealOnScroll from "@/components/public/RevealOnScroll";
+import TiltCard from "@/components/public/TiltCard";
 
 const ORBIT = ["PyTorch", "Unreal", "RAG", "Solidity", "Next.js", "MongoDB", "FastAPI", "LangChain"];
 
@@ -133,17 +135,19 @@ export default function LandingExperience({ profile }: { profile: { name?: strin
       </section>
 
       <section className="mx-auto max-w-[1400px] px-5 py-8 sm:px-8">
-        <div className="grid gap-3 sm:grid-cols-5">
-          {lanes.map((lane, index) => (
-            <div key={lane.lane} className="stage-panel float-chip p-4" style={{ animationDelay: `${index * 0.2}s` }}>
-              <div className="text-[11px] uppercase tracking-[0.2em] text-[var(--stage-muted)]">{lane.lane}</div>
-              <div className="mt-2 font-serif text-4xl">{lane.count}</div>
-              <div className="mt-3 h-1 overflow-hidden rounded-full bg-[var(--stage-line)]">
-                <div className="xp-fill" style={{ width: `${(lane.count / PUBLIC_WORK.length) * 100}%` }} />
+        <RevealOnScroll>
+          <div className="grid gap-3 sm:grid-cols-5">
+            {lanes.map((lane, index) => (
+              <div key={lane.lane} className="stage-panel float-chip p-4" style={{ animationDelay: `${index * 0.2}s` }}>
+                <div className="text-[11px] uppercase tracking-[0.2em] text-[var(--stage-muted)]">{lane.lane}</div>
+                <div className="mt-2 font-serif text-4xl">{lane.count}</div>
+                <div className="mt-3 h-1 overflow-hidden rounded-full bg-[var(--stage-line)]">
+                  <div className="xp-fill" style={{ width: `${(lane.count / PUBLIC_WORK.length) * 100}%` }} />
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </RevealOnScroll>
       </section>
 
       <section className="mx-auto max-w-[1400px] px-5 py-16 sm:px-8">
@@ -151,37 +155,41 @@ export default function LandingExperience({ profile }: { profile: { name?: strin
           <h2 className="font-serif text-5xl tracking-[-0.04em]">Every public name</h2>
           <Link href="/projects" className="text-sm text-[var(--stage-muted)] underline-offset-4 hover:underline">Filter them</Link>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {PUBLIC_WORK.map((item, index) => (
-            <Link
-              key={item.slug}
-              href={`/projects/${item.slug}`}
-              className="stage-rise rounded-full border border-[var(--stage-line)] px-3 py-2 text-sm transition hover:-translate-y-1 hover:border-[var(--stage-signal)] hover:text-[var(--stage-signal)]"
-              style={{ animationDelay: `${Math.min(index * 18, 400)}ms` }}
-            >
-              {item.title}
-            </Link>
-          ))}
-        </div>
+        <RevealOnScroll>
+          <div className="flex flex-wrap gap-2">
+            {PUBLIC_WORK.map((item, index) => (
+              <Link
+                key={item.slug}
+                href={`/projects/${item.slug}`}
+                className="stage-rise rounded-full border border-[var(--stage-line)] px-3 py-2 text-sm transition hover:-translate-y-1 hover:border-[var(--stage-signal)] hover:text-[var(--stage-signal)]"
+                style={{ animationDelay: `${Math.min(index * 18, 400)}ms` }}
+              >
+                {item.title}
+              </Link>
+            ))}
+          </div>
+        </RevealOnScroll>
       </section>
 
       <section className="mx-auto grid max-w-[1400px] gap-4 px-5 pb-20 sm:px-8 md:grid-cols-2">
         {featured.map((item, index) => (
-          <article key={item.slug} className="stage-panel quest-card stage-rise p-6 sm:p-8" style={{ animationDelay: `${index * 60}ms` }}>
-            <span className="card-sheen" aria-hidden />
-            <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-[var(--stage-muted)]">
-              <span>Lvl {String(index + 1).padStart(2, "0")} · {item.lane}</span>
-              <span className="select-prompt">Select</span>
-            </div>
-            <h3 className="mt-5 font-serif text-4xl tracking-[-0.04em]">{item.title}</h3>
-            <p className="mt-3 text-sm leading-6 text-[var(--stage-muted)]">{item.description}</p>
-            <div className="mt-5 h-1 overflow-hidden rounded-full bg-[var(--stage-line)]">
-              <div className="xp-fill" style={{ width: `${78 - index * 5}%` }} />
-            </div>
-            <Link href={`/projects/${item.slug}`} className="mt-6 inline-flex items-center gap-2 text-sm">
-              Enter scene <ArrowUpRight className="h-4 w-4" />
-            </Link>
-          </article>
+          <TiltCard key={item.slug} className="h-full">
+            <article className="stage-panel quest-card h-full p-6 sm:p-8">
+              <span className="card-sheen" aria-hidden />
+              <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-[var(--stage-muted)]">
+                <span>Lvl {String(index + 1).padStart(2, "0")} · {item.lane}</span>
+                <span className="select-prompt">Select</span>
+              </div>
+              <h3 className="mt-5 font-serif text-4xl tracking-[-0.04em]">{item.title}</h3>
+              <p className="mt-3 text-sm leading-6 text-[var(--stage-muted)]">{item.description}</p>
+              <div className="mt-5 h-1 overflow-hidden rounded-full bg-[var(--stage-line)]">
+                <div className="xp-fill" style={{ width: `${78 - index * 5}%` }} />
+              </div>
+              <Link href={`/projects/${item.slug}`} className="mt-6 inline-flex items-center gap-2 text-sm">
+                Enter scene <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </article>
+          </TiltCard>
         ))}
       </section>
     </div>
