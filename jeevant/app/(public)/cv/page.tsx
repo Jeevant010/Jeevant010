@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { CV } from "@/lib/catalog/cv";
+import PageHeader from "@/components/ui/PageHeader";
 
 export const dynamic = "force-static";
 
@@ -13,10 +14,11 @@ export default function CvPage() {
     <div className="relative">
       <div className="pointer-events-none absolute inset-0 stage-grid opacity-40" />
       <article className="relative mx-auto max-w-3xl px-5 py-16 sm:px-8 sm:py-20">
-        <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--stage-signal)]">Curriculum vitae</p>
-        <h1 className="mt-3 font-serif text-6xl tracking-[-0.045em] sm:text-7xl">{CV.name}</h1>
-        <p className="mt-3 text-lg text-[var(--stage-paper)]">{CV.role} · {CV.location}</p>
-        <p className="mt-6 text-base leading-7 text-[var(--stage-muted)]">{CV.summary}</p>
+        <PageHeader
+          eyebrow="Curriculum vitae"
+          title={CV.name}
+          description={`${CV.role} · ${CV.location}. ${CV.summary}`}
+        />
 
         <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-sm">
           <a className="underline-offset-4 hover:underline" href={`mailto:${CV.email}`}>{CV.email}</a>
