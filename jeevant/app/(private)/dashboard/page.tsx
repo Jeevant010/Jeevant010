@@ -3,6 +3,7 @@ import { getDailyTasks } from "@/lib/actions/task.actions";
 import { getNotes } from "@/lib/actions/note.actions";
 import { getCharacterSheet } from "@/lib/actions/rpg.actions";
 import { getOpsCounts } from "@/lib/actions/voice.actions";
+import PrivateShell from "@/components/layout/PrivateShell";
 import { 
   Activity, Target, FileText, Clock, ShieldAlert, Database, Terminal, Briefcase, BarChart, Mic, PenLine, Inbox
 } from "lucide-react";
@@ -42,22 +43,14 @@ export default async function Dashboard() {
     : "N/A";
 
   return (
-    <div className="min-h-full bg-transparent p-4 sm:p-6 md:p-10 font-mono relative">
-      <div className="relative z-10 max-w-7xl mx-auto space-y-8 sm:space-y-12">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-shell-border pb-6 relative gap-4">
-          <div className="absolute bottom-0 left-0 w-1/3 h-[2px] bg-gradient-to-r from-[color:var(--accent)] to-transparent" />
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-3 h-3 bg-[color:var(--accent)] rounded-full animate-pulse shadow-[0_0_15px_var(--accent)]" />
-              <span className="text-[color:var(--accent)] font-bold tracking-[0.3em] text-[10px] sm:text-xs uppercase">SYSTEM_ONLINE // THE_CONTINENTAL</span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-shell-text uppercase tracking-tighter drop-shadow-md">
-              Operations Board
-            </h1>
-          </div>
-        </div>
-
+    <PrivateShell
+      eyebrow="System online · the continental"
+      title="Operations Board"
+      description="Live state of projects, threads, voice captures, and the day."
+      accent="emerald"
+      icon={<Activity className="h-6 w-6 text-emerald-400" />}
+    >
+      <div className="space-y-8 sm:space-y-12">
         {/* Metrics / Case Files */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {[
@@ -189,7 +182,7 @@ export default async function Dashboard() {
           </div>
         </div>
       </div>
-    </div>
+    </PrivateShell>
   );
 }
 
