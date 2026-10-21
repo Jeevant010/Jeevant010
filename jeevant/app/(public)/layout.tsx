@@ -33,7 +33,6 @@ export default function PublicLayout({
               <Link href="/projects" className="transition hover:text-shell-text">Projects</Link>
               <Link href="/research" className="transition hover:text-shell-text">Research</Link>
               <Link href="/library" className="transition hover:text-shell-text">Library</Link>
-              <Link href="/schedule" className="transition hover:text-shell-text">Schedule</Link>
             </div>
           </div>
 
@@ -42,6 +41,7 @@ export default function PublicLayout({
             <div className="mt-4 grid gap-3 text-sm text-shell-muted">
               <Link href="/cv" className="transition hover:text-shell-text">CV</Link>
               <Link href="/contact" className="transition hover:text-shell-text">Contact</Link>
+              <Link href="/login" className="transition hover:text-shell-text">Operator login</Link>
             </div>
           </div>
 
