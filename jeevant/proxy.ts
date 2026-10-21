@@ -15,6 +15,7 @@ export async function proxy(request: NextRequest) {
     "/voice",
     "/studio",
     "/integrations",
+    "/agent",
   ];
   const path = request.nextUrl.pathname;
   const isProtected = protectedPaths.some((prefix) => path.startsWith(prefix));
@@ -53,5 +54,6 @@ export const config = {
     "/voice/:path*",
     "/studio/:path*",
     "/integrations/:path*",
+    "/agent/:path*",
   ],
 };
