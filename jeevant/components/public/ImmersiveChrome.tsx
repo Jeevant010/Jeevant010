@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import LiveField from "@/components/public/LiveField";
+import BootSequence from "@/components/public/BootSequence";
 
 export default function ImmersiveChrome({ children }: { children: React.ReactNode }) {
   const glowRef = useRef<HTMLDivElement>(null);
@@ -46,9 +48,11 @@ export default function ImmersiveChrome({ children }: { children: React.ReactNod
           ))}
         </div>
       </div>
+      <LiveField />
       <div ref={glowRef} className="pointer-glow fixed z-[1]" style={{ transform: "translate(-999px, -999px)" }} />
       <div ref={barRef} className="scroll-progress" />
       <div className="relative z-10">{children}</div>
+      <BootSequence />
     </div>
   );
 }
