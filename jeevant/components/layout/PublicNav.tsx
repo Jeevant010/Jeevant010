@@ -12,7 +12,6 @@ const LINKS = [
   { href: "/cv", label: "CV" },
   { href: "/research", label: "Research" },
   { href: "/library", label: "Library" },
-  { href: "/schedule", label: "Schedule" },
   { href: "/contact", label: "Contact" },
 ];
 
