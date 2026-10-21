@@ -9,7 +9,7 @@ import {
   FileCog, Sword, UserCog, 
   LogOut, Monitor, Settings,
   Menu, X, Calendar, Compass, FileText, Award,
-  Code, Radio, Mail, Wrench, Mic, PenLine, Plug
+  Code, Radio, Mail, Wrench, Mic, PenLine, Plug, Bot
 } from "lucide-react";
 import { logout } from "@/lib/actions/auth.actions";
 
@@ -85,6 +85,7 @@ export default function Sidebar({ isExpanded, toggleSidebar, isMobile }: Sidebar
           {mode === "VIEW" ? (
             <>
               {isExpanded && <SectionHeader label="Comm Center" />}
+              <SidebarItem href="/agent" icon={<Bot size={18} />} label="Agent" active={pathname === "/agent"} expanded={isExpanded} />
               <SidebarItem href="/voice" icon={<Mic size={18} />} label="Voice Inbox" active={pathname === "/voice"} expanded={isExpanded} />
               <SidebarItem href="/studio" icon={<PenLine size={18} />} label="Studio" active={pathname === "/studio"} expanded={isExpanded} />
               <SidebarItem href="/integrations" icon={<Plug size={18} />} label="Integrations" active={pathname === "/integrations"} expanded={isExpanded} />
@@ -102,7 +103,6 @@ export default function Sidebar({ isExpanded, toggleSidebar, isMobile }: Sidebar
               <SidebarItem href="/about" icon={<UserCog size={18} />} label="About" active={pathname === "/about"} expanded={isExpanded} />
               <SidebarItem href="/projects" icon={<Code size={18} />} label="Projects" active={pathname === "/projects"} expanded={isExpanded} />
               <SidebarItem href="/journey" icon={<Sword size={18} />} label="Journey" active={pathname === "/journey"} expanded={isExpanded} />
-              <SidebarItem href="/schedule" icon={<Calendar size={18} />} label="Schedule" active={pathname === "/schedule"} expanded={isExpanded} />
               <SidebarItem href="/research" icon={<Radio size={18} />} label="Research" active={pathname === "/research"} expanded={isExpanded} />
               <SidebarItem href="/library" icon={<Library size={18} />} label="Library" active={pathname === "/library"} expanded={isExpanded} />
               <SidebarItem href="/contact" icon={<Mail size={18} />} label="Contact" active={pathname === "/contact"} expanded={isExpanded} />
@@ -112,7 +112,6 @@ export default function Sidebar({ isExpanded, toggleSidebar, isMobile }: Sidebar
               {isExpanded && <SectionHeader label="Content Management" />}
               <SidebarItem href="/cms/projects" icon={<FileCog size={18} />} label="Projects" active={pathname.includes("projects")} isCms expanded={isExpanded} />
               <SidebarItem href="/cms/rpg" icon={<Sword size={18} />} label="RPG System" active={pathname.includes("rpg")} isCms expanded={isExpanded} />
-              <SidebarItem href="/cms/schedule" icon={<Calendar size={18} />} label="Schedule" active={pathname.includes("schedule")} isCms expanded={isExpanded} />
               <SidebarItem href="/cms/expertise" icon={<Award size={18} />} label="Expertise" active={pathname.includes("expertise")} isCms expanded={isExpanded} />
               <SidebarItem href="/cms/journey" icon={<Compass size={18} />} label="Journey" active={pathname.includes("journey")} isCms expanded={isExpanded} />
               <SidebarItem href="/cms/resume" icon={<FileText size={18} />} label="Resume" active={pathname.includes("resume")} isCms expanded={isExpanded} />
