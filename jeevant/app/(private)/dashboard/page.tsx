@@ -2,8 +2,9 @@ import { getProjects } from "@/lib/actions/project.action";
 import { getDailyTasks } from "@/lib/actions/task.actions";
 import { getNotes } from "@/lib/actions/note.actions";
 import { getCharacterSheet } from "@/lib/actions/rpg.actions";
+import { getOpsCounts } from "@/lib/actions/voice.actions";
 import { 
-  Activity, Target, FileText, Clock, ShieldAlert, Database, Terminal, Briefcase, BarChart, Users, Eye
+  Activity, Target, FileText, Clock, ShieldAlert, Database, Terminal, Briefcase, BarChart, Mic, PenLine, Inbox
 } from "lucide-react";
 import Link from "next/link";
 
@@ -14,6 +15,7 @@ export default async function Dashboard() {
   const tasks = await getDailyTasks();
   const notes = await getNotes();
   const { loot: achievements } = await getCharacterSheet();
+  const ops = await getOpsCounts();
 
   const activeCases = projects.filter((p: any) => p.status !== "Archived").length;
   const pendingTasks = tasks.filter((t: any) => !t.isCompleted);
@@ -151,12 +153,12 @@ export default async function Dashboard() {
                 <h4 className="text-[10px] font-bold text-shell-muted uppercase tracking-[0.3em] border-b border-shell-border pb-2 flex items-center gap-2"><BarChart className="w-3 h-3"/> Global Analytics</h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-black/40 border border-shell-border p-3 flex flex-col justify-center items-center">
-                    <div className="text-[9px] text-shell-muted uppercase tracking-widest mb-1 flex items-center gap-1"><Users className="w-3 h-3"/> Visitors (24h)</div>
-                    <div className="text-xl font-bold text-blue-400">1,204</div>
+                    <div className="text-[9px] text-shell-muted uppercase tracking-widest mb-1 flex items-center gap-1"><Mic className="w-3 h-3"/> Voice Captures</div>
+                    <div className="text-xl font-bold text-blue-400">{ops.voiceCaptures}</div>
                   </div>
                   <div className="bg-black/40 border border-shell-border p-3 flex flex-col justify-center items-center">
-                    <div className="text-[9px] text-shell-muted uppercase tracking-widest mb-1 flex items-center gap-1"><Eye className="w-3 h-3"/> Profile Views</div>
-                    <div className="text-xl font-bold text-emerald-400">8,492</div>
+                    <div className="text-[9px] text-shell-muted uppercase tracking-widest mb-1 flex items-center gap-1"><Inbox className="w-3 h-3"/> Unread Inbox</div>
+                    <div className="text-xl font-bold text-emerald-400">{ops.unreadMessages}</div>
                   </div>
                   <div className="bg-black/40 border border-shell-border p-3 flex flex-col justify-center items-center">
                     <div className="text-[9px] text-shell-muted uppercase tracking-widest mb-1 text-center">Tech Skills</div>
@@ -181,6 +183,8 @@ export default async function Dashboard() {
              <DashboardLink href="/planner/daily" title="Schedule" sub="Agenda" icon={<Clock className="w-5 h-5 sm:w-6 sm:h-6" />} />
              <DashboardLink href="/brain" title="Notes" sub="Intel" icon={<Terminal className="w-5 h-5 sm:w-6 sm:h-6" />} />
              <DashboardLink href="/cms/rpg" title="Quests" sub="RPG Hub" icon={<Briefcase className="w-5 h-5 sm:w-6 sm:h-6" />} />
+             <DashboardLink href="/voice" title="Voice" sub="Comm Center" icon={<Mic className="w-5 h-5 sm:w-6 sm:h-6" />} />
+             <DashboardLink href="/studio" title="Studio" sub="Broadcast" icon={<PenLine className="w-5 h-5 sm:w-6 sm:h-6" />} />
              <DashboardLink href="/cms/projects" title="Admin" sub="Manage" icon={<Database className="w-5 h-5 sm:w-6 sm:h-6" />} isSpecial />
           </div>
         </div>
