@@ -291,6 +291,94 @@ const ResumeSchema = new Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+// --- 13. VOICE CAPTURE SCHEMA (Comm Center / Voice Inbox) ---
+// A raw voice note, its transcript, and every AI-generated artifact derived from it.
+const VoiceDraftSchema = new Schema(
+  {
+    kind: { type: String, enum: ["email", "linkedin", "youtube", "whatsapp", "twitter", "generic"], default: "generic" },
+    title: { type: String, default: "" },
+    body: { type: String, default: "" },
+    meta: { type: Schema.Types.Mixed },
+  },
+  { _id: true }
+);
+
+const CalendarBlockSchema = new Schema(
+  {
+    title: { type: String, default: "" },
+    start: { type: Date },
+    end: { type: Date },
+    notes: { type: String },
+  },
+  { _id: true }
+);
+
+const TaskSuggestionSchema = new Schema(
+  {
+    title: { type: String, default: "" },
+    priority: { type: String, enum: ["low", "medium", "high"], default: "medium" },
+  },
+  { _id: true }
+);
+
+const VoiceCaptureSchema = new Schema({
+  transcript: { type: String, default: "" },
+  durationSec: { type: Number, default: 0 },
+  status: {
+    type: String,
+    enum: ["captured", "transcribing", "drafting", "ready", "failed"],
+    default: "captured",
+  },
+  intent: { type: String, enum: ["email", "content", "schedule", "mixed"], default: "mixed" },
+  drafts: [VoiceDraftSchema],
+  calendarBlocks: [CalendarBlockSchema],
+  taskSuggestions: [TaskSuggestionSchema],
+  provider: {
+    whisper: { type: String, default: "" },
+    llm: { type: String, default: "" },
+  },
+  simulated: { type: Boolean, default: false },
+  error: { type: String },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+});
+
+// --- 14. CONTENT POST SCHEMA (Studio: write once, distribute everywhere) ---
+const DispatchResultSchema = new Schema(
+  {
+    channel: { type: String, default: "" },
+    ok: { type: Boolean, default: false },
+    mode: { type: String, default: "" }, // webhook | direct | link | clipboard | manual | queued
+    url: { type: String, default: "" },
+    detail: { type: String, default: "" },
+    at: { type: Date, default: Date.now },
+  },
+  { _id: true }
+);
+
+const ContentPostSchema = new Schema({
+  title: { type: String, default: "" },
+  body: { type: String, required: true },
+  summary: { type: String, default: "" },
+  source: { type: String, enum: ["manual", "voice", "ai"], default: "manual" },
+  voiceCaptureId: { type: Schema.Types.ObjectId, ref: "VoiceCapture" },
+  channels: [{ type: String }],
+  status: { type: String, enum: ["draft", "queued", "published", "failed"], default: "draft" },
+  scheduledAt: { type: Date },
+  publishedAt: { type: Date },
+  dispatch: [DispatchResultSchema],
+  tags: [{ type: String }],
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+});
+
+// --- 15. SETTING SCHEMA (Non-secret runtime config editable from the Integrations page) ---
+const SettingSchema = new Schema({
+  key: { type: String, required: true, unique: true },
+  value: { type: Schema.Types.Mixed },
+  updatedAt: { type: Date, default: Date.now },
+});
+
 export const Profile = models.Profile || model("Profile", ProfileSchema);
 export const Snippet = models.Snippet || model("Snippet", SnippetSchema);
 export const Message = models.Message || model("Message", MessageSchema);
@@ -305,3 +393,6 @@ export const Note = models.Note || model("Note", NoteSchema);
 export const Learning = models.Learning || model("Learning", LearningSchema);
 export const Schedule = models.Schedule || model("Schedule", ScheduleSchema);
 export const Resume = models.Resume || model("Resume", ResumeSchema);
+export const VoiceCapture = models.VoiceCapture || model("VoiceCapture", VoiceCaptureSchema);
+export const ContentPost = models.ContentPost || model("ContentPost", ContentPostSchema);
+export const Setting = models.Setting || model("Setting", SettingSchema);
