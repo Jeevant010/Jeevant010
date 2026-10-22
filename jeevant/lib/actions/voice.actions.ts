@@ -2,10 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import connectDB from "@/lib/db";
-import { VoiceCapture, Schedule, Message, Task, ContentPost } from "@/lib/database/models";
+import { VoiceCapture, Schedule, Message, Task, ContentPost, Approval } from "@/lib/database/models";
 import { getSession } from "@/lib/auth";
-import { saveDraft } from "@/lib/integrations/gmail";
-import { createEvent } from "@/lib/integrations/calendar";
+import { evaluateExternalAction } from "@/lib/guardrails/policy";
 
 function plain(doc: any) {
   const obj = doc?.toObject ? doc.toObject() : doc;
@@ -87,11 +86,22 @@ export async function pushEmailDraft(captureId: string, draftId?: string) {
     const draft = draftId ? drafts.id(draftId) : drafts.find((d: any) => d.kind === "email");
     if (!draft) return { success: false, detail: "No email draft on this capture." };
 
-    const result = await saveDraft({ subject: draft.title, body: draft.body });
-    draft.meta = { ...(draft.meta || {}), gmail: result };
-    await capture.save();
-    revalidatePath("/voice");
-    return { success: result.ok, mode: result.mode, detail: result.detail };
+    const guard = await evaluateExternalAction({
+      kind: "email",
+      target: draft.title || "email draft",
+      meta: { capture: String(capture._id) },
+    });
+    if (!guard.allowed) return { success: false, detail: guard.reason };
+
+    await Approval.create({
+      kind: "email",
+      title: `Email draft: ${draft.title || "untitled"}`,
+      detail: "Creates a Gmail draft. Nothing is sent.",
+      payload: { subject: draft.title, body: draft.body },
+      status: "pending",
+    });
+    revalidatePath("/approvals");
+    return { success: true, mode: "approval", detail: "Queued for approval — open /approvals." };
   } catch (error) {
     return { success: false, detail: (error as Error).message };
   }
@@ -108,32 +118,29 @@ export async function lockSchedule(captureId: string) {
     if (!capture) return { success: false, detail: "Capture not found." };
     if (!capture.calendarBlocks?.length) return { success: false, detail: "No blocks to lock." };
 
-    const results: string[] = [];
-    for (const block of capture.calendarBlocks as any) {
-      const start = block.start ? new Date(block.start) : new Date();
-      const end = block.end ? new Date(block.end) : new Date(start.getTime() + 60 * 60 * 1000);
-      const remote = await createEvent({ title: block.title, start: start.toISOString(), end: end.toISOString(), notes: block.notes });
+    const guard = await evaluateExternalAction({
+      kind: "calendar",
+      target: String(capture.transcript || "").slice(0, 80) || "voice schedule",
+      meta: { blocks: capture.calendarBlocks.length },
+    });
+    if (!guard.allowed) return { success: false, detail: guard.reason };
 
-      if (!remote.ok) {
-        await Schedule.create({
+    await Approval.create({
+      kind: "calendar",
+      title: `Lock ${capture.calendarBlocks.length} time block(s)`,
+      detail: (capture.calendarBlocks as any[]).map((block) => block.title).join(" · "),
+      payload: {
+        blocks: (capture.calendarBlocks as any[]).map((block) => ({
           title: block.title,
-          start,
-          end,
-          notes: block.notes || `From voice capture ${capture._id}`,
-          visibility: "private",
-          status: "scheduled",
-          source: "voice",
-        });
-      }
-      results.push(`${block.title}: ${remote.ok ? "Google Calendar" : "local schedule"}`);
-    }
-
-    capture.set("scheduleLockedAt", new Date());
-    await capture.save();
-    revalidatePath("/voice");
-    revalidatePath("/planner/daily");
-    revalidatePath("/cms/schedule");
-    return { success: true, detail: results.join(" · ") };
+          start: block.start,
+          end: block.end,
+          notes: block.notes,
+        })),
+      },
+      status: "pending",
+    });
+    revalidatePath("/approvals");
+    return { success: true, detail: "Queued for approval — open /approvals." };
   } catch (error) {
     return { success: false, detail: (error as Error).message };
   }
