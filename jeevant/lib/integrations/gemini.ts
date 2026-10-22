@@ -3,6 +3,7 @@
 // local draft when no keys are configured, so the pipeline is always usable.
 
 import type { DraftBundle, DraftArtifact, Intent, PlanBlock, TaskSuggestion } from "./types";
+import { groqChat, groqConfigured, groqModel } from "./groq";
 
 function apiKeys(): string[] {
   return (process.env.GEMINI_API_KEYS || "")
@@ -156,9 +157,24 @@ function simulate(transcript: string, note?: string): DraftBundle {
   };
 }
 
+async function groqDraft(transcript: string, hint?: string): Promise<DraftBundle | null> {
+  if (!groqConfigured()) return null;
+  const text = await groqChat(SYSTEM_PROMPT, buildPrompt(transcript, hint), true);
+  if (!text) return null;
+  try {
+    const bundle = coerce(extractJson(text));
+    return { ...bundle, provider: `groq:${groqModel()}` };
+  } catch {
+    return null;
+  }
+}
+
 export async function draftFromTranscript(transcript: string, hint?: string): Promise<DraftBundle> {
   const keys = apiKeys();
-  if (!keys.length) return simulate(transcript);
+  if (!keys.length) {
+    const viaGroq = await groqDraft(transcript, hint);
+    return viaGroq ?? simulate(transcript);
+  }
 
   let lastError = "";
   for (let attempt = 0; attempt < keys.length; attempt++) {
@@ -199,6 +215,8 @@ export async function draftFromTranscript(transcript: string, hint?: string): Pr
     }
   }
 
-  const fallback = simulate(transcript, `All Gemini keys failed (${lastError}). Showing heuristic drafts.`);
-  return fallback;
+  const viaGroq = await groqDraft(transcript, hint);
+  if (viaGroq) return viaGroq;
+
+  return simulate(transcript, `All Gemini and Groq attempts failed (${lastError}). Showing heuristic drafts.`);
 }
