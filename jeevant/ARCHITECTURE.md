@@ -358,3 +358,106 @@ This is a self-contained subsystem added on top of the CMS. Full setup guide:
 - LinkedIn/X/WhatsApp/Reddit/YouTube do not expose free silent-posting APIs; the app returns share-intent links or copy-ready drafts. n8n removes that limitation.
 - Gmail *reading* for the overnight digest requires a read scope; without it the digest uses the `Message` collection.
 - Audio blobs are not persisted (transcript only) to avoid DB/filesystem bloat.
+
+---
+
+## 16. Assistant, Memory, Worker, Approvals
+
+### Assistant (`/assistant`)
+
+Voice-first surface: hold the orb → Groq Whisper → agent → spoken reply via the
+browser SpeechSynthesis API. Text input works the same way. Every reply shows the
+provider (`groq:openai/gpt-oss-120b`, `gemini:…`, or `fallback-parser`).
+
+### Agent (`/agent` and `lib/agent`)
+
+- `tools.ts` — tool registry that writes to the same MongoDB collections as the
+  admin UI: tasks, notes, projects, posts, achievements, memory, approvals.
+- `run.ts` — planner. Gemini keys are used when present; otherwise Groq chat
+  (`GROQ_MODEL`, default `openai/gpt-oss-120b`); otherwise a deterministic parser.
+- Destructive tools (`delete_task`, `delete_note`) require `confirm: true` and
+  otherwise return `needsConfirm` without changing anything.
+- `remember` / `recall` persist durable facts; the 20 most recent memories are
+  injected into every planning prompt.
+
+### Memory (`Memory`)
+
+Manual add/delete on `/assistant`; agent-created via the `remember` tool.
+
+### Worker queue (`Job`, `lib/worker/queue.ts`)
+
+- Durable jobs in MongoDB with `attempts`, `maxAttempts`, and exponential backoff.
+- `GET|POST /api/cron/worker?limit=10` drains the queue.
+- Current handlers: `dispatch_due` (scheduled posts) and `digest`.
+
+### Approvals (`Approval`, `/approvals`)
+
+Human-in-the-loop gate for external actions. The agent can queue one with
+`request_approval`. Approving executes the action (post dispatch, Gmail draft, or
+Calendar event); rejecting records the decision. Every decision is stored with a
+result string and timestamp.
+
+By default **all outbound actions are gated**: `dispatchPost`, voice email drafts,
+and voice calendar locks create pending approvals instead of firing. Set
+`AUTO_APPROVE=true` in `.env.local` to bypass the gate. Scheduled posts
+(`dispatch_due`) run automatically because the schedule itself is the approval.
+
+### Health
+
+`GET /api/health` reports DB reachability, provider configuration, queue depth,
+and pending approvals.
+
+### Guardrails (`/guardrails`, `lib/guardrails/policy.ts`)
+
+Hard rules, enforced in code — not by prompt:
+
+- **No auto-send path exists.** `AUTO_APPROVE` was removed. Every outbound action
+  either creates an `Approval` or is blocked.
+- **Emergency stop.** Setting `guardrailMode=blocked` blocks new actions *and*
+  blocks execution of approvals queued before the switch flipped.
+- **HTTP allowlist.** Workflow `http` steps are blocked unless the hostname is
+  allowlisted; even then they still require approval.
+- **Scheduled posts** create approvals when due; they never publish themselves.
+- **Audit log.** Every decision (`approval`, `blocked`, `executed`, `failed`) is
+  written to `AuditLog` and shown on `/guardrails`.
+- Agent `send_message` also passes through the same gate.
+
+### Accounts (`/accounts`)
+
+- `ChannelAccount` stores multiple accounts per channel (`whatsapp`, `sms`,
+  `call`, `telegram`, `email`) with a label and an `isDefault` flag.
+- `config` holds non-secret fields; `secrets` holds tokens and is server-only —
+  it is never included in the data sent to the browser.
+- `resolveAccount(channel, id?)` picks an explicit account, else the channel
+  default, else null (adapters then fall back to environment variables).
+
+### Messaging (`/messages`)
+
+- Channels: WhatsApp, SMS, calls.
+- WhatsApp uses the Meta Cloud API (`WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`);
+  without it, a `wa.me` link is returned.
+- SMS and calls use Twilio (`TWILIO_*`); without it, the message is manual and
+  calls return a `tel:` link.
+- Every outbound message is approval-gated by default. Approving executes the
+  send and writes an `OutboundMessage` log row.
+- Agent tools: `send_message`, plus `remind` (creates a task with a due date).
+
+### Mobile
+
+`MobileDock` adds a bottom navigation bar on phones; the private shell stacks to
+one column and the sidebar becomes a drawer.
+
+### Workflows (in-app n8n alternative)
+
+- `Workflow` stores ordered steps and a trigger (`manual`, `schedule`, `webhook`).
+- `WorkflowRun` stores per-step results with attempt counts; `/automations` shows
+  the last runs per workflow.
+- Steps: `agent`, `task`, `note`, `post`, `email`, `calendar`, `http`.
+- `http` lets a workflow call n8n, Zapier, or any webhook.
+- Inbound trigger: `POST /api/hooks/<webhookKey>` (the key is the credential).
+- Scheduled workflows run from `/api/cron/worker`; manual runs from the UI.
+- Bounded retries apply only to safe-to-repeat steps (`agent`, `http`).
+- `lib/agent/run.ts` stores recent `ChatMessage` turns and injects them, so the
+  assistant has short-term conversation memory. Workflow-internal agent calls use
+  `persist: false`.
+
