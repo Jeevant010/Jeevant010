@@ -211,7 +211,7 @@ export default function VoiceHub({ initialCaptures, digest }: { initialCaptures:
                     {busy === "delete" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />} Delete
                   </button>
                 </div>
-                {active.error && (
+                {active.error && (active.status === "failed" || active.simulated) && (
                   <p className="mt-3 flex items-center gap-2 text-[11px] text-amber-400">
                     <AlertTriangle className="h-3 w-3" /> {active.error}
                   </p>
