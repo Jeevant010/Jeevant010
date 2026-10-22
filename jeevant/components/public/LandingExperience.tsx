@@ -71,7 +71,7 @@ export default function LandingExperience({ profile }: { profile: { name?: strin
             <span className="rounded-full border border-[var(--stage-signal)] px-3 py-1 text-[var(--stage-signal)]">
               Founder · {CV.company.name.split(" (")[0]}
             </span>
-            <span className="text-[var(--stage-muted)]">SSIP 2.0 grantee · AI/ML lead, GDG IIIT Surat</span>
+            <span className="text-[var(--stage-muted)]">SSIP 2.0 grantee · ex-AI/ML lead, GDG IIIT Surat</span>
           </div>
           <p className="mt-4 max-w-xl text-base leading-7 text-[var(--stage-muted)]">
             {PUBLIC_WORK.length} original repositories, {CV.roles.length} roles from the resumes, and one rule under the title: finish the scene you are in.
