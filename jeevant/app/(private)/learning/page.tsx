@@ -15,7 +15,7 @@ export default async function LearningMatrix() {
       title="Knowledge Upload"
       description="Courses, papers, and guides with live progress."
       accent="green"
-      icon={<Terminal className="h-6 w-6 text-green-400" />}
+      icon={<Terminal className="h-6 w-6 text-[#d8cfbe]" />}
     >
       <AddLearningForm />
       <LearningSortableList initialItems={items} />
