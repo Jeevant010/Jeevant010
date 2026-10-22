@@ -26,6 +26,7 @@ type Entry = {
   text: string;
   actions?: Action[];
   simulated?: boolean;
+  provider?: string;
 };
 
 function pickMime(): string {
@@ -70,7 +71,7 @@ export default function AgentConsole() {
       });
       const json = await res.json();
       if (!res.ok || json?.error) throw new Error(json?.error || `Request failed (${res.status})`);
-      push({ kind: "agent", text: json.reply, actions: json.actions, simulated: json.simulated });
+      push({ kind: "agent", text: json.reply, actions: json.actions, simulated: json.simulated, provider: json.provider });
       router.refresh();
     } catch (error) {
       push({ kind: "agent", text: (error as Error).message });
@@ -93,7 +94,7 @@ export default function AgentConsole() {
         next[next.length - 1] = { kind: "user", text: json.transcript };
         return next;
       });
-      push({ kind: "agent", text: json.reply, actions: json.actions, simulated: json.simulated });
+      push({ kind: "agent", text: json.reply, actions: json.actions, simulated: json.simulated, provider: json.provider });
       router.refresh();
     } catch (error) {
       push({ kind: "agent", text: (error as Error).message });
@@ -156,9 +157,13 @@ export default function AgentConsole() {
                   <Bot className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
                   <span className="text-shell-text">{entry.text}</span>
                 </div>
-                {entry.simulated && entry.actions?.length ? (
-                  <p className="mt-1 pl-6 text-[10px] uppercase tracking-widest text-amber-500">
-                    fallback parser — add GEMINI_API_KEYS for free-form commands
+                {entry.provider ? (
+                  <p
+                    className={`mt-1 pl-6 text-[10px] uppercase tracking-widest ${
+                      entry.provider.startsWith("fallback") ? "text-amber-500" : "text-emerald-500"
+                    }`}
+                  >
+                    via {entry.provider}
                   </p>
                 ) : null}
                 {entry.actions?.map((action, actionIndex) => (
