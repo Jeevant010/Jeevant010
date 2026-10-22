@@ -16,6 +16,12 @@ export async function proxy(request: NextRequest) {
     "/studio",
     "/integrations",
     "/agent",
+    "/assistant",
+    "/approvals",
+    "/automations",
+    "/messages",
+    "/accounts",
+    "/guardrails",
   ];
   const path = request.nextUrl.pathname;
   const isProtected = protectedPaths.some((prefix) => path.startsWith(prefix));
@@ -55,5 +61,11 @@ export const config = {
     "/studio/:path*",
     "/integrations/:path*",
     "/agent/:path*",
+    "/assistant/:path*",
+    "/approvals/:path*",
+    "/automations/:path*",
+    "/messages/:path*",
+    "/accounts/:path*",
+    "/guardrails/:path*",
   ],
 };
