@@ -30,7 +30,7 @@ export default function AboutPage() {
               className="h-80 w-full object-cover object-top"
             />
             <div className="p-6">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--stage-signal)]">Founder</p>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--stage-signal)]">Founder · current</p>
               <h2 className="mt-2 font-serif text-3xl tracking-[-0.03em]">{CV.company.name}</h2>
               <p className="mt-2 text-sm leading-6 text-[var(--stage-muted)]">{CV.company.blurb}</p>
               <div className="mt-4 flex flex-wrap gap-2">
