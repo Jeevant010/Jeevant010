@@ -6,6 +6,19 @@ import { Send, Copy, Trash2, Loader2, ExternalLink, Clock, CheckCircle2, AlertTr
 import { dispatchPost, deletePost, duplicatePost } from "@/lib/actions/content.actions";
 import { CHANNEL_ACCENT } from "@/lib/catalog/channels";
 
+const ACCENT_BY_CHANNEL: Record<string, string> = {
+  telegram: "sky",
+  whatsapp: "emerald",
+  twitter: "slate",
+  linkedin: "blue",
+  youtube: "rose",
+  reddit: "orange",
+  discord: "indigo",
+  slack: "amber",
+  mastodon: "violet",
+  email: "violet",
+};
+
 const STATUS_STYLE: Record<string, string> = {
   draft: "border-slate-700 text-slate-400",
   queued: "border-amber-700 text-amber-400",
@@ -95,10 +108,12 @@ export default function PostBoard({ posts }: { posts: Post[] }) {
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
             {post.channels.map((channel) => (
-              <span key={channel} className={`border px-2 py-1 text-[9px] font-bold uppercase tracking-widest ${CHANNEL_ACCENT[
-                channel === "telegram" ? "sky" : channel === "whatsapp" ? "emerald" : channel === "twitter" ? "slate" :
-                channel === "linkedin" ? "blue" : channel === "youtube" ? "rose" : channel === "reddit" ? "orange" : "violet"
-              ]}`}>
+              <span
+                key={channel}
+                className={`border px-2 py-1 text-[9px] font-bold uppercase tracking-widest ${
+                  CHANNEL_ACCENT[ACCENT_BY_CHANNEL[channel] || "violet"]
+                }`}
+              >
                 {channel}
               </span>
             ))}
