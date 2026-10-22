@@ -10,6 +10,9 @@ export const CHANNELS: ChannelMeta[] = [
   { id: "linkedin", label: "LinkedIn", hint: "Share intent or n8n", accent: "blue" },
   { id: "youtube", label: "YouTube", hint: "Outline → copy / n8n", accent: "rose" },
   { id: "reddit", label: "Reddit", hint: "Submit or n8n", accent: "orange" },
+  { id: "discord", label: "Discord", hint: "Webhook", accent: "indigo" },
+  { id: "slack", label: "Slack", hint: "Webhook", accent: "amber" },
+  { id: "mastodon", label: "Mastodon", hint: "Access token", accent: "violet" },
   { id: "email", label: "Email", hint: "Gmail draft or n8n", accent: "violet" },
 ];
 
@@ -21,4 +24,5 @@ export const CHANNEL_ACCENT: Record<string, string> = {
   rose: "border-rose-600/60 bg-rose-950/20 text-rose-400",
   orange: "border-orange-600/60 bg-orange-950/20 text-orange-400",
   violet: "border-violet-600/60 bg-violet-950/20 text-violet-400",
+  indigo: "border-indigo-600/60 bg-indigo-950/20 text-indigo-400",
 };
