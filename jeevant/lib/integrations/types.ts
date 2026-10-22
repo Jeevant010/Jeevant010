@@ -47,6 +47,9 @@ export type ChannelId =
   | "linkedin"
   | "youtube"
   | "reddit"
+  | "discord"
+  | "slack"
+  | "mastodon"
   | "email";
 
 export interface ChannelMeta {
