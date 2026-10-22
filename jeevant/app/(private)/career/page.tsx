@@ -15,14 +15,14 @@ export default async function CareerKanban() {
       title="Corp Infiltration"
       description="Every application, from first contact to signed offer."
       accent="pink"
-      icon={<Building2 className="h-6 w-6 text-pink-400" />}
+      icon={<Building2 className="h-6 w-6 text-[#d8cfbe]" />}
     >
       <AddApplicationForm />
 
       <div className="mb-10 grid gap-3 sm:grid-cols-3">
         <div className="panel-cyber p-4">
           <div className="text-[10px] font-bold uppercase tracking-widest text-shell-muted">Total Targets</div>
-          <div className="mt-2 text-3xl font-black text-pink-400">{applications.length}</div>
+          <div className="mt-2 text-3xl font-black text-[#d8cfbe]">{applications.length}</div>
         </div>
         <div className="panel-cyber p-4">
           <div className="text-[10px] font-bold uppercase tracking-widest text-shell-muted">Interviews Active</div>
@@ -30,7 +30,7 @@ export default async function CareerKanban() {
         </div>
         <div className="panel-cyber p-4">
           <div className="text-[10px] font-bold uppercase tracking-widest text-shell-muted">Offers Secured</div>
-          <div className="mt-2 text-3xl font-black text-green-400">{applications.filter((a: any) => a.status === 'offer').length}</div>
+          <div className="mt-2 text-3xl font-black text-[#c8b48a]">{applications.filter((a: any) => a.status === 'offer').length}</div>
         </div>
       </div>
 
