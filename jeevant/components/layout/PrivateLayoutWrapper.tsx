@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/layout/Sidebar";
+import MobileDock from "@/components/layout/MobileDock";
+import ReminderWatcher from "@/components/layout/ReminderWatcher";
 import { Menu } from "lucide-react";
 
 export default function PrivateLayoutWrapper({
@@ -46,7 +48,7 @@ export default function PrivateLayoutWrapper({
       </div>
 
       {/* --- MAIN CONTENT AREA --- */}
-      <main className="flex-1 min-w-0 h-full overflow-y-auto overflow-x-hidden relative z-10 transition-all duration-300">
+      <main className="flex-1 min-w-0 h-full overflow-y-auto overflow-x-hidden relative z-10 transition-all duration-300 pb-[76px] md:pb-0">
         
         {/* Mobile Header */}
         <div className="md:hidden sticky top-0 z-30 bg-shell-bg/80 backdrop-blur-md p-4 border-b border-shell-border flex items-center justify-between">
@@ -78,6 +80,9 @@ export default function PrivateLayoutWrapper({
           onClick={() => setIsExpanded(false)}
         />
       )}
+
+      <MobileDock />
+      <ReminderWatcher />
     </div>
   );
 }
