@@ -9,6 +9,7 @@ import { whisperConfigured } from "@/lib/integrations/whisper";
 import { geminiConfigured } from "@/lib/integrations/gemini";
 import { gmailConfigured } from "@/lib/integrations/gmail";
 import { calendarConfigured } from "@/lib/integrations/calendar";
+import { groqConfigured, groqModel } from "@/lib/integrations/groq";
 import { dispatchToChannel } from "@/lib/integrations/channels";
 import type { ChannelId } from "@/lib/integrations/types";
 
@@ -60,11 +61,18 @@ export async function getIntegrationStatus() {
       detail: "Free Whisper transcription of your voice notes.",
     },
     {
+      id: "groq-llm",
+      label: "AI Drafting & Agent (Groq)",
+      env: "GROQ_API_KEY · GROQ_MODEL",
+      configured: groqConfigured(),
+      detail: `Active model: ${groqModel()}. Powers free-form agent commands and drafting.`,
+    },
+    {
       id: "gemini",
-      label: "AI Drafting (Gemini, rotating keys)",
+      label: "AI Drafting (Gemini, optional)",
       env: "GEMINI_API_KEYS",
       configured: geminiConfigured(),
-      detail: "Comma-separated key pool; rotates automatically on rate limits.",
+      detail: "Optional. Groq is used automatically when Gemini keys are absent.",
     },
     {
       id: "gmail",
@@ -93,6 +101,27 @@ export async function getIntegrationStatus() {
       env: "telegramBotToken + telegramChatId",
       configured: has(cfg.telegramBotToken) && has(cfg.telegramChatId),
       detail: "Posts straight to a channel via the free Bot API.",
+    },
+    {
+      id: "discord",
+      label: "Discord Webhook",
+      env: "DISCORD_WEBHOOK_URL",
+      configured: has(cfg.discordWebhookUrl),
+      detail: "Posts into a Discord channel through a webhook.",
+    },
+    {
+      id: "slack",
+      label: "Slack Webhook",
+      env: "SLACK_WEBHOOK_URL",
+      configured: has(cfg.slackWebhookUrl),
+      detail: "Posts into a Slack channel through a webhook.",
+    },
+    {
+      id: "mastodon",
+      label: "Mastodon",
+      env: "MASTODON_INSTANCE · MASTODON_TOKEN",
+      configured: has(cfg.mastodonInstance) && has(process.env.MASTODON_TOKEN),
+      detail: "Posts a status directly to your Mastodon instance.",
     },
   ];
 }
