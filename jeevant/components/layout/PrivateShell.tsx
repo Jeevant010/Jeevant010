@@ -3,63 +3,25 @@ import Atmosphere from "@/components/ui/Atmosphere";
 
 export type ShellAccent = "emerald" | "amber" | "blue" | "sky" | "rose" | "violet" | "pink" | "green";
 
-const ACCENTS: Record<ShellAccent, { text: string; border: string; bg: string; glow: string; dot: string }> = {
-  emerald: {
-    text: "text-emerald-400",
-    border: "border-emerald-500/40",
-    bg: "bg-emerald-500/10",
-    glow: "shadow-[0_0_40px_rgba(16,185,129,0.16)]",
-    dot: "bg-emerald-400",
-  },
-  amber: {
-    text: "text-amber-400",
-    border: "border-amber-500/40",
-    bg: "bg-amber-500/10",
-    glow: "shadow-[0_0_40px_rgba(245,158,11,0.16)]",
-    dot: "bg-amber-400",
-  },
-  blue: {
-    text: "text-blue-400",
-    border: "border-blue-500/40",
-    bg: "bg-blue-500/10",
-    glow: "shadow-[0_0_40px_rgba(59,130,246,0.16)]",
-    dot: "bg-blue-400",
-  },
-  sky: {
-    text: "text-sky-400",
-    border: "border-sky-500/40",
-    bg: "bg-sky-500/10",
-    glow: "shadow-[0_0_40px_rgba(14,165,233,0.16)]",
-    dot: "bg-sky-400",
-  },
-  rose: {
-    text: "text-rose-400",
-    border: "border-rose-500/40",
-    bg: "bg-rose-500/10",
-    glow: "shadow-[0_0_40px_rgba(244,63,94,0.16)]",
-    dot: "bg-rose-400",
-  },
-  violet: {
-    text: "text-violet-400",
-    border: "border-violet-500/40",
-    bg: "bg-violet-500/10",
-    glow: "shadow-[0_0_40px_rgba(139,92,246,0.16)]",
-    dot: "bg-violet-400",
-  },
-  pink: {
-    text: "text-pink-400",
-    border: "border-pink-500/40",
-    bg: "bg-pink-500/10",
-    glow: "shadow-[0_0_40px_rgba(236,72,153,0.16)]",
-    dot: "bg-pink-400",
-  },
-  green: {
-    text: "text-green-400",
-    border: "border-green-500/40",
-    bg: "bg-green-500/10",
-    glow: "shadow-[0_0_40px_rgba(34,197,94,0.16)]",
-    dot: "bg-green-400",
-  },
+// A single restrained tone. The old per-page rainbow (pink/green/blue/violet)
+// made the admin feel like different products glued together.
+const NEUTRAL = {
+  text: "text-[#d8cfbe]",
+  border: "border-white/10",
+  bg: "bg-white/5",
+  glow: "shadow-[0_0_40px_rgba(200,180,138,0.08)]",
+  dot: "bg-[#c8b48a]",
+};
+
+const ACCENTS: Record<ShellAccent, typeof NEUTRAL> = {
+  emerald: NEUTRAL,
+  amber: NEUTRAL,
+  blue: NEUTRAL,
+  sky: NEUTRAL,
+  rose: NEUTRAL,
+  violet: NEUTRAL,
+  pink: NEUTRAL,
+  green: NEUTRAL,
 };
 
 export default function PrivateShell({
