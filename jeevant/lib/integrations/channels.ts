@@ -125,6 +125,65 @@ export async function dispatchToChannel(
     };
   }
 
+  if (channel === "discord" || channel === "slack") {
+    const webhookUrl = channel === "discord" ? cfg.discordWebhookUrl : cfg.slackWebhookUrl;
+    if (!isTruthy(webhookUrl)) {
+      return {
+        channel,
+        ok: true,
+        mode: "manual",
+        detail: `${channel === "discord" ? "Discord" : "Slack"} webhook not configured — copy the post.`,
+      };
+    }
+    try {
+      const res = await fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: JSON.stringify(
+          channel === "discord" ? { content: text } : { text }
+        ),
+      });
+      return {
+        channel,
+        ok: res.ok,
+        mode: "direct",
+        detail: res.ok ? `Posted to ${channel}.` : `${channel} responded ${res.status}.`,
+      };
+    } catch (error) {
+      return { channel, ok: false, mode: "direct", detail: (error as Error).message };
+    }
+  }
+
+  if (channel === "mastodon") {
+    const instance = cfg.mastodonInstance.replace(/\/$/, "");
+    const token = process.env.MASTODON_TOKEN;
+    if (!instance || !token) {
+      return {
+        channel,
+        ok: true,
+        mode: "manual",
+        detail: "Mastodon instance/token not configured — copy the post.",
+      };
+    }
+    try {
+      const res = await fetch(`${instance}/api/v1/statuses`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        cache: "no-store",
+        body: JSON.stringify({ status: text }),
+      });
+      return {
+        channel,
+        ok: res.ok,
+        mode: "direct",
+        detail: res.ok ? "Posted to Mastodon." : `Mastodon responded ${res.status}.`,
+      };
+    } catch (error) {
+      return { channel, ok: false, mode: "direct", detail: (error as Error).message };
+    }
+  }
+
   // Channels without a free direct API: prefer n8n, else a share link.
   const webhook = await postToWebhook(cfg, { channel, title: post.title, body: post.body, tags: post.tags, source: post.source });
   if (webhook) return webhook;
