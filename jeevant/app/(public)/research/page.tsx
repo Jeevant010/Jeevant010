@@ -16,8 +16,8 @@ export default function ResearchPage() {
       <div className="relative mx-auto max-w-[1000px] px-5 py-16 sm:px-8 sm:py-24">
         <PageHeader
           eyebrow="Research"
-          title="First paper in progress, not a reading list."
-          description="I am a fourth-year student writing my first paper. This page tracks what I am actually building and writing now — retrieval-grounded grading, agentic control of Unreal Engine, and local-first model stacks."
+          title="Two papers in progress, not a reading list."
+          description="I am a fourth-year student writing my first two papers: agentic control of Unreal Engine 5, and privacy-preserving gunshot detection on edge devices. This page tracks only what is actually being written."
         />
 
         <section className="mt-14 grid gap-4">
