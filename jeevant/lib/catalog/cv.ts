@@ -14,7 +14,7 @@ export type CvMark = {
 
 export const CV = {
   name: "Jeevant Mudgil",
-  role: "Backend, AI/ML, and full-stack engineer",
+  role: "Founder and engineer — backend, AI/ML, full-stack",
   location: "Surat, India",
   phone: "9306130032",
   email: "jeevantmudgil@gmail.com",
@@ -25,7 +25,7 @@ export const CV = {
     { label: "LeetCode", href: "https://leetcode.com/u/JEEVANT10/" },
   ],
   summary:
-    "Computer science student at IIIT Surat building backend systems, retrieval and agentic AI, and game tooling. Founder of Scholar Dive (AdaptiveGrade), an SSIP 2.0 grantee. AI/ML Lead at GDG IIIT Surat and a backend intern at Astra3D. The public repositories carry the proof: RAG services, local model stacks, MCP for Unreal Engine, and full-stack products.",
+    "Computer science student at IIIT Surat building backend systems, retrieval and agentic AI, and game tooling. Founder of Scholar Dive (AdaptiveGrade), an SSIP 2.0 grantee. Former AI/ML Lead at GDG IIIT Surat (tenure ended August 2026) and backend intern at Astra3D (June–July 2026). The public repositories carry the proof: RAG services, MCP for Unreal Engine, edge ML, and full-stack products.",
   education: {
     school: "Indian Institute of Information Technology, Surat",
     degree: "B.Tech, Computer Science and Engineering",
@@ -37,7 +37,7 @@ export const CV = {
     {
       org: "Astra3D — Reealtech Pvt Ltd",
       title: "Backend developer intern",
-      when: "Jun 2026 — present",
+      when: "Jun 2026 — Jul 2026",
       place: "Remote",
       points: [
         "Backend for the Astra3D platform in Node.js, Express, and MongoDB.",
@@ -57,13 +57,13 @@ export const CV = {
     },
     {
       org: "Google Developer Groups, IIIT Surat",
-      title: "AI/ML lead",
-      when: "Aug 2025 — present",
+      title: "AI/ML lead (tenure completed)",
+      when: "Aug 2025 — Aug 2026",
       place: "Surat",
       points: [
-        "Leads the AI/ML tracks and mentors juniors on ML fundamentals.",
+        "Led the AI/ML tracks and mentored juniors on ML fundamentals.",
         "Technical lead for Innov-AI-Thon, Dev Heat, WebXperience, and PromptCraft.",
-        "Runs mock interviews and technical screening for student developer teams.",
+        "Ran mock interviews and technical screening for student developer teams.",
       ],
     },
     {
@@ -94,16 +94,6 @@ export const CV = {
       points: [
         "Six-week program in employability skills, digital literacy, and AI fundamentals.",
         "Guided project work with mentor review; completion certificate on file.",
-      ],
-    },
-    {
-      org: "Open Source Society, IIIT Surat",
-      title: "Founder",
-      when: "2026 — present",
-      place: "Surat",
-      points: [
-        "Drafted the manifesto and groundwork for a low-level engineering community (kernel, virtualization).",
-        "Formerly the Deep Systems and Open-Source Lab.",
       ],
     },
     {
@@ -248,21 +238,14 @@ export const CV = {
       title: "Driving Unreal Engine 5 through the Model Context Protocol",
       status: "writing" as const,
       detail:
-        "First paper, in progress. Protocol design for safe tool calls into the engine, latency measurements, and how an agent can act inside a running editor without breaking state.",
+        "In progress. Protocol design for safe tool calls into a running editor, latency measurements, and how an agent can act without corrupting engine state.",
       when: "2026",
     },
     {
-      title: "Retrieval-grounded grading for adaptive learning",
-      status: "in-progress" as const,
+      title: "Privacy-preserving gunshot detection on edge devices",
+      status: "writing" as const,
       detail:
-        "RAG over course material with calibrated grading and feedback loops. This is the research behind Scholar Dive, not a reading exercise.",
-      when: "2025 — 2026",
-    },
-    {
-      title: "Local-first agent stacks: latency and cost",
-      status: "experiment" as const,
-      detail:
-        "Benchmarking Ollama, DeepSeek, and Groq for tool-calling latency and cost against hosted APIs, with an evaluation harness for tutor responses.",
+        "In progress. A 1D/2D CNN pipeline for the Arduino Nano 33 BLE Sense that classifies gunshots on-device, so raw audio never leaves the hardware.",
       when: "2026",
     },
   ],
