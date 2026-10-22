@@ -9,7 +9,7 @@ import {
   FileCog, Sword, UserCog, 
   LogOut, Monitor, Settings,
   Menu, X, Calendar, Compass, FileText, Award,
-  Code, Radio, Mail, Wrench, Mic, PenLine, Plug, Bot
+  Code, Radio, Mail, Wrench, Mic, PenLine, Plug, Bot, Terminal, ShieldCheck, Workflow, MessageSquare, KeyRound, ShieldAlert
 } from "lucide-react";
 import { logout } from "@/lib/actions/auth.actions";
 
@@ -85,10 +85,16 @@ export default function Sidebar({ isExpanded, toggleSidebar, isMobile }: Sidebar
           {mode === "VIEW" ? (
             <>
               {isExpanded && <SectionHeader label="Comm Center" />}
-              <SidebarItem href="/agent" icon={<Bot size={18} />} label="Agent" active={pathname === "/agent"} expanded={isExpanded} />
+              <SidebarItem href="/assistant" icon={<Bot size={18} />} label="Assistant" active={pathname === "/assistant"} expanded={isExpanded} />
+              <SidebarItem href="/agent" icon={<Terminal size={18} />} label="Agent" active={pathname === "/agent"} expanded={isExpanded} />
+              <SidebarItem href="/messages" icon={<MessageSquare size={18} />} label="Messages" active={pathname === "/messages"} expanded={isExpanded} />
               <SidebarItem href="/voice" icon={<Mic size={18} />} label="Voice Inbox" active={pathname === "/voice"} expanded={isExpanded} />
               <SidebarItem href="/studio" icon={<PenLine size={18} />} label="Studio" active={pathname === "/studio"} expanded={isExpanded} />
               <SidebarItem href="/integrations" icon={<Plug size={18} />} label="Integrations" active={pathname === "/integrations"} expanded={isExpanded} />
+              <SidebarItem href="/accounts" icon={<KeyRound size={18} />} label="Accounts" active={pathname === "/accounts"} expanded={isExpanded} />
+              <SidebarItem href="/approvals" icon={<ShieldCheck size={18} />} label="Approvals" active={pathname === "/approvals"} expanded={isExpanded} />
+              <SidebarItem href="/guardrails" icon={<ShieldAlert size={18} />} label="Guardrails" active={pathname === "/guardrails"} expanded={isExpanded} />
+              <SidebarItem href="/automations" icon={<Workflow size={18} />} label="Automations" active={pathname === "/automations"} expanded={isExpanded} />
 
               {isExpanded && <div className="mt-4"><SectionHeader label="Private Tools" /></div>}
               <SidebarItem href="/dashboard" icon={<LayoutDashboard size={18} />} label="Overview" active={pathname === "/dashboard"} expanded={isExpanded} />
