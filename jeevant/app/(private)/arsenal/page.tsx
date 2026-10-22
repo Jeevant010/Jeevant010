@@ -15,11 +15,11 @@ export default async function ArsenalPage() {
       title="The Arsenal"
       description="Reusable code, tested versions, and the notes that matter."
       accent="amber"
-      icon={<Box className="h-6 w-6 text-amber-400" />}
+      icon={<Box className="h-6 w-6 text-[#d8cfbe]" />}
       actions={
         <div className="stat-chip text-right">
           <div className="text-[9px] font-bold uppercase tracking-widest text-shell-muted">Capacity</div>
-          <div className="text-xl font-black text-amber-300">{snippets.length} / 100</div>
+          <div className="text-xl font-black text-[#c8b48a]">{snippets.length} / 100</div>
         </div>
       }
     >
