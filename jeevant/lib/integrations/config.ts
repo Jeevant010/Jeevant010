@@ -17,6 +17,9 @@ const DEFAULTS: RuntimeConfig = {
   linkedinProfile: "",
   youtubeChannel: "",
   twitterHandle: "",
+  discordWebhookUrl: "",
+  slackWebhookUrl: "",
+  mastodonInstance: "",
 };
 
 export async function getRuntimeConfig(): Promise<RuntimeConfig> {
@@ -29,6 +32,9 @@ export async function getRuntimeConfig(): Promise<RuntimeConfig> {
     gmailSender: process.env.GMAIL_SENDER || DEFAULTS.gmailSender,
     googleCalendarId: process.env.GOOGLE_CALENDAR_ID || DEFAULTS.googleCalendarId,
     siteUrl: process.env.PUBLIC_SITE_URL || DEFAULTS.siteUrl,
+    discordWebhookUrl: process.env.DISCORD_WEBHOOK_URL || DEFAULTS.discordWebhookUrl,
+    slackWebhookUrl: process.env.SLACK_WEBHOOK_URL || DEFAULTS.slackWebhookUrl,
+    mastodonInstance: process.env.MASTODON_INSTANCE || DEFAULTS.mastodonInstance,
   };
 
   const stored: RuntimeConfig = {};
