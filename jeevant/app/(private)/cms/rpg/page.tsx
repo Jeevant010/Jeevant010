@@ -3,6 +3,7 @@ import { QuestList, LootList } from "@/components/features/AdminRPGLists";
 import { AddQuestForm } from "@/components/features/AddQuestForm";
 import { AddLootForm } from "@/components/features/AddLootForm";
 import { Sword, Shield, Scroll, Save } from "lucide-react";
+import PrivateShell from "@/components/layout/PrivateShell";
 
 export const dynamic = "force-dynamic";
 
@@ -10,20 +11,14 @@ export default async function GameMasterConsole() {
   const { quests, loot } = await getCharacterSheet();
 
   return (
-    <div className="min-h-screen bg-[#1a1510] text-[#a89c8a] p-8 font-serif relative overflow-hidden -m-8">
-      
-      {/* HEADER */}
-      <div className="mb-12 border-b border-[#4a3c30] pb-6 flex items-center gap-4">
-        <div className="w-12 h-12 bg-[#2a2420] border-2 border-yellow-600 rounded flex items-center justify-center">
-           <Scroll className="w-6 h-6 text-yellow-500" />
-        </div>
-        <div>
-           <h1 className="text-4xl font-black text-[#e8dcc5] uppercase tracking-tighter">Game Master Console</h1>
-           <p className="text-[#8a7045] font-bold mt-1">Modify Character Stats & History</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+    <PrivateShell
+      eyebrow="Character stats & history"
+      title="Game Master Console"
+      description="Edit quests and loot — the same data the public timeline reads."
+      accent="amber"
+      icon={<Scroll className="h-6 w-6 text-amber-400" />}
+    >
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         
         {/* COLUMN 1: QUESTS (Experience) */}
         <div>
@@ -49,6 +44,6 @@ export default async function GameMasterConsole() {
         </div>
 
       </div>
-    </div>
+    </PrivateShell>
   );
 }

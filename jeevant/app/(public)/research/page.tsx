@@ -1,84 +1,55 @@
-import { getNotes } from "@/lib/actions/note.actions";
-import { BookOpen, FileText, Mic2, Search } from "lucide-react";
+import { CV } from "@/lib/catalog/cv";
+import PageHeader from "@/components/ui/PageHeader";
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-static";
 
-export default async function ResearchPage() {
-  const notes = await getNotes();
+const STATUS_LABEL: Record<string, string> = {
+  writing: "First paper · writing",
+  "in-progress": "In progress",
+  experiment: "Experiment",
+};
 
+export default function ResearchPage() {
   return (
-    <div className="space-y-8">
-      <section className="rounded-[2rem] border border-shell-border bg-[radial-gradient(circle_at_top,rgba(34,197,94,0.16),transparent_35%),linear-gradient(180deg,var(--color-shell-surface),var(--color-shell-bg))] p-8 shadow-2xl sm:p-10">
-        <div className="max-w-3xl space-y-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-emerald-300">Research</p>
-          <h1 className="text-4xl font-black tracking-tight text-shell-text sm:text-6xl">Notes, papers, and the ideas worth keeping.</h1>
-          <p className="text-lg leading-8 text-shell-muted">
-            This page is the written trail behind the work: what I read, what I learned, and what I want to remember.
-          </p>
-        </div>
-      </section>
+    <div className="relative">
+      <div className="pointer-events-none absolute inset-0 stage-grid opacity-50" />
+      <div className="relative mx-auto max-w-[1000px] px-5 py-16 sm:px-8 sm:py-24">
+        <PageHeader
+          eyebrow="Research"
+          title="Two papers in progress, not a reading list."
+          description="I am a fourth-year student writing my first two papers: agentic control of Unreal Engine 5, and privacy-preserving gunshot detection on edge devices. This page tracks only what is actually being written."
+        />
 
-      <section className="grid gap-6 lg:grid-cols-3">
-        <div className="rounded-[1.75rem] border border-shell-border bg-shell-surface p-6">
-          <Search className="h-6 w-6 text-emerald-300" />
-          <h2 className="mt-4 text-xl font-bold text-shell-text">Searchable notes</h2>
-          <p className="mt-2 text-sm leading-6 text-shell-muted">Store articles, observations, and summaries in one place.</p>
-        </div>
-        <div className="rounded-[1.75rem] border border-shell-border bg-shell-surface p-6">
-          <BookOpen className="h-6 w-6 text-sky-300" />
-          <h2 className="mt-4 text-xl font-bold text-shell-text">Reading list</h2>
-          <p className="mt-2 text-sm leading-6 text-shell-muted">Books, courses, and papers can all live here.</p>
-        </div>
-        <div className="rounded-[1.75rem] border border-shell-border bg-shell-surface p-6">
-          <Mic2 className="h-6 w-6 text-violet-300" />
-          <h2 className="mt-4 text-xl font-bold text-shell-text">Thought log</h2>
-          <p className="mt-2 text-sm leading-6 text-shell-muted">A place for the ideas you want to build on later.</p>
-        </div>
-      </section>
+        <section className="mt-14 grid gap-4">
+          {CV.research.map((item) => (
+            <article key={item.title} className="stage-panel quest-card p-6 sm:p-8">
+              <span className="card-sheen" aria-hidden />
+              <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] uppercase tracking-[0.18em]">
+                <span className="rounded-full border border-[var(--stage-signal)] px-3 py-1 text-[var(--stage-signal)]">
+                  {STATUS_LABEL[item.status] || item.status}
+                </span>
+                <span className="text-[var(--stage-muted)]">{item.when}</span>
+              </div>
+              <h2 className="mt-4 font-serif text-3xl tracking-[-0.03em]">{item.title}</h2>
+              <p className="mt-3 text-sm leading-6 text-[var(--stage-muted)]">{item.detail}</p>
+            </article>
+          ))}
+        </section>
 
-      <section className="grid gap-6 lg:grid-cols-[1fr_300px]">
-        <div className="rounded-[2rem] border border-shell-border bg-shell-surface p-6 sm:p-8">
-          <div className="flex items-center justify-between border-b border-shell-border pb-4">
-            <h2 className="text-2xl font-bold text-shell-text">Research & Notes</h2>
-            <span className="text-xs uppercase tracking-[0.3em] text-shell-muted">Archive</span>
-          </div>
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {notes.length === 0 ? (
-              <div className="col-span-full text-sm text-shell-muted">Add notes, summaries, or reference material from the admin area.</div>
-            ) : (
-              notes.map((note: any) => (
-                <div key={note._id} className="rounded-2xl border border-shell-border bg-shell-bg/30 p-5 flex flex-col justify-between">
-                  <div>
-                    <div className="text-lg font-semibold text-shell-text">{note.title}</div>
-                    <p className="mt-3 text-sm leading-6 text-shell-muted">{note.content || "Use this for book notes, paper summaries, or research ideas."}</p>
-                  </div>
-                  {note.tags?.length ? (
-                    <div className="mt-6 flex flex-wrap gap-2">
-                      {note.tags.map((tag: string) => (
-                        <span key={tag} className="rounded-full border border-shell-border bg-emerald-500/10 px-3 py-1 text-xs uppercase tracking-[0.1em] text-emerald-300">
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <div className="rounded-[2rem] border border-shell-border bg-gradient-to-br from-emerald-500/10 to-transparent p-6 sm:p-8">
-            <h2 className="text-2xl font-bold text-shell-text">Index</h2>
-            <ul className="mt-4 space-y-4 text-sm leading-6 text-shell-muted">
-              <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-400"></div> AI & Machine Learning</li>
-              <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-sky-400"></div> Web Architecture</li>
-              <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-violet-400"></div> Design Systems</li>
-              <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-amber-400"></div> Computer Science</li>
-            </ul>
-          </div>
-        </div>
-      </section>
+        <section className="mt-20 border-t border-[var(--stage-line)] pt-10">
+          <h2 className="text-[11px] uppercase tracking-[0.28em] text-[var(--stage-signal)]">
+            Reading that fed the work
+          </h2>
+          <ul className="mt-5 grid gap-2 text-sm text-[var(--stage-muted)]">
+            {CV.reading.map((title) => (
+              <li key={title} className="flex gap-3 border-b border-[var(--stage-line)] pb-2">
+                <span className="text-[var(--stage-signal)]">—</span>
+                {title}
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
     </div>
   );
 }

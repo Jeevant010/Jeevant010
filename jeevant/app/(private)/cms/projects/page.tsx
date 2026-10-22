@@ -2,6 +2,7 @@ import { getProjects } from "@/lib/actions/project.action";
 import AddProjectForm from "@/components/features/AddProjectForm";
 import SortableProjectList from "@/components/features/SortableProjectList";
 import { FolderOpen, Archive } from "lucide-react";
+import PrivateShell from "@/components/layout/PrivateShell";
 
 export const dynamic = "force-dynamic";
 
@@ -9,38 +10,29 @@ export default async function ProjectCMS() {
   const projects = await getProjects();
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] text-shell-muted p-8 font-mono -m-8">
-      
-      {/* HEADER */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-shell-text uppercase tracking-tight flex items-center gap-3">
-            <FolderOpen className="w-8 h-8 text-yellow-600" /> Projects
-          </h1>
-          <p className="text-shell-muted text-xs tracking-widest mt-1">// ACCESS LEVEL: ADMIN // DATABASE: PROJECTS</p>
-        </div>
-      </div>
-
-      {/* ADD FORM */}
-      <div className="mb-12">
+    <PrivateShell
+      eyebrow="Access level admin · database projects"
+      title="Projects"
+      description="Add, order, and publish the repositories that appear publicly."
+      accent="amber"
+      icon={<FolderOpen className="h-6 w-6 text-yellow-500" />}
+    >
+      <div className="mb-10">
         <AddProjectForm />
       </div>
 
-      {/* FILE SYSTEM (Grid Layout) */}
-      <div className="border border-slate-800 bg-[#121212]">
-        {/* Header Row */}
-        <div className="grid grid-cols-12 gap-4 p-4 border-b border-slate-800 bg-[#1a1a1a] text-xs font-bold text-shell-muted uppercase tracking-widest">
+      <div className="panel-cyber overflow-hidden">
+        <div className="grid grid-cols-12 gap-4 border-b border-white/5 bg-white/[0.02] p-4 text-xs font-bold uppercase tracking-widest text-shell-muted">
           <div className="col-span-5">Project</div>
           <div className="col-span-3">Status</div>
           <div className="col-span-2">Visibility</div>
           <div className="col-span-2 text-right">Actions</div>
         </div>
 
-        {/* Project Rows */}
-        <div className="divide-y divide-slate-800">
+        <div className="divide-y divide-white/5">
           {projects.length === 0 ? (
-            <div className="p-12 text-center flex flex-col items-center gap-4 text-shell-muted">
-              <Archive className="w-12 h-12 opacity-20" />
+            <div className="flex flex-col items-center gap-4 p-12 text-center text-shell-muted">
+              <Archive className="h-12 w-12 opacity-20" />
               <p>NO PROJECTS FOUND.</p>
             </div>
           ) : (
@@ -48,6 +40,6 @@ export default async function ProjectCMS() {
           )}
         </div>
       </div>
-    </div>
+    </PrivateShell>
   );
 }

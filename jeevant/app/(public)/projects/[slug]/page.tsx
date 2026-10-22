@@ -1,4 +1,6 @@
 import { getProjectBySlug } from "@/lib/actions/project.action";
+import { getPublicWork } from "@/lib/catalog/public-work";
+import WorkDossier from "@/components/public/WorkDossier";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
@@ -10,6 +12,10 @@ export const dynamic = "force-dynamic";
 
 export default async function ProjectDossier({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
+  const published = getPublicWork(resolvedParams.slug);
+  if (published) {
+    return <WorkDossier item={published} />;
+  }
   const project = await getProjectBySlug(resolvedParams.slug);
   
   if (!project) {

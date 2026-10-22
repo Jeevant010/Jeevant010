@@ -1,5 +1,6 @@
 import Link from "next/link";
-import ThemeToggle from "@/components/layout/ThemeToggle";
+import PublicNav from "@/components/layout/PublicNav";
+import ImmersiveChrome from "@/components/public/ImmersiveChrome";
 
 export default function PublicLayout({
   children,
@@ -7,43 +8,20 @@ export default function PublicLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="theme-shell flex min-h-screen flex-col relative">
-      <div className="film-grain" />
-      <nav className="sticky top-0 z-50 border-b border-shell-border bg-shell-bg/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link href="/" className="text-lg font-black tracking-tight text-shell-text relative group">
-            Jeevant<span className="text-shell-accent">.dev</span>
-            <div className="absolute -bottom-1 left-0 h-[2px] w-0 bg-[color:var(--shell-accent)] transition-all group-hover:w-full" />
-          </Link>
+    <ImmersiveChrome>
+      <div className="flex min-h-screen flex-col">
+      <PublicNav />
 
-          <div className="hidden items-center gap-6 text-sm font-medium text-shell-muted md:flex">
-            <Link href="/about" className="transition hover:text-shell-text hover:drop-shadow-md">Profile</Link>
-            <Link href="/journey" className="transition hover:text-shell-text hover:drop-shadow-md">Journey</Link>
-            <Link href="/projects" className="transition hover:text-shell-text hover:drop-shadow-md">Projects</Link>
-            <Link href="/research" className="transition hover:text-shell-text hover:drop-shadow-md">Research</Link>
-            <Link href="/library" className="transition hover:text-shell-text hover:drop-shadow-md">Library</Link>
-            <Link href="/schedule" className="transition hover:text-shell-text hover:drop-shadow-md">Schedule</Link>
-            <Link href="/contact" className="transition hover:text-shell-text hover:drop-shadow-md">Contact</Link>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-          </div>
-        </div>
-      </nav>
-
-      <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8 relative z-10">
-        <div className="mx-auto max-w-7xl">
-          {children}
-        </div>
+      <main className="flex-1 relative z-10">
+        {children}
       </main>
 
-      <footer className="border-t border-shell-border bg-shell-bg relative z-10">
+      <footer className="relative z-10 border-t border-[var(--stage-line)]">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-4 lg:px-8">
           <div>
             <h3 className="text-sm font-bold uppercase tracking-[0.25em] text-shell-text">Jeevant</h3>
             <p className="mt-4 max-w-sm text-sm leading-6 text-shell-muted">
-              A cinematic portfolio and operating dashboard for work, research, and the story behind the code.
+              AI systems, game tools, and full-stack products. The public repositories are the proof.
             </p>
           </div>
 
@@ -55,14 +33,15 @@ export default function PublicLayout({
               <Link href="/projects" className="transition hover:text-shell-text">Projects</Link>
               <Link href="/research" className="transition hover:text-shell-text">Research</Link>
               <Link href="/library" className="transition hover:text-shell-text">Library</Link>
-              <Link href="/schedule" className="transition hover:text-shell-text">Schedule</Link>
             </div>
           </div>
 
           <div>
             <h4 className="text-xs font-bold uppercase tracking-[0.25em] text-shell-text">More</h4>
             <div className="mt-4 grid gap-3 text-sm text-shell-muted">
+              <Link href="/cv" className="transition hover:text-shell-text">CV</Link>
               <Link href="/contact" className="transition hover:text-shell-text">Contact</Link>
+              <Link href="/login" className="transition hover:text-shell-text">Operator login</Link>
             </div>
           </div>
 
@@ -77,10 +56,11 @@ export default function PublicLayout({
           </div>
         </div>
 
-        <div className="border-t border-shell-border py-4 text-center text-xs uppercase tracking-[0.2em] text-shell-muted">
-          © {new Date().getFullYear()} Jeevant Mudgil. Built with Next.js and MongoDB.
+        <div className="border-t border-[var(--stage-line)] py-4 text-center text-xs uppercase tracking-[0.2em] text-[var(--stage-muted)]">
+          © {new Date().getFullYear()} Jeevant Mudgil
         </div>
       </footer>
-    </div>
+      </div>
+    </ImmersiveChrome>
   );
 }

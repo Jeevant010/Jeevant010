@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import path from "path";
+import { PUBLIC_WORK } from "../lib/catalog/public-work";
 
 // Load .env.local
 dotenv.config({ path: path.resolve(__dirname, "../.env.local") });
@@ -186,7 +187,6 @@ const ACHIEVEMENTS = [
   { title: "AlgoUniversity Tech Fellowship — Stage 2 Qualified (Top 4k/20k+)", platform: "Fellowship", date: new Date("2024-06-15"), description: "Qualified Stage 2 of AlgoUniversity Tech Fellowship. Top 4,000 out of 20,000+ applicants.", visibility: "public" },
   { title: "SSIP 2.0 Grant — AdaptiveGrade (Govt of Gujarat)", platform: "Academic Grant", date: new Date("2026-03-25"), description: "SSIP 2.0 financial grant accepted for AdaptiveGrade startup. Team: Harsh Zadafiya, Jeevant, Deepesh Dangi. Mentor: Dr. Sudeep Sharma.", visibility: "public" },
   { title: "AdaptiveGrade Beta — 50+ Users, 100% Server Uptime", platform: "Product Launch", date: new Date("2026-04-15"), description: "Successfully launched beta with 50+ active users and maintained 100% uptime.", visibility: "public" },
-  { title: "Open Source Society (DSO) — Founder", platform: "Community Building", date: new Date("2026-05-01"), description: "Founded the Developer Student Organization for open source at IIIT Surat.", visibility: "public" },
   { title: "LeetCode 200 Days Badge 2025", platform: "LeetCode", date: new Date("2025-09-01"), description: "200-day consistency streak on LeetCode.", visibility: "public" },
   { title: "LeetCode 50 Days Badge 2025", platform: "LeetCode", date: new Date("2025-04-01"), description: "50-day consistency streak on LeetCode.", visibility: "public" },
   { title: "Kaggle Badges — 3+ in Data Analysis & ML", platform: "Kaggle", date: new Date("2025-06-01"), description: "Earned 3+ badges in Data Analysis and ML challenges on Kaggle.", visibility: "public" },
@@ -309,6 +309,31 @@ async function seed() {
     }
     await Project.create({ ...p, slug: slug(p.title) });
     console.log(`   ✅ ${p.title}`);
+  }
+
+  console.log(`\n🔗 Syncing ${PUBLIC_WORK.length} public GitHub repositories...`);
+  for (const item of PUBLIC_WORK) {
+    const existing = await Project.findOne({
+      $or: [{ slug: item.slug }, { repoLink: item.repo }],
+    });
+    const payload = {
+      title: item.title,
+      slug: item.slug,
+      description: item.description,
+      content: item.detail,
+      techStack: item.stack,
+      repoLink: item.repo,
+      visibility: "public",
+      status: item.featured ? "live" : "building",
+    };
+    if (existing) {
+      Object.assign(existing, payload);
+      await existing.save();
+      console.log(`   ↻  ${item.title}`);
+    } else {
+      await Project.create(payload);
+      console.log(`   ✅ ${item.title}`);
+    }
   }
 
   // ─── Experiences ───

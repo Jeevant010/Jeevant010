@@ -2,6 +2,7 @@ import { getDailyTasks, createTask } from "@/lib/actions/task.actions";
 import { PlannerSortableList } from "@/components/features/PlannerSortableList";
 import { AddTaskForm } from "@/components/features/AddTaskForm";
 import { Calendar, Plus, Crosshair, ChevronRight } from "lucide-react";
+import PrivateShell from "@/components/layout/PrivateShell";
 
 export const dynamic = "force-dynamic";
 
@@ -11,25 +12,19 @@ export default async function DailyPlanner() {
   const completedTasks = tasks.filter((t: any) => t.isCompleted);
 
   return (
-    <div className="min-h-screen bg-[#111] text-shell-muted p-8 font-mono -m-8">
-      
-      {/* HEADER */}
-      <div className="flex justify-between items-end border-b border-shell-border pb-6 mb-12">
-        <div>
-          <h1 className="text-4xl font-black text-shell-text uppercase tracking-tighter flex items-center gap-4">
-            <Crosshair className="w-8 h-8 text-red-600" />
-            Tactical Log
-          </h1>
-          <p className="text-shell-muted mt-2 text-sm tracking-widest">
-            // OPERATION: DAILY_GRIND // STATUS: ACTIVE
-          </p>
-        </div>
-        <div className="px-4 py-2 bg-red-900/20 border border-red-900/50 text-red-400 text-xs font-bold uppercase tracking-widest rounded animate-pulse">
+    <PrivateShell
+      eyebrow="Operation daily grind · status active"
+      title="Tactical Log"
+      description="What gets done today, in the order that matters."
+      accent="rose"
+      icon={<Crosshair className="h-6 w-6 text-rose-400" />}
+      actions={
+        <span className="animate-pulse rounded border border-red-900/50 bg-red-900/20 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-red-400">
           Live Ops
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        </span>
+      }
+    >
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         
         {/* LEFT: MISSION INPUT & LIST */}
         <div className="lg:col-span-2 space-y-8">
@@ -88,6 +83,6 @@ export default async function DailyPlanner() {
         </div>
 
       </div>
-    </div>
+    </PrivateShell>
   );
 }

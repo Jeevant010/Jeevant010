@@ -2,8 +2,10 @@ import { getProjects } from "@/lib/actions/project.action";
 import { getDailyTasks } from "@/lib/actions/task.actions";
 import { getNotes } from "@/lib/actions/note.actions";
 import { getCharacterSheet } from "@/lib/actions/rpg.actions";
+import { getOpsCounts } from "@/lib/actions/voice.actions";
+import PrivateShell from "@/components/layout/PrivateShell";
 import { 
-  Activity, Target, FileText, Clock, ShieldAlert, Database, Terminal, Briefcase, BarChart, Users, Eye
+  Activity, Target, FileText, Clock, ShieldAlert, Database, Terminal, Briefcase, BarChart, Mic, PenLine, Inbox
 } from "lucide-react";
 import Link from "next/link";
 
@@ -14,6 +16,7 @@ export default async function Dashboard() {
   const tasks = await getDailyTasks();
   const notes = await getNotes();
   const { loot: achievements } = await getCharacterSheet();
+  const ops = await getOpsCounts();
 
   const activeCases = projects.filter((p: any) => p.status !== "Archived").length;
   const pendingTasks = tasks.filter((t: any) => !t.isCompleted);
@@ -40,22 +43,14 @@ export default async function Dashboard() {
     : "N/A";
 
   return (
-    <div className="min-h-full bg-transparent p-4 sm:p-6 md:p-10 font-mono relative">
-      <div className="relative z-10 max-w-7xl mx-auto space-y-8 sm:space-y-12">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-shell-border pb-6 relative gap-4">
-          <div className="absolute bottom-0 left-0 w-1/3 h-[2px] bg-gradient-to-r from-[color:var(--accent)] to-transparent" />
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-3 h-3 bg-[color:var(--accent)] rounded-full animate-pulse shadow-[0_0_15px_var(--accent)]" />
-              <span className="text-[color:var(--accent)] font-bold tracking-[0.3em] text-[10px] sm:text-xs uppercase">SYSTEM_ONLINE // THE_CONTINENTAL</span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-shell-text uppercase tracking-tighter drop-shadow-md">
-              Operations Board
-            </h1>
-          </div>
-        </div>
-
+    <PrivateShell
+      eyebrow="System online · the continental"
+      title="Operations Board"
+      description="Live state of projects, threads, voice captures, and the day."
+      accent="emerald"
+      icon={<Activity className="h-6 w-6 text-emerald-400" />}
+    >
+      <div className="space-y-8 sm:space-y-12">
         {/* Metrics / Case Files */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {[
@@ -151,12 +146,12 @@ export default async function Dashboard() {
                 <h4 className="text-[10px] font-bold text-shell-muted uppercase tracking-[0.3em] border-b border-shell-border pb-2 flex items-center gap-2"><BarChart className="w-3 h-3"/> Global Analytics</h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-black/40 border border-shell-border p-3 flex flex-col justify-center items-center">
-                    <div className="text-[9px] text-shell-muted uppercase tracking-widest mb-1 flex items-center gap-1"><Users className="w-3 h-3"/> Visitors (24h)</div>
-                    <div className="text-xl font-bold text-blue-400">1,204</div>
+                    <div className="text-[9px] text-shell-muted uppercase tracking-widest mb-1 flex items-center gap-1"><Mic className="w-3 h-3"/> Voice Captures</div>
+                    <div className="text-xl font-bold text-blue-400">{ops.voiceCaptures}</div>
                   </div>
                   <div className="bg-black/40 border border-shell-border p-3 flex flex-col justify-center items-center">
-                    <div className="text-[9px] text-shell-muted uppercase tracking-widest mb-1 flex items-center gap-1"><Eye className="w-3 h-3"/> Profile Views</div>
-                    <div className="text-xl font-bold text-emerald-400">8,492</div>
+                    <div className="text-[9px] text-shell-muted uppercase tracking-widest mb-1 flex items-center gap-1"><Inbox className="w-3 h-3"/> Unread Inbox</div>
+                    <div className="text-xl font-bold text-emerald-400">{ops.unreadMessages}</div>
                   </div>
                   <div className="bg-black/40 border border-shell-border p-3 flex flex-col justify-center items-center">
                     <div className="text-[9px] text-shell-muted uppercase tracking-widest mb-1 text-center">Tech Skills</div>
@@ -181,11 +176,13 @@ export default async function Dashboard() {
              <DashboardLink href="/planner/daily" title="Schedule" sub="Agenda" icon={<Clock className="w-5 h-5 sm:w-6 sm:h-6" />} />
              <DashboardLink href="/brain" title="Notes" sub="Intel" icon={<Terminal className="w-5 h-5 sm:w-6 sm:h-6" />} />
              <DashboardLink href="/cms/rpg" title="Quests" sub="RPG Hub" icon={<Briefcase className="w-5 h-5 sm:w-6 sm:h-6" />} />
+             <DashboardLink href="/voice" title="Voice" sub="Comm Center" icon={<Mic className="w-5 h-5 sm:w-6 sm:h-6" />} />
+             <DashboardLink href="/studio" title="Studio" sub="Broadcast" icon={<PenLine className="w-5 h-5 sm:w-6 sm:h-6" />} />
              <DashboardLink href="/cms/projects" title="Admin" sub="Manage" icon={<Database className="w-5 h-5 sm:w-6 sm:h-6" />} isSpecial />
           </div>
         </div>
       </div>
-    </div>
+    </PrivateShell>
   );
 }
 

@@ -30,7 +30,6 @@ export default async function Navbar() {
           <NavLink href="/projects" icon={<Code size={18} />} label="Projects" />
           <NavLink href="/research" icon={<Radio size={18} />} label="Research" />
           <NavLink href="/library" icon={<Library size={18} />} label="Library" />
-          <NavLink href="/schedule" icon={<Crosshair size={18} />} label="Schedule" />
           <NavLink href="/contact" icon={<Terminal size={18} />} label="Contact" />
         </div>
 
@@ -52,7 +51,6 @@ export default async function Navbar() {
             <div className="flex items-center gap-1 pl-2">
               <NavLink href="/cms/projects" icon={<FileCog size={18} />} label="Projects" activeColor="text-blue-400" isCms />
               <NavLink href="/cms/rpg" icon={<Sword size={18} />} label="RPG / Quests" activeColor="text-yellow-600" isCms />
-              <NavLink href="/cms/schedule" icon={<Calendar size={18} />} label="Schedule" activeColor="text-emerald-400" isCms />
               <NavLink href="/cms/expertise" icon={<Award size={18} />} label="Expertise" activeColor="text-amber-400" isCms />
               <NavLink href="/cms/journey" icon={<Compass size={18} />} label="Journey" activeColor="text-cyan-400" isCms />
               <NavLink href="/cms/resume" icon={<FileText size={18} />} label="Resume" activeColor="text-rose-400" isCms />

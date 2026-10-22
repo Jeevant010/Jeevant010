@@ -17,7 +17,7 @@ export default function ContactComms() {
 
   if (status === "SENT") {
     return (
-      <div className="min-h-screen bg-shell-bg flex items-center justify-center p-4">
+      <div className="flex min-h-[70vh] items-center justify-center p-6">
         <div className="text-center space-y-6">
           <div className="w-24 h-24 bg-green-900/20 border-2 border-green-500 rounded-full flex items-center justify-center mx-auto animate-pulse">
             <ShieldCheck className="w-10 h-10 text-green-500" />
@@ -36,7 +36,7 @@ export default function ContactComms() {
   }
 
   return (
-    <div className="min-h-screen bg-[#020202] text-shell-muted p-6 font-mono relative overflow-hidden -m-8 flex items-center justify-center">
+    <div className="relative flex min-h-[80vh] items-center justify-center p-6 text-[var(--stage-muted)]">
       
       {/* NOISE BG */}
       <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
