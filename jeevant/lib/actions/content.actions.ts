@@ -2,10 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import connectDB from "@/lib/db";
-import { ContentPost } from "@/lib/database/models";
+import { ContentPost, Approval } from "@/lib/database/models";
 import { getSession } from "@/lib/auth";
 import { getRuntimeConfig } from "@/lib/integrations/config";
 import { dispatchToChannel, buildShareUrl } from "@/lib/integrations/channels";
+import { evaluateExternalAction } from "@/lib/guardrails/policy";
 import type { ChannelId } from "@/lib/integrations/types";
 
 function plain(doc: any) {
@@ -145,8 +146,9 @@ async function runDispatch(post: any, channels?: string[]) {
   return { success: anyOk, outcomes: JSON.parse(JSON.stringify(outcomes)) };
 }
 
-// Fan a post out to the selected channels and record what happened.
-export async function dispatchPost(id: string, channels?: string[]) {
+// Execute a dispatch immediately. Used by the approvals executor and by
+// scheduled jobs — never called directly from the UI.
+export async function executePostDispatch(id: string, channels?: string[]) {
   try {
     const session = await getSession();
     if (!session || session.role !== "admin") return { success: false, detail: "Unauthorized." };
@@ -163,6 +165,50 @@ export async function dispatchPost(id: string, channels?: string[]) {
   }
 }
 
+// UI entry point. By default this queues an approval instead of sending.
+export async function dispatchPost(id: string, channels?: string[]) {
+  try {
+    const session = await getSession();
+    if (!session || session.role !== "admin") return { success: false, detail: "Unauthorized." };
+
+    await connectDB();
+    const post = await ContentPost.findById(id);
+    if (!post) return { success: false, detail: "Post not found." };
+
+    const targets = (channels?.length ? channels : (post.channels as string[])) || [];
+
+    const guard = await evaluateExternalAction({
+      kind: "post",
+      target: post.title || String(post._id),
+      meta: { channels: targets },
+    });
+    if (!guard.allowed) return { success: false, detail: guard.reason };
+
+    const approval = await Approval.create({
+      kind: "post",
+      title: `Publish: ${post.title || "untitled post"}`,
+      detail: `Channels: ${targets.join(", ") || "none"}`,
+      payload: { postId: String(post._id), channels: targets },
+      status: "pending",
+    });
+
+    post.status = "queued";
+    post.updatedAt = new Date();
+    await post.save();
+
+    revalidatePath("/studio");
+    revalidatePath("/approvals");
+    return {
+      success: true,
+      queued: true,
+      approvalId: String(approval._id),
+      detail: "Queued for approval — open /approvals to publish.",
+    };
+  } catch (error) {
+    return { success: false, detail: (error as Error).message };
+  }
+}
+
 // Called by the cron endpoint: publish every queued post whose time has come.
 export async function dispatchDuePosts() {
   try {
@@ -170,7 +216,23 @@ export async function dispatchDuePosts() {
     const due = await ContentPost.find({ status: "queued", scheduledAt: { $lte: new Date() } });
     const results: any[] = [];
     for (const post of due) {
-      results.push({ id: String(post._id), ...(await runDispatch(post)) });
+      const guard = await evaluateExternalAction({
+        kind: "post",
+        target: post.title || String(post._id),
+        meta: { scheduled: true, channels: post.channels },
+      });
+      if (!guard.allowed) {
+        results.push({ id: String(post._id), ok: false, detail: guard.reason });
+        continue;
+      }
+      await Approval.create({
+        kind: "post",
+        title: `Publish scheduled post: ${post.title || "untitled"}`,
+        detail: `Channels: ${(post.channels as string[]).join(", ")}`,
+        payload: { postId: String(post._id), channels: post.channels },
+        status: "pending",
+      });
+      results.push({ id: String(post._id), ok: true, detail: "Queued for approval." });
     }
     if (results.length) revalidatePath("/studio");
     return { count: results.length, results };
