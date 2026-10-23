@@ -2,7 +2,7 @@
 // (stored as non-secret Setting documents). Only non-secret values live here.
 
 import connectDB from "@/lib/db";
-import { Setting } from "@/lib/database/models";
+import { ChannelAccount, Setting } from "@/lib/database/models";
 
 export type RuntimeConfig = Record<string, string>;
 
@@ -20,6 +20,7 @@ const DEFAULTS: RuntimeConfig = {
   discordWebhookUrl: "",
   slackWebhookUrl: "",
   mastodonInstance: "",
+  mastodonToken: "",
 };
 
 export async function getRuntimeConfig(): Promise<RuntimeConfig> {
@@ -35,6 +36,7 @@ export async function getRuntimeConfig(): Promise<RuntimeConfig> {
     discordWebhookUrl: process.env.DISCORD_WEBHOOK_URL || DEFAULTS.discordWebhookUrl,
     slackWebhookUrl: process.env.SLACK_WEBHOOK_URL || DEFAULTS.slackWebhookUrl,
     mastodonInstance: process.env.MASTODON_INSTANCE || DEFAULTS.mastodonInstance,
+    mastodonToken: process.env.MASTODON_TOKEN || DEFAULTS.mastodonToken,
   };
 
   const stored: RuntimeConfig = {};
@@ -44,6 +46,38 @@ export async function getRuntimeConfig(): Promise<RuntimeConfig> {
     for (const doc of docs) {
       if (typeof doc.value === "string") stored[doc.key] = doc.value;
     }
+
+    const merged: RuntimeConfig = { ...seeded, ...stored };
+    const accounts = await ChannelAccount.find({ isDefault: true }).lean();
+
+    for (const account of accounts as any[]) {
+      const config = (account.config || {}) as Record<string, string>;
+      const secrets = (account.secrets || {}) as Record<string, string>;
+
+      switch (account.channel) {
+        case "telegram":
+          merged.telegramBotToken ||= secrets.botToken || secrets.token || "";
+          merged.telegramChatId ||= config.chatId || "";
+          break;
+        case "discord":
+          merged.discordWebhookUrl ||= secrets.webhookUrl || config.webhookUrl || "";
+          break;
+        case "slack":
+          merged.slackWebhookUrl ||= secrets.webhookUrl || config.webhookUrl || "";
+          break;
+        case "mastodon":
+          merged.mastodonInstance ||= config.instance || "";
+          merged.mastodonToken ||= secrets.token || "";
+          break;
+        case "whatsapp":
+          merged.whatsappNumber ||= config.fromNumber || "";
+          break;
+        default:
+          break;
+      }
+    }
+
+    return merged;
   } catch {
     // Database not reachable — fall back to env defaults only.
   }
