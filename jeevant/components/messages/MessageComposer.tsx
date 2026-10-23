@@ -87,7 +87,7 @@ export default function MessageComposer() {
       )}
 
       <p className="mt-4 border-t border-white/5 pt-3 text-[10px] uppercase tracking-widest text-shell-muted/70">
-        By default every message waits in /approvals. Set AUTO_APPROVE=true to send immediately.
+        By default every message waits in /approvals. Approve it there to send.
       </p>
     </div>
   );
