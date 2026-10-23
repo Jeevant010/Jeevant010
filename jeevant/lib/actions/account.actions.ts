@@ -4,8 +4,9 @@ import { revalidatePath } from "next/cache";
 import connectDB from "@/lib/db";
 import { ChannelAccount } from "@/lib/database/models";
 import { getSession } from "@/lib/auth";
+import { ACCOUNT_CHANNEL_IDS } from "@/lib/integrations/account-catalog";
 
-const CHANNELS = ["whatsapp", "sms", "call", "telegram", "email"];
+const CHANNELS = ACCOUNT_CHANNEL_IDS;
 
 export async function getAccounts() {
   try {
@@ -18,6 +19,7 @@ export async function getAccounts() {
       config: doc.config || {},
       isDefault: !!doc.isDefault,
       hasSecrets: !!(doc.secrets && Object.keys(doc.secrets).length),
+      secretKeys: Object.keys(doc.secrets || {}),
     }));
   } catch {
     return [];
@@ -28,12 +30,52 @@ export async function createAccountAction(formData: FormData): Promise<void> {
   const session = await getSession();
   if (!session || session.role !== "admin") return;
 
-  const channel = String(formData.get("channel") || "whatsapp");
-  const label = String(formData.get("label") || "").trim();
-  if (!CHANNELS.includes(channel) || !label) return;
+  let channel = String(formData.get("channel") || "whatsapp");
+  let label = String(formData.get("label") || "").trim();
 
   const config: Record<string, string> = {};
   const secrets: Record<string, string> = {};
+
+  const raw = String(formData.get("configJson") || "").trim();
+  if (raw) {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      return;
+    }
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return;
+
+    const data = parsed as Record<string, unknown>;
+    if (typeof data.channel === "string" && CHANNELS.includes(data.channel)) channel = data.channel;
+    if (typeof data.label === "string" && data.label.trim()) label = data.label.trim();
+
+    const configBlock =
+      data.config && typeof data.config === "object" && !Array.isArray(data.config)
+        ? (data.config as Record<string, unknown>)
+        : null;
+    const secretBlock =
+      data.secrets && typeof data.secrets === "object" && !Array.isArray(data.secrets)
+        ? (data.secrets as Record<string, unknown>)
+        : null;
+
+    if (configBlock || secretBlock) {
+      for (const [key, value] of Object.entries(configBlock || {})) {
+        if (typeof value === "string") config[key.trim()] = value.trim().slice(0, 2000);
+      }
+      for (const [key, value] of Object.entries(secretBlock || {})) {
+        if (typeof value === "string") secrets[key.trim()] = value.trim().slice(0, 4000);
+      }
+    } else {
+      for (const [key, value] of Object.entries(data)) {
+        if (key === "channel" || key === "label" || typeof value !== "string") continue;
+        const secret = /token|secret|key|webhook|password|sid/i.test(key);
+        (secret ? secrets : config)[key.trim()] = value.trim().slice(0, 4000);
+      }
+    }
+  }
+
+  if (!CHANNELS.includes(channel) || !label) return;
 
   const take = (key: string, secret = false) => {
     const value = String(formData.get(key) || "").trim();
