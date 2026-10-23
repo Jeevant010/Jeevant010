@@ -10,6 +10,7 @@ import { executePostDispatch } from "@/lib/actions/content.actions";
 import { sendByChannel } from "@/lib/integrations/messaging";
 import { resolveAccount } from "@/lib/integrations/accounts";
 import { audit, evaluateExternalAction } from "@/lib/guardrails/policy";
+import { redact } from "@/lib/logging/redact";
 
 function plain(doc: any) {
   const obj = doc?.toObject ? doc.toObject() : doc;
@@ -175,7 +176,7 @@ export async function decideApproval(id: string, decision: "approved" | "rejecte
       result = (error as Error).message;
     }
 
-    approval.result = result;
+    approval.result = redact(result);
     approval.decidedAt = new Date();
     await approval.save();
     await audit(
