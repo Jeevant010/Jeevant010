@@ -1,5 +1,11 @@
 import mongoose, { Schema, models, model } from "mongoose";
 
+function retentionSeconds(envKey: string, fallbackDays: number): number {
+  const days = Number(process.env[envKey]);
+  const safe = Number.isFinite(days) && days > 0 ? days : fallbackDays;
+  return Math.round(safe * 24 * 60 * 60);
+}
+
 // --- 1. PROJECT SCHEMA (Portfolio & Ideas) ---
 const ProjectSchema = new Schema({
   title: { type: String, required: true },
@@ -487,6 +493,7 @@ const OutboundMessageSchema = new Schema({
   detail: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now },
 });
+OutboundMessageSchema.index({ createdAt: 1 }, { expireAfterSeconds: retentionSeconds("RETENTION_OUTBOUND_DAYS", 180) });
 
 // --- 20. CHAT MESSAGE SCHEMA (short-term conversation memory) ---
 const ChatMessageSchema = new Schema({
@@ -496,6 +503,7 @@ const ChatMessageSchema = new Schema({
   provider: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now },
 });
+ChatMessageSchema.index({ createdAt: 1 }, { expireAfterSeconds: retentionSeconds("RETENTION_CHAT_DAYS", 90) });
 
 // --- 24. AUDIT LOG SCHEMA (every external-action decision) ---
 const AuditLogSchema = new Schema({
@@ -506,6 +514,7 @@ const AuditLogSchema = new Schema({
   meta: { type: Schema.Types.Mixed },
   createdAt: { type: Date, default: Date.now },
 });
+AuditLogSchema.index({ createdAt: 1 }, { expireAfterSeconds: retentionSeconds("RETENTION_AUDIT_DAYS", 180) });
 
 // --- 25. CONTACT SCHEMA (name -> number/address resolution) ---
 const ContactSchema = new Schema({
