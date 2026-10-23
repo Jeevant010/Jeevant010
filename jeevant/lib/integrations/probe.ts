@@ -2,6 +2,7 @@ import connectDB from "@/lib/db";
 import { ChannelAccount } from "@/lib/database/models";
 import type { ResolvedAccount } from "./accounts";
 import { getGoogleAccessToken } from "./google";
+import { openSecrets } from "@/lib/crypto/secrets";
 
 export type ProbeResult = { ok: boolean; mode: string; detail: string; provider?: string };
 
@@ -161,7 +162,7 @@ export async function probeAccountById(id: string): Promise<ProbeResult> {
       id: String(doc._id),
       label: doc.label,
       config: (doc.config || {}) as Record<string, string>,
-      secrets: (doc.secrets || {}) as Record<string, string>,
+      secrets: openSecrets(doc.secrets),
     });
   } catch (error) {
     return fail(`Could not read the account: ${clip((error as Error).message)}`);
