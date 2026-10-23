@@ -91,7 +91,7 @@ export default function AdminCalendar({ schedules }: { schedules: ScheduleItem[]
   const handleDateSelect = (selectInfo: any) => {
     setNewEventDates({ start: selectInfo.start, end: selectInfo.end });
     setIsCreating(true);
-    let calendarApi = selectInfo.view.calendar;
+    const calendarApi = selectInfo.view.calendar;
     calendarApi.unselect();
   };
 
