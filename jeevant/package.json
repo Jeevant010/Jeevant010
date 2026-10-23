@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "verify": "npm run typecheck && npm run lint && npm run build",
     "seed": "npx tsx scripts/seed.ts",
-    "seed:fresh": "npx tsx scripts/seed.ts --fresh"
+    "seed:fresh": "npx tsx scripts/seed.ts --fresh",
+    "secrets:encrypt": "npx tsx scripts/encrypt-secrets.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
