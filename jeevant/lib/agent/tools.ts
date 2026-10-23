@@ -3,8 +3,11 @@
 // Destructive tools require an explicit `confirm: true` from the planner.
 
 import connectDB from "@/lib/db";
-import { Task, Note, Project, ContentPost, Achievement, Memory, Approval } from "@/lib/database/models";
+import { Task, Note, Project, ContentPost, Achievement, Memory, Approval, Contact, Activity, FocusSession, Template } from "@/lib/database/models";
 import { evaluateExternalAction } from "@/lib/guardrails/policy";
+import { getStyleGuide } from "@/lib/style";
+import { groqChat, groqConfigured } from "@/lib/integrations/groq";
+import { getBriefing } from "@/lib/agent/briefing";
 
 export type ToolResult = {
   ok: boolean;
@@ -28,14 +31,90 @@ recall             args: { query? }                  // search memories
 web_search         args: { query }             // free instant-answer search
 weather            args: { city }
 send_message       args: { channel: "whatsapp"|"sms"|"call", to, body }
+send_message_to    args: { name, channel: "whatsapp"|"sms"|"call", body }  // resolves a saved contact
 remind             args: { what, when }         // when = ISO datetime
 news               args: { count? }             // Hacker News top stories
+summarize          args: { text }               // 3-bullet summary of an email/message
+suggest_reply      args: { text, tone? }        // reply drafted in your learned style
+log_activity       args: { kind, label, minutes, intended? }
+start_activity     args: { kind, label }
+stop_activity      args: { }
+day_summary        args: { }
+list_templates     args: { kind? }
 list_tasks         args: {}
+get_briefing       args: {}                  // live state: tasks, approvals, focus, activity
+list_approvals     args: {}                  // pending approvals waiting on the user
+start_focus        args: { intent }          // start a focus session
+end_focus          args: {}                  // close the active focus session
+open_page          args: { page }            // navigate: home, projects, journey, cv, research, library, contact, dashboard, planner, notes, career, learning, approvals, studio, voice, tracker, messages, contacts, integrations, automations, guardrails, arsenal, media, templates, style
 `.trim();
+
+const PAGES: Record<string, { path: string; label: string }> = {
+  home: { path: "/", label: "home" },
+  record: { path: "/projects", label: "the record" },
+  projects: { path: "/projects", label: "the record" },
+  journey: { path: "/journey", label: "the journey" },
+  about: { path: "/about", label: "the profile" },
+  profile: { path: "/about", label: "the profile" },
+  cv: { path: "/cv", label: "the CV" },
+  research: { path: "/research", label: "research" },
+  library: { path: "/library", label: "the library" },
+  contact: { path: "/contact", label: "contact" },
+  assistant: { path: "/assistant", label: "the assistant" },
+  agent: { path: "/agent", label: "the agent console" },
+  dashboard: { path: "/dashboard", label: "the dashboard" },
+  overview: { path: "/dashboard", label: "the dashboard" },
+  planner: { path: "/planner/daily", label: "the daily planner" },
+  agenda: { path: "/planner/daily", label: "the daily planner" },
+  notes: { path: "/brain", label: "notes" },
+  brain: { path: "/brain", label: "notes" },
+  career: { path: "/career", label: "career" },
+  learning: { path: "/learning", label: "learning" },
+  approvals: { path: "/approvals", label: "approvals" },
+  studio: { path: "/studio", label: "the studio" },
+  voice: { path: "/voice", label: "the voice inbox" },
+  tracker: { path: "/tracker", label: "the tracker" },
+  messages: { path: "/messages", label: "messages" },
+  contacts: { path: "/contacts", label: "contacts" },
+  integrations: { path: "/integrations", label: "integrations" },
+  automations: { path: "/automations", label: "automations" },
+  guardrails: { path: "/guardrails", label: "guardrails" },
+  arsenal: { path: "/arsenal", label: "the arsenal" },
+  media: { path: "/media", label: "media" },
+  templates: { path: "/templates", label: "templates" },
+  style: { path: "/style", label: "the style profile" },
+};
 
 function includes(value: unknown, allowed: string[], fallback: string): string {
   const text = String(value || "");
   return allowed.includes(text) ? text : fallback;
+}
+
+const ACTIVITY_KINDS = ["deep_work", "meeting", "eating", "sleep", "exercise", "waste", "break", "other"];
+
+function activityKind(value: unknown): string {
+  const text = String(value || "").toLowerCase().trim().replace(/[\s-]+/g, "_");
+  const aliases: Record<string, string> = {
+    work: "deep_work",
+    coding: "deep_work",
+    code: "deep_work",
+    study: "deep_work",
+    studying: "deep_work",
+    focus: "deep_work",
+    eat: "eating",
+    food: "eating",
+    meal: "eating",
+    nap: "sleep",
+    sleeping: "sleep",
+    gym: "exercise",
+    workout: "exercise",
+    distraction: "waste",
+    distracted: "waste",
+    scrolling: "waste",
+    rest: "break",
+  };
+  const normalized = aliases[text] || text;
+  return ACTIVITY_KINDS.includes(normalized) ? normalized : "other";
 }
 
 export async function executeTool(tool: string, args: any): Promise<ToolResult> {
@@ -343,6 +422,34 @@ export async function executeTool(tool: string, args: any): Promise<ToolResult> 
       return { ok: true, result: `Queued ${channel} "${doc.title}" for approval. Nothing sent yet.` };
     }
 
+    case "send_message_to": {
+      const name = String(args?.name || "").trim();
+      const channel = includes(args?.channel, ["whatsapp", "sms", "call"], "whatsapp");
+      const body = String(args?.body || "").trim();
+      if (!name) return { ok: false, result: "Which contact?" };
+
+      const contact: any = await Contact.findOne({ name: { $regex: name, $options: "i" } });
+      if (!contact) return { ok: false, result: `No contact named "${name}". Add them in /contacts.` };
+
+      const to =
+        channel === "whatsapp"
+          ? contact.whatsapp || contact.phone
+          : contact.phone || contact.whatsapp;
+      if (!to) return { ok: false, result: `"${contact.name}" has no phone number saved.` };
+
+      const guard = await evaluateExternalAction({ kind: channel, target: to, meta: { contact: contact.name } });
+      if (!guard.allowed) return { ok: false, result: guard.reason };
+
+      const doc = await Approval.create({
+        kind: channel,
+        title: `${channel === "call" ? "Call" : channel === "sms" ? "SMS" : "WhatsApp"} ${contact.name}: ${to}`,
+        detail: body || "Outbound call",
+        payload: { to, body },
+        status: "pending",
+      });
+      return { ok: true, result: `Queued ${channel} to ${contact.name} for approval. Nothing sent yet.` };
+    }
+
     case "remind": {
       const what = String(args?.what || "").trim();
       if (!what) return { ok: false, result: "What should I remind you about?" };
@@ -377,13 +484,165 @@ export async function executeTool(tool: string, args: any): Promise<ToolResult> 
       }
     }
 
+    case "summarize": {
+      const text = String(args?.text || "").trim();
+      if (!text) return { ok: false, result: "Paste the text to summarize." };
+      if (!groqConfigured()) return { ok: false, result: "Set GROQ_API_KEY to enable summaries." };
+      const summary = await groqChat(
+        "Summarize the message in at most 3 short bullets. Then state the one action it needs, if any.",
+        text,
+        false
+      );
+      return summary
+        ? { ok: true, result: summary }
+        : { ok: false, result: "The summarizer returned nothing." };
+    }
+
+    case "suggest_reply": {
+      const text = String(args?.text || "").trim();
+      if (!text) return { ok: false, result: "Paste the message to reply to." };
+      if (!groqConfigured()) return { ok: false, result: "Set GROQ_API_KEY to enable reply drafting." };
+      const style = await getStyleGuide();
+      const tone = String(args?.tone || "").trim();
+      const reply = await groqChat(
+        [
+          "Write a reply to the message. Output only the reply text.",
+          style ? `Match this writing style:\n${style}` : "",
+          tone ? `Tone: ${tone}` : "",
+        ]
+          .filter(Boolean)
+          .join("\n"),
+        text,
+        false
+      );
+      return reply ? { ok: true, result: reply } : { ok: false, result: "No reply generated." };
+    }
+
+    case "log_activity": {
+      const label = String(args?.label || "").trim();
+      const minutes = Math.max(1, Number(args?.minutes || 0));
+      if (!label || !minutes) return { ok: false, result: "Activity needs a label and minutes." };
+      const kind = activityKind(args?.kind);
+      const end = new Date();
+      const doc = await Activity.create({
+        kind,
+        label,
+        start: new Date(end.getTime() - minutes * 60_000),
+        end,
+        intended: args?.intended !== false,
+      });
+      return { ok: true, result: `Logged ${minutes}m of ${kind}: ${doc.label}.` };
+    }
+
+    case "start_activity": {
+      const label = String(args?.label || "").trim();
+      if (!label) return { ok: false, result: "What are you starting?" };
+      const kind = activityKind(args?.kind);
+      await Activity.updateMany({ end: null }, { $set: { end: new Date() } });
+      const doc = await Activity.create({ kind, label, start: new Date(), intended: true });
+      return { ok: true, result: `Tracking "${doc.label}" (${kind}).` };
+    }
+
+    case "stop_activity": {
+      const open = await Activity.findOne({ end: null }).sort({ start: -1 });
+      if (!open) return { ok: false, result: "Nothing is being tracked." };
+      await Activity.updateMany({ end: null }, { $set: { end: new Date() } });
+      return { ok: true, result: `Stopped "${open.label}".` };
+    }
+
+    case "day_summary": {
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      const activities = await Activity.find({ start: { $gte: start } }).lean();
+      const totals: Record<string, number> = {};
+      for (const activity of activities as any[]) {
+        const end = activity.end ? new Date(activity.end).getTime() : Date.now();
+        const minutes = Math.max(0, Math.round((end - new Date(activity.start).getTime()) / 60_000));
+        totals[activity.kind] = (totals[activity.kind] || 0) + minutes;
+      }
+      const focus: any = await FocusSession.findOne({ status: "active" }).lean();
+      const parts = Object.entries(totals).map(([kind, minutes]) => `${kind} ${minutes}m`);
+      return {
+        ok: true,
+        result: `${parts.length ? parts.join(", ") : "Nothing logged today"}.${
+          focus ? ` Active focus: ${focus.intent}.` : ""
+        }`,
+      };
+    }
+
+    case "list_templates": {
+      const kind = String(args?.kind || "").trim();
+      const filter = kind
+        ? { kind: ["email", "linkedin", "whatsapp", "post", "reply", "meeting", "other"].includes(kind) ? kind : "other" }
+        : {};
+      const docs = await Template.find(filter as any).limit(20);
+      return {
+        ok: true,
+        result: docs.length ? docs.map((doc: any) => `${doc.name} (${doc.kind})`).join(" | ") : "No templates.",
+        data: docs.map((doc: any) => ({ id: String(doc._id), name: doc.name, kind: doc.kind })),
+      };
+    }
+
     case "list_tasks": {
       const docs = await Task.find({ isCompleted: false }).sort({ createdAt: -1 }).limit(20);
       return {
         ok: true,
         result: docs.length ? `${docs.length} open task(s).` : "No open tasks.",
-        data: docs.map((doc: any) => ({ id: String(doc._id), title: doc.title, priority: doc.priority })),
+        data: docs.map((doc: any) => ({
+          id: String(doc._id),
+          title: doc.title,
+          priority: doc.priority,
+          due: doc.dueDate ? new Date(doc.dueDate).toISOString() : null,
+        })),
       };
+    }
+
+    case "get_briefing": {
+      const briefing = await getBriefing();
+      return {
+        ok: true,
+        result: `${briefing.greeting}. ${briefing.line}`,
+        data: briefing,
+      };
+    }
+
+    case "list_approvals": {
+      const docs = await Approval.find({ status: "pending" }).sort({ createdAt: -1 }).limit(10).lean();
+      return {
+        ok: true,
+        result: docs.length ? `${docs.length} approval(s) waiting: ${docs.map((doc: any) => doc.title).join(" | ")}` : "No approvals waiting.",
+        data: docs.map((doc: any) => ({ id: String(doc._id), title: doc.title, kind: doc.kind, detail: doc.detail })),
+      };
+    }
+
+    case "start_focus": {
+      const intent = String(args?.intent || "").trim();
+      if (!intent) return { ok: false, result: "What is the focus for this session?" };
+      await FocusSession.updateMany({ status: "active" }, { $set: { status: "done", endedAt: new Date() } });
+      const doc = await FocusSession.create({ intent, status: "active", startedAt: new Date() });
+      return { ok: true, result: `Focus started: ${doc.intent}.` };
+    }
+
+    case "end_focus": {
+      const active: any = await FocusSession.findOne({ status: "active" }).sort({ startedAt: -1 });
+      if (!active) return { ok: false, result: "No focus session is active." };
+      active.status = "done";
+      active.endedAt = new Date();
+      await active.save();
+      const minutes = Math.max(0, Math.round((Date.now() - new Date(active.startedAt).getTime()) / 60_000));
+      return { ok: true, result: `Focus closed after ${minutes}m: ${active.intent}.` };
+    }
+
+    case "open_page": {
+      const raw = String(args?.page || "").trim().toLowerCase().replace(/^\/+/, "");
+      const page = PAGES[raw];
+      if (!page) {
+        return {
+          ok: false,
+          result: `I do not have a page called "${raw}". Try: ${Object.keys(PAGES).slice(0, 12).join(", ")}.`,
+        };
+      }
+      return { ok: true, result: `Opening ${page.label}.`, data: { path: page.path } };
     }
 
     default:
