@@ -2,22 +2,39 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { createHash, timingSafeEqual } from "node:crypto";
 import { encrypt } from "@/lib/auth";
 
+function safeEqual(a: string, b: string): boolean {
+  const left = createHash("sha256").update(a).digest();
+  const right = createHash("sha256").update(b).digest();
+  return timingSafeEqual(left, right);
+}
+
 export async function login(formData: FormData) {
-  const password = formData.get("password") as string;
+  const password = String(formData.get("password") || "");
   const SECRET = process.env.ADMIN_SECRET;
 
-  if (password === SECRET) {
+  if (!SECRET) {
+    return { error: "ACCESS_DENIED // SERVER_KEY_NOT_CONFIGURED" };
+  }
+
+  if (safeEqual(password, SECRET)) {
     // 1. Create the encrypted session
     // We store the 'role' inside the encrypted seal
-    const token = await encrypt({ role: "admin", valid: true });
+    let token: string;
+    try {
+      token = await encrypt({ role: "admin", valid: true });
+    } catch {
+      return { error: "ACCESS_DENIED // SERVER_KEY_MISCONFIGURED" };
+    }
     
     // 2. Save the encrypted token as a cookie
     const cookieStore = await cookies();
     cookieStore.set("session", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7, // 1 week
       path: "/",
     });
