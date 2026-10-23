@@ -78,18 +78,25 @@ two `executed` audit rows.
 
 **Goal:** paste credentials once, then post from phone or desktop.
 
-- `/accounts` guided + raw JSON paste, with a "Test connection" button per account
-- Transport capability matrix shown honestly per channel:
-  direct / link / manual, and why
-- Transports: Telegram, Discord, Slack, Mastodon, WhatsApp Cloud API, email,
-  Reddit, X (token or OAuth PKCE), LinkedIn (approved-app token only)
-- Secrets encrypted at rest; never sent to the browser; masked in logs
-- Per-account rate-limit and quota counters with visible remaining budget
-- Mobile-first composer with copy, share-sheet, and direct-send paths
+- [x] `/accounts` accepts guided fields or a raw JSON paste, structured or flat
+- [x] Secret keys are detected, stored server-side, and only their names are
+      shown in the browser
+- [x] Read-only "Test connection" per account: Telegram, WhatsApp, Twilio,
+      Discord, Slack, Mastodon, Google, X
+- [x] Honest capability matrix per channel: direct, webhook, share, or manual,
+      with no fake success
+- [x] Default accounts are merged into runtime config, so Telegram, Discord,
+      Slack, Mastodon, and WhatsApp transports use them automatically
+- [x] Mobile-first composer already works at phone width; direct-send and
+      share-sheet paths are unchanged
+- [ ] X, LinkedIn, and Reddit real posting (needs approved developer apps; share
+      intent is the honest fallback today)
+- [ ] Secrets encrypted at rest (Phase 5)
+- [ ] Rate-limit and quota counters (Phase 6)
 
-**Acceptance:** paste a Telegram bot token and a Discord webhook, hit test, post
-from a phone, and see the dispatch log entry. WhatsApp without credentials must
-still produce a working `wa.me` link, never a fake "sent".
+**Acceptance:** paste a Telegram bot token and chat id, press Test, and see the
+bot username. Send a post to Telegram from `/studio` on a phone-width viewport
+and confirm the dispatch log row.
 
 ## Phase 4 — Google layer
 
