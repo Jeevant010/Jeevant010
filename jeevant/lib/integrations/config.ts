@@ -3,6 +3,7 @@
 
 import connectDB from "@/lib/db";
 import { ChannelAccount, Setting } from "@/lib/database/models";
+import { openSecrets } from "@/lib/crypto/secrets";
 
 export type RuntimeConfig = Record<string, string>;
 
@@ -52,7 +53,7 @@ export async function getRuntimeConfig(): Promise<RuntimeConfig> {
 
     for (const account of accounts as any[]) {
       const config = (account.config || {}) as Record<string, string>;
-      const secrets = (account.secrets || {}) as Record<string, string>;
+      const secrets = openSecrets(account.secrets);
 
       switch (account.channel) {
         case "telegram":
