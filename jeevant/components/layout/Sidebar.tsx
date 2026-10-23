@@ -9,7 +9,7 @@ import {
   FileCog, Sword, UserCog, 
   LogOut, Monitor, Settings,
   Menu, X, Calendar, Compass, FileText, Award,
-  Code, Radio, Mail, Wrench, Mic, PenLine, Plug, Bot, Terminal, ShieldCheck, Workflow, MessageSquare, KeyRound, ShieldAlert, Users, Film, PenTool, ClipboardList, Timer, Link2, Inbox
+  Code, Radio, Mail, Wrench, Mic, PenLine, Plug, Bot, Terminal, ShieldCheck, Workflow, MessageSquare, KeyRound, ShieldAlert, Users, Film, PenTool, ClipboardList, Timer, Link2, Inbox, Lock
 } from "lucide-react";
 import { logout } from "@/lib/actions/auth.actions";
 
@@ -100,6 +100,7 @@ export default function Sidebar({ isExpanded, toggleSidebar, isMobile }: Sidebar
               <SidebarItem href="/accounts" icon={<KeyRound size={18} />} label="Accounts" active={pathname === "/accounts"} expanded={isExpanded} />
               <SidebarItem href="/approvals" icon={<ShieldCheck size={18} />} label="Approvals" active={pathname === "/approvals"} expanded={isExpanded} />
               <SidebarItem href="/guardrails" icon={<ShieldAlert size={18} />} label="Guardrails" active={pathname === "/guardrails"} expanded={isExpanded} />
+              <SidebarItem href="/privacy" icon={<Lock size={18} />} label="Privacy" active={pathname === "/privacy"} expanded={isExpanded} />
               <SidebarItem href="/actions" icon={<Link2 size={18} />} label="Bridge" active={pathname === "/actions"} expanded={isExpanded} />
               <SidebarItem href="/automations" icon={<Workflow size={18} />} label="Automations" active={pathname === "/automations"} expanded={isExpanded} />
 
