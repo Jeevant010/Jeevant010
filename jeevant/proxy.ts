@@ -29,6 +29,7 @@ export async function proxy(request: NextRequest) {
     "/tracker",
     "/actions",
     "/inbox",
+    "/privacy",
   ];
   const path = request.nextUrl.pathname;
   const isProtected = protectedPaths.some((prefix) => path.startsWith(prefix));
@@ -81,5 +82,6 @@ export const config = {
     "/tracker/:path*",
     "/actions/:path*",
     "/inbox/:path*",
+    "/privacy/:path*",
   ],
 };
