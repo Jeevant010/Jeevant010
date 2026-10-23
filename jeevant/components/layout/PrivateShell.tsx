@@ -6,11 +6,11 @@ export type ShellAccent = "emerald" | "amber" | "blue" | "sky" | "rose" | "viole
 // A single restrained tone. The old per-page rainbow (pink/green/blue/violet)
 // made the admin feel like different products glued together.
 const NEUTRAL = {
-  text: "text-[#d8cfbe]",
-  border: "border-white/10",
-  bg: "bg-white/5",
-  glow: "shadow-[0_0_40px_rgba(200,180,138,0.08)]",
-  dot: "bg-[#c8b48a]",
+  text: "text-[color:var(--shell-accent)]",
+  border: "border-[color:var(--shell-border)]",
+  bg: "bg-[color:var(--shell-surface)]",
+  glow: "shadow-[0_0_40px_var(--cinematic-glow)]",
+  dot: "bg-[color:var(--shell-accent)]",
 };
 
 const ACCENTS: Record<ShellAccent, typeof NEUTRAL> = {
@@ -44,11 +44,11 @@ export default function PrivateShell({
   const tone = ACCENTS[accent];
 
   return (
-    <div className="relative min-h-full overflow-hidden bg-[#07080a] p-5 font-mono text-shell-text sm:p-8 lg:p-10">
+    <div className="private-stage relative min-h-full overflow-hidden p-5 font-mono text-shell-text sm:p-8 lg:p-10">
       <Atmosphere />
 
       <div className="relative z-10 mx-auto w-full max-w-[1600px]">
-        <header className="private-header mb-8 border-b border-white/5 pb-6">
+        <header className="private-header mb-8 border-b border-[color:var(--page-rule)] pb-6">
           <div className="flex flex-wrap items-start justify-between gap-5">
             <div className="flex items-start gap-4">
               {icon ? (
@@ -63,7 +63,7 @@ export default function PrivateShell({
                 </p>
                 <h1 className="private-title mt-2">{title}</h1>
                 {description ? (
-                  <p className="mt-2 max-w-2xl text-[11px] uppercase tracking-[0.16em] text-shell-muted/80">{description}</p>
+                  <p className="mt-2 hidden max-w-2xl text-[11px] uppercase tracking-[0.16em] text-shell-muted/80 sm:block">{description}</p>
                 ) : null}
               </div>
             </div>
