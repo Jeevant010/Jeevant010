@@ -503,6 +503,84 @@ const AuditLogSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+// --- 25. CONTACT SCHEMA (name -> number/address resolution) ---
+const ContactSchema = new Schema({
+  name: { type: String, required: true },
+  phone: { type: String, default: "" },
+  whatsapp: { type: String, default: "" },
+  email: { type: String, default: "" },
+  instagram: { type: String, default: "" },
+  linkedin: { type: String, default: "" },
+  tags: [{ type: String }],
+  createdAt: { type: Date, default: Date.now },
+});
+
+// --- 26. STYLE PROFILE (how the owner writes) ---
+const StyleProfileSchema = new Schema({
+  samples: [{ type: String }],
+  guide: { type: String, default: "" },
+  updatedAt: { type: Date, default: Date.now },
+});
+
+// --- 27. TEMPLATE (copy-paste replies and posts) ---
+const TemplateSchema = new Schema({
+  name: { type: String, required: true },
+  kind: { type: String, enum: ["email", "linkedin", "whatsapp", "post", "reply", "meeting", "other"], default: "other" },
+  body: { type: String, required: true },
+  tags: [{ type: String }],
+  usageCount: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now },
+});
+
+// --- 28. ACTIVITY (time tracking) ---
+const ActivitySchema = new Schema({
+  kind: {
+    type: String,
+    enum: ["deep_work", "meeting", "eating", "sleep", "exercise", "waste", "break", "other"],
+    default: "other",
+  },
+  label: { type: String, required: true },
+  start: { type: Date, required: true },
+  end: { type: Date },
+  intended: { type: Boolean, default: true },
+  notes: { type: String, default: "" },
+  createdAt: { type: Date, default: Date.now },
+});
+
+// --- 29. FOCUS SESSION (anti-waste check-ins) ---
+const FocusSessionSchema = new Schema({
+  intent: { type: String, required: true },
+  status: { type: String, enum: ["active", "done", "abandoned"], default: "active" },
+  startedAt: { type: Date, default: Date.now },
+  endedAt: { type: Date },
+  checkIns: [
+    {
+      at: { type: Date, default: Date.now },
+      answer: { type: String, default: "" },
+      wasted: { type: Boolean, default: false },
+      _id: false,
+    },
+  ],
+  distractions: [{ label: String, at: Date, _id: false }],
+});
+
+// --- 30. ACTION TOKEN (signed single-use or reusable bridge links) ---
+const ActionTokenSchema = new Schema({
+  tokenHash: { type: String, required: true, unique: true, index: true },
+  hint: { type: String, default: "" },
+  action: { type: String, required: true },
+  args: { type: Schema.Types.Mixed, default: {} },
+  label: { type: String, default: "" },
+  status: { type: String, enum: ["active", "exhausted", "revoked"], default: "active" },
+  maxUses: { type: Number, default: 1, min: 0 },
+  uses: { type: Number, default: 0, min: 0 },
+  expiresAt: { type: Date, required: true },
+  lastUsedAt: { type: Date },
+  result: { type: String, default: "" },
+  createdAt: { type: Date, default: Date.now },
+});
+ActionTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
 export const Profile = models.Profile || model("Profile", ProfileSchema);
 export const Snippet = models.Snippet || model("Snippet", SnippetSchema);
 export const Message = models.Message || model("Message", MessageSchema);
@@ -529,3 +607,9 @@ export const ChatMessage = models.ChatMessage || model("ChatMessage", ChatMessag
 export const OutboundMessage = models.OutboundMessage || model("OutboundMessage", OutboundMessageSchema);
 export const ChannelAccount = models.ChannelAccount || model("ChannelAccount", ChannelAccountSchema);
 export const AuditLog = models.AuditLog || model("AuditLog", AuditLogSchema);
+export const Contact = models.Contact || model("Contact", ContactSchema);
+export const StyleProfile = models.StyleProfile || model("StyleProfile", StyleProfileSchema);
+export const Template = models.Template || model("Template", TemplateSchema);
+export const Activity = models.Activity || model("Activity", ActivitySchema);
+export const FocusSession = models.FocusSession || model("FocusSession", FocusSessionSchema);
+export const ActionToken = models.ActionToken || model("ActionToken", ActionTokenSchema);
