@@ -7,6 +7,7 @@ import { groqChat, groqConfigured, groqModel } from "@/lib/integrations/groq";
 import connectDB from "@/lib/db";
 import { Memory, ChatMessage } from "@/lib/database/models";
 import { getGuardrailSettings } from "@/lib/guardrails/policy";
+import { getStyleGuide } from "@/lib/style";
 
 async function recentMemories(): Promise<string[]> {
   try {
@@ -62,7 +63,12 @@ Rules:
 - If a tool result says something is queued for approval, say it is queued. Never claim a message, post, email, or call was sent when it is only pending approval.
 - If a tool result is not ok (blocked, failed, or rejected), say exactly that and give the reason. Never claim success for a blocked or failed action.
 - Do not assume the current guardrail mode from earlier turns. The authoritative mode is GUARDRAIL_MODE in this request. Always call the tool and let it decide; never refuse pre-emptively based on conversation history.
-- To send a WhatsApp, SMS, or call, use "send_message". Use "request_approval" only for actions that have no dedicated tool.`;
+- To send a WhatsApp, SMS, or call, use "send_message". Use "request_approval" only for actions that have no dedicated tool.
+- When the user asks what is going on, for a briefing, or about today, call "get_briefing" first. Do not invent the state.
+- When the user says open, go to, or show a page, call "open_page" with the page name. It actually navigates.
+- Pending external actions are visible with "list_approvals".
+- "start_focus" and "end_focus" control the focus session. Use them instead of describing focus.
+- Prefer doing over explaining: if a tool can answer the request, call it.`;
 
 function extractJson(text: string): any {
   const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
@@ -73,17 +79,24 @@ function extractJson(text: string): any {
   return JSON.parse(raw.slice(start, end + 1));
 }
 
-async function plan(prompt: string): Promise<{ reply: string; actions: { tool: string; args: any }[] } | null> {
+async function plan(
+  prompt: string,
+  onStep?: (step: string) => void
+): Promise<{ reply: string; actions: { tool: string; args: any }[] } | null> {
   const memories = await recentMemories();
   const conversation = await recentConversation();
+  onStep?.("reading memory and the last turns");
   const memoryBlock = memories.length
     ? `KNOWN FACTS ABOUT THE USER (memory):\n- ${memories.join("\n- ")}\n\n`
     : "";
   const conversationBlock = conversation ? `RECENT CONVERSATION:\n${conversation}\n\n` : "";
   const guardrail = await getGuardrailSettings();
   const guardBlock = `GUARDRAIL_MODE: ${guardrail.mode} (approval = queue the action; blocked = refuse it).\n\n`;
-  const userMessage = `CURRENT_DATETIME: ${new Date().toISOString()}\n\n${guardBlock}${memoryBlock}${conversationBlock}REQUEST: ${prompt}`;
+  const style = await getStyleGuide();
+  const styleBlock = style ? `WRITING STYLE (match this in your reply):\n${style}\n\n` : "";
+  const userMessage = `CURRENT_DATETIME: ${new Date().toISOString()}\n\n${guardBlock}${styleBlock}${memoryBlock}${conversationBlock}REQUEST: ${prompt}`;
   const pool = keys();
+  onStep?.("planning the action");
 
   if (!pool.length) {
     if (!groqConfigured()) return null;
@@ -135,6 +148,33 @@ function fallback(prompt: string): { reply: string; actions: { tool: string; arg
   const text = prompt.trim();
   const match = (pattern: RegExp) => text.match(pattern)?.[1]?.trim();
 
+  if (/^(?:brief(?:\s+me)?|catch me up|what(?:'s| is) up|status|what(?:'s| is) going on)[?.!]*$/i.test(text)) {
+    return { reply: "Reading the live state.", actions: [{ tool: "get_briefing", args: {} }] };
+  }
+
+  if (/^(?:what(?:'s| is) due(?:\s+today)?|due today|my tasks?|open tasks?|list tasks?|show tasks?)[?.!]*$/i.test(text)) {
+    return { reply: "Here are your open tasks.", actions: [{ tool: "list_tasks", args: {} }] };
+  }
+
+  if (/^(?:what did i do(?: today)?|summari[sz]e my day|day summary|how did today go)[?.!]*$/i.test(text)) {
+    return { reply: "Reading today's log.", actions: [{ tool: "day_summary", args: {} }] };
+  }
+
+  if (/^(?:list|show|any|pending)?\s*approvals?[?.!]*$/i.test(text)) {
+    return { reply: "Checking approvals.", actions: [{ tool: "list_approvals", args: {} }] };
+  }
+
+  const focus = match(/^(?:start|begin)\s+focus(?:\s+on)?[:\s]+(.+)$/i);
+  if (focus) return { reply: "Starting focus.", actions: [{ tool: "start_focus", args: { intent: focus } }] };
+  if (/^(?:end|stop|close)\s+focus$/i.test(text)) {
+    return { reply: "Closing focus.", actions: [{ tool: "end_focus", args: {} }] };
+  }
+
+  const open = match(/^(?:open|go to|show me|show)\s+(?:the\s+)?([a-z /-]+?)[.!]*$/i);
+  if (open) {
+    return { reply: `Opening ${open}.`, actions: [{ tool: "open_page", args: { page: open } }] };
+  }
+
   const addTask = match(/^(?:add|create)\s+task[:\s]+(.+)$/i);
   if (addTask) return { reply: "Adding that task.", actions: [{ tool: "create_task", args: { title: addTask } }] };
 
@@ -150,6 +190,17 @@ function fallback(prompt: string): { reply: string; actions: { tool: string; arg
 
   const confirm = match(/^confirm\s+(?:delete|remove)\s+task[:\s]+(.+)$/i);
   if (confirm) return { reply: "Confirmed.", actions: [{ tool: "delete_task", args: { query: confirm, confirm: true } }] };
+
+  const removeNote = match(/^(?:delete|remove)\s+note[:\s]+(.+)$/i);
+  if (removeNote)
+    return {
+      reply: "This is destructive. Say 'confirm delete note: …' to proceed.",
+      actions: [{ tool: "delete_note", args: { query: removeNote, confirm: false } }],
+    };
+
+  const confirmNote = match(/^confirm\s+(?:delete|remove)\s+note[:\s]+(.+)$/i);
+  if (confirmNote)
+    return { reply: "Confirmed.", actions: [{ tool: "delete_note", args: { query: confirmNote, confirm: true } }] };
 
   const note = match(/^(?:note|remember)[:\s]+(.+)$/i);
   if (note) {
@@ -167,8 +218,6 @@ function fallback(prompt: string): { reply: string; actions: { tool: string; arg
       actions: [{ tool: "create_project", args: { title: project, description: project } }],
     };
 
-  if (/^(?:list|show)\s+tasks?$/i.test(text)) return { reply: "Here are your open tasks.", actions: [{ tool: "list_tasks", args: {} }] };
-
   return {
     reply:
       "I could not reach an LLM, so I only understood basic commands. Check GROQ_API_KEY in .env.local and restart the dev server. Basic commands: 'add task: …', 'complete task: …', 'note: title | body', 'list tasks'.",
@@ -176,11 +225,17 @@ function fallback(prompt: string): { reply: string; actions: { tool: string; arg
   };
 }
 
-export async function runAgent(prompt: string, opts: { persist?: boolean } = {}): Promise<AgentRun> {
+export type AgentRunOptions = {
+  persist?: boolean;
+  onStep?: (step: string) => void;
+};
+
+export async function runAgent(prompt: string, opts: AgentRunOptions = {}): Promise<AgentRun> {
   const trimmed = prompt.trim();
   if (!trimmed) return { reply: "Give me a request.", actions: [], simulated: true, provider: "none" };
 
-  const planned = await plan(trimmed);
+  opts.onStep?.("connecting to the operator");
+  const planned = await plan(trimmed, opts.onStep);
   const resolved = planned ?? fallback(trimmed);
   const provider = planned ? (keys().length ? `gemini:${modelName()}` : `groq:${groqModel()}`) : "fallback-parser";
 
@@ -188,6 +243,7 @@ export async function runAgent(prompt: string, opts: { persist?: boolean } = {})
   for (const action of resolved.actions) {
     if (!action || typeof action.tool !== "string") continue;
     let outcome: ToolResult;
+    opts.onStep?.(`running ${action.tool.replace(/_/g, " ")}`);
     try {
       outcome = await executeTool(action.tool, action.args || {});
     } catch (error) {
@@ -196,6 +252,7 @@ export async function runAgent(prompt: string, opts: { persist?: boolean } = {})
     actions.push({ tool: action.tool, args: action.args || {}, ...outcome });
   }
 
+  opts.onStep?.(actions.length ? "writing the reply" : "composing the answer");
   let reply = resolved.reply || (actions.length ? "Done." : "Nothing to do.");
 
   // Code-enforced truth: never let the model claim success for a blocked or
@@ -208,6 +265,13 @@ export async function runAgent(prompt: string, opts: { persist?: boolean } = {})
     actions.every((action) => action.ok && /queued for approval/i.test(action.result))
   ) {
     reply = "Queued for approval — nothing has been sent.";
+  } else {
+    // Speak the tool results verbatim. This prevents the model from adding
+    // claims like "queued for approval" to actions that actually completed.
+    const results = actions
+      .filter((action) => action.ok && action.result)
+      .map((action) => action.result);
+    if (results.length) reply = results.join(" ");
   }
 
   if (opts.persist !== false) {
