@@ -68,6 +68,8 @@ Rules:
 - When the user says open, go to, or show a page, call "open_page" with the page name. It actually navigates.
 - Pending external actions are visible with "list_approvals".
 - "start_focus" and "end_focus" control the focus session. Use them instead of describing focus.
+- For email questions, call gmail_search, email_digest, or summarize_email. Never invent inbox contents.
+- To schedule, call check_availability first, then schedule_block. Say the block is queued for approval; never claim it is on the calendar.
 - Prefer doing over explaining: if a tool can answer the request, call it.`;
 
 function extractJson(text: string): any {
