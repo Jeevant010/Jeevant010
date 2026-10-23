@@ -128,15 +128,27 @@ for 90 minutes" and confirm it returns a real slot, not a guess.
 
 **Goal:** defensible privacy, not a privacy claim.
 
-- Strict CSP with nonces (report-only first, then enforce)
-- Secrets encrypted at rest with a key derived from `ADMIN_SECRET`
-- Retention policy with Mongo TTL indexes: chat, audit, jobs, activity
-- Data export and hard delete for personal records
-- Redaction of tokens and phone numbers in logs and error messages
-- Threat model document covering what leaves the device and to whom
+- [x] Credential secrets encrypted at rest with AES-256-GCM and a per-record
+      salt; key derived from `ADMIN_SECRET`
+- [x] Legacy plaintext secrets stay readable, with `npm run secrets:encrypt` to
+      migrate them
+- [x] Mongo TTL retention for chat (90d), audit (180d), and outbound messages
+      (180d), configurable by env
+- [x] Full JSON export with credential values replaced by key names and token
+      hashes stripped
+- [x] Two-tier deletion on `/privacy`: activity data, or everything, both
+      confirmation-gated; guardrail settings always survive
+- [x] Token, bearer, password, and phone-number redaction in audit logs and
+      approval results
+- [x] Safe CSP directives enforced; full policy report-only so nothing breaks
+- [x] Threat model and data-flow document (`docs/PRIVACY.md`)
+- [ ] Nonce-based strict CSP enforcement
+- [ ] Encryption for non-secret config such as phone numbers
+- [ ] Backup-aware deletion guidance
 
-**Acceptance:** export produces a complete archive; delete removes every record;
-turning on `blocked` mode stops queued approvals from executing.
+**Acceptance:** run `npm run secrets:encrypt`, confirm `/accounts` still tests a
+credential, download the export, and verify a deleted activity record is gone
+from MongoDB while a project remains.
 
 ## Phase 6 — Reliability and reach
 
