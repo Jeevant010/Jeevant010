@@ -52,16 +52,27 @@ Application → Service Worker, confirm `jeevant-shell-v2`, and confirm
 
 **Goal:** one tap, or one phone shortcut, actually finishes a chore.
 
-- Signed, expiring action tokens (`/api/actions/:token`) with idempotency keys
-- Action registry: `block_time`, `create_task`, `draft_email`, `post_channel`,
-  `message_contact`, `start_focus`
-- "Run now" buttons on the dashboard with a result receipt
-- iOS Shortcuts recipe + Android Tasker/MacroDroid recipe generated from the app
-- Every bridge call writes to the audit log, gated by the same guardrails
-- Inbound hook already exists at `/api/hooks/<key>`; add replay protection
+- [x] Hashed, expiring action tokens at `/api/actions/run/<token>`; the raw token
+      is shown once and only the hash is stored
+- [x] Single-use by default, reusable only when explicitly requested, revocable,
+      and deleted automatically at expiry
+- [x] Atomic claim prevents replay and concurrent double-use; used, expired, and
+      revoked links return `410 Gone`
+- [x] Action registry with a server-side whitelist and shared field validation:
+      `create_task`, `complete_task`, `create_note`, `block_time`,
+      `start_focus`, `end_focus`, `log_activity`, `start_activity`,
+      `stop_activity`, `open_page`, `request_approval`
+- [x] `/actions` admin UI: create, copy-once, list, status, use counts, result,
+      revoke, and the phone recipe
+- [x] iOS Shortcuts and Android Tasker/MacroDroid recipes in the UI and
+      [`docs/BRIDGE.md`](./BRIDGE.md)
+- [x] Every run writes to `AuditLog`; external actions still queue approvals
+- [x] `block_time` detects overlaps and says so in the receipt
+- [ ] Dashboard "run now" tiles (deferred; `/actions` covers manual use)
 
-**Acceptance:** a Shortcut on the phone triggers a real task or calendar block,
-and the receipt shows the same idempotency key exactly once.
+**Acceptance:** create a reusable `create_task` link, run it twice, revoke it,
+and confirm the third run returns `410` with no new task. Check `/guardrails` for
+two `executed` audit rows.
 
 ## Phase 3 — Credential vault and real transports
 
