@@ -1,15 +1,18 @@
 import Link from "next/link";
 import PublicNav from "@/components/layout/PublicNav";
 import ImmersiveChrome from "@/components/public/ImmersiveChrome";
+import { getLife } from "@/lib/catalog/live";
 
-export default function PublicLayout({
+export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const life = await getLife();
+
   return (
     <ImmersiveChrome>
-      <div className="flex min-h-screen flex-col">
+      <div className="stage flex min-h-screen flex-col">
       <PublicNav />
 
       <main className="flex-1 relative z-10">
@@ -47,17 +50,25 @@ export default function PublicLayout({
 
           <div>
             <h4 className="text-xs font-bold uppercase tracking-[0.25em] text-shell-text">Contact</h4>
-            <p className="mt-4 text-sm leading-6 text-shell-muted">
-              Open to full-time roles, freelance work, and portfolio collaborations.
-            </p>
+            <p className="mt-4 text-sm leading-6 text-shell-muted">{life.profile.availability}</p>
+            <a
+              href={`mailto:${life.profile.email}`}
+              className="mt-2 block text-sm text-shell-text underline-offset-4 hover:underline"
+            >
+              {life.profile.email}
+            </a>
             <Link href="/contact" className="mt-4 inline-flex rounded-full border border-shell-border bg-shell-surface px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-shell-text transition hover:border-[color:var(--shell-accent)] hover:bg-[color:var(--shell-accent)]/10 hover:shadow-[0_0_15px_var(--cinematic-glow)]">
               Send a message
             </Link>
           </div>
         </div>
 
-        <div className="border-t border-[var(--stage-line)] py-4 text-center text-xs uppercase tracking-[0.2em] text-[var(--stage-muted)]">
-          © {new Date().getFullYear()} Jeevant Mudgil
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--stage-line)] px-4 py-4 text-xs uppercase tracking-[0.2em] text-[var(--stage-muted)] sm:px-6 lg:px-8">
+          <span>© {new Date().getFullYear()} {life.profile.name}</span>
+          <span className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#a8c49a]" />
+            {life.live ? `${life.projects.length} live records · ${life.profile.location}` : "Archive mode · database offline"}
+          </span>
         </div>
       </footer>
       </div>
