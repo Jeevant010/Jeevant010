@@ -157,7 +157,7 @@ export async function dispatchToChannel(
 
   if (channel === "mastodon") {
     const instance = cfg.mastodonInstance.replace(/\/$/, "");
-    const token = process.env.MASTODON_TOKEN;
+    const token = cfg.mastodonToken;
     if (!instance || !token) {
       return {
         channel,
