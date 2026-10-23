@@ -102,15 +102,27 @@ and confirm the dispatch log row.
 
 **Goal:** the time savings that actually matter.
 
-- Gmail read/search (requires the read scope), thread summary, reply drafting
-- Calendar availability lookup, conflict detection, and "schedule this" that
-  proposes the first free slot instead of guessing
-- Agent tools: `check_availability`, `schedule_block`, `email_digest`,
-  `draft_reply_from_email`
-- Overnight digest built from real mail, not just the `Message` collection
+- [x] Gmail read and search with metadata parsing, unread state, and body
+      extraction (`lib/integrations/gmail-read.ts`)
+- [x] Three-bullet message summaries and one-shot inbox digests, with a
+      deterministic fallback when Groq is not configured
+- [x] Reply drafting in the learned style, queued as an email approval; the
+      approval creates the Gmail draft
+- [x] Calendar `freeBusy`, conflict detection, upcoming events, and first-free
+      slot search on a 15-minute grid inside working hours
+- [x] "Schedule this" checks conflicts and queues a calendar approval; the
+      approval writes to Google Calendar
+- [x] Agent tools: `gmail_search`, `read_email`, `summarize_email`,
+      `email_digest`, `draft_email_reply`, `check_availability`,
+      `upcoming_events`, `schedule_block`
+- [x] Mobile-friendly `/inbox` and `/inbox/[id]` pages, plus sidebar entry
+- [x] Explicit scope errors that name the OAuth scope to add
+- [ ] Overnight digest built from real Gmail (the worker still reads `Message`)
+- [ ] Attachment parsing and thread-aware reply headers
 
-**Acceptance:** "when am I free tomorrow for 90 minutes" returns a real slot from
-Google Calendar, and creating it appears in Google Calendar.
+**Acceptance:** search `in:inbox newer_than:7d`, open one message, see a summary,
+queue a reply, and approve it. Then ask the assistant "when am I free tomorrow
+for 90 minutes" and confirm it returns a real slot, not a guess.
 
 ## Phase 5 — Privacy and retention
 
