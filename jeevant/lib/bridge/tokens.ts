@@ -67,11 +67,16 @@ function toISO(value: Date | string | null | undefined): string | null {
 }
 
 function serialize(doc: TokenDoc): TokenView {
+  const uses = Number(doc.uses || 0);
+  const maxUses = Number(doc.maxUses ?? 1);
+
   const status = doc.status === "revoked" || doc.status === "exhausted"
     ? doc.status
-    : new Date(doc.expiresAt).getTime() <= Date.now()
-      ? "expired"
-      : "active";
+    : maxUses > 0 && uses >= maxUses
+      ? "exhausted"
+      : new Date(doc.expiresAt).getTime() <= Date.now()
+        ? "expired"
+        : "active";
 
   return {
     id: String(doc._id),
@@ -79,8 +84,8 @@ function serialize(doc: TokenDoc): TokenView {
     label: String(doc.label || ""),
     hint: String(doc.hint || ""),
     status,
-    uses: Number(doc.uses || 0),
-    maxUses: Number(doc.maxUses ?? 1),
+    uses,
+    maxUses,
     expiresAt: toISO(doc.expiresAt) || "",
     createdAt: toISO(doc.createdAt) || "",
     lastUsedAt: toISO(doc.lastUsedAt),
