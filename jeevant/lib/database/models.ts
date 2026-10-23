@@ -463,7 +463,11 @@ const WorkflowRunSchema = new Schema({
 
 // --- 23. CHANNEL ACCOUNT SCHEMA (multi-account credentials) ---
 const ChannelAccountSchema = new Schema({
-  channel: { type: String, enum: ["whatsapp", "sms", "call", "telegram", "email"], required: true },
+  channel: {
+    type: String,
+    enum: ["whatsapp", "sms", "call", "telegram", "email", "discord", "slack", "mastodon", "twitter", "linkedin", "reddit"],
+    required: true,
+  },
   label: { type: String, required: true },
   config: { type: Schema.Types.Mixed, default: {} }, // phoneNumberId, fromNumber, chatId, sender
   secrets: { type: Schema.Types.Mixed, default: {} }, // tokens — server-only, never sent to the browser
