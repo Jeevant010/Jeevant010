@@ -5,6 +5,7 @@ import connectDB from "@/lib/db";
 import { ChannelAccount } from "@/lib/database/models";
 import { getSession } from "@/lib/auth";
 import { ACCOUNT_CHANNEL_IDS } from "@/lib/integrations/account-catalog";
+import { openSecrets, sealSecrets, secretsAreEncrypted } from "@/lib/crypto/secrets";
 
 const CHANNELS = ACCOUNT_CHANNEL_IDS;
 
@@ -12,15 +13,19 @@ export async function getAccounts() {
   try {
     await connectDB();
     const docs = await ChannelAccount.find({}).sort({ channel: 1, createdAt: 1 });
-    return docs.map((doc: any) => ({
-      _id: String(doc._id),
-      channel: doc.channel,
-      label: doc.label,
-      config: doc.config || {},
-      isDefault: !!doc.isDefault,
-      hasSecrets: !!(doc.secrets && Object.keys(doc.secrets).length),
-      secretKeys: Object.keys(doc.secrets || {}),
-    }));
+    return docs.map((doc: any) => {
+      const secretKeys = Object.keys(openSecrets(doc.secrets));
+      return {
+        _id: String(doc._id),
+        channel: doc.channel,
+        label: doc.label,
+        config: doc.config || {},
+        isDefault: !!doc.isDefault,
+        hasSecrets: secretKeys.length > 0,
+        secretKeys,
+        encrypted: secretsAreEncrypted(doc.secrets),
+      };
+    });
   } catch {
     return [];
   }
@@ -92,7 +97,7 @@ export async function createAccountAction(formData: FormData): Promise<void> {
 
   await connectDB();
   const existing = await ChannelAccount.countDocuments({ channel });
-  await ChannelAccount.create({ channel, label, config, secrets, isDefault: existing === 0 });
+  await ChannelAccount.create({ channel, label, config, secrets: sealSecrets(secrets), isDefault: existing === 0 });
 
   revalidatePath("/accounts");
   revalidatePath("/messages");
