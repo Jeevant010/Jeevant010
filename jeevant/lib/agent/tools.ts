@@ -8,6 +8,8 @@ import { evaluateExternalAction } from "@/lib/guardrails/policy";
 import { getStyleGuide } from "@/lib/style";
 import { groqChat, groqConfigured } from "@/lib/integrations/groq";
 import { getBriefing } from "@/lib/agent/briefing";
+import { draftReply, getMessage, listMessages, summarizeMessage, summarizeMessages } from "@/lib/integrations/gmail-read";
+import { checkConflicts, findFreeSlot, listUpcoming } from "@/lib/integrations/calendar-read";
 
 export type ToolResult = {
   ok: boolean;
@@ -47,6 +49,14 @@ list_approvals     args: {}                  // pending approvals waiting on the
 start_focus        args: { intent }          // start a focus session
 end_focus          args: {}                  // close the active focus session
 open_page          args: { page }            // navigate: home, projects, journey, cv, research, library, contact, dashboard, planner, notes, career, learning, approvals, studio, voice, tracker, messages, contacts, integrations, automations, guardrails, arsenal, media, templates, style
+gmail_search       args: { query, count? }        // read-only Gmail search
+read_email         args: { id }                   // full message body
+summarize_email    args: { id }                   // 3 bullets + the action it needs
+email_digest       args: { query?, count? }       // one summary of recent mail
+draft_email_reply  args: { id, instruction? }     // queues a Gmail draft approval
+check_availability args: { start?, end?, minutes?, workStart?, workEnd? }  // real free/busy
+upcoming_events    args: { days?, max? }          // next events from Google Calendar
+schedule_block     args: { title, start, minutes?, notes? }  // queues a calendar approval
 `.trim();
 
 const PAGES: Record<string, { path: string; label: string }> = {
@@ -631,6 +641,134 @@ export async function executeTool(tool: string, args: any): Promise<ToolResult> 
       await active.save();
       const minutes = Math.max(0, Math.round((Date.now() - new Date(active.startedAt).getTime()) / 60_000));
       return { ok: true, result: `Focus closed after ${minutes}m: ${active.intent}.` };
+    }
+
+    case "gmail_search": {
+      const query = String(args?.query || "").trim();
+      if (!query) return { ok: false, result: "Give me something to search for." };
+      const found = await listMessages({ query, count: Number(args?.count) || 8 });
+      return {
+        ok: found.ok,
+        result: found.ok
+          ? `${found.detail} ${found.messages.map((message) => `${message.from}: ${message.subject}`).join(" | ")}`
+          : found.detail,
+        data: found.messages,
+      };
+    }
+
+    case "read_email": {
+      const id = String(args?.id || "").trim();
+      if (!id) return { ok: false, result: "I need a message id." };
+      const message = await getMessage(id);
+      if (!message.ok || !message.message) return { ok: false, result: message.detail };
+      return {
+        ok: true,
+        result: `${message.message.subject} — ${message.message.from}\n${message.message.body.slice(0, 1500)}`,
+        data: { id: message.message.id, subject: message.message.subject, from: message.message.from },
+      };
+    }
+
+    case "summarize_email": {
+      const id = String(args?.id || "").trim();
+      if (!id) return { ok: false, result: "I need a message id." };
+      const message = await getMessage(id);
+      if (!message.ok || !message.message) return { ok: false, result: message.detail };
+      const summary = await summarizeMessage(message.message);
+      return { ok: summary.ok, result: summary.detail, data: { id } };
+    }
+
+    case "email_digest": {
+      const found = await listMessages({ query: String(args?.query || "in:inbox"), count: Number(args?.count) || 8 });
+      if (!found.ok) return { ok: false, result: found.detail };
+      const summary = await summarizeMessages(found.messages);
+      return { ok: summary.ok, result: summary.detail, data: found.messages };
+    }
+
+    case "draft_email_reply": {
+      const id = String(args?.id || "").trim();
+      if (!id) return { ok: false, result: "I need a message id." };
+      const message = await getMessage(id);
+      if (!message.ok || !message.message) return { ok: false, result: message.detail };
+
+      const draft = await draftReply({ message: message.message, instruction: String(args?.instruction || "") });
+      if (!draft.ok) return { ok: false, result: draft.detail };
+
+      const guard = await evaluateExternalAction({ kind: "email", target: message.message.replyTo });
+      if (!guard.allowed) return { ok: false, result: guard.reason };
+
+      const doc = await Approval.create({
+        kind: "email",
+        title: `Reply to ${message.message.replyTo}`,
+        detail: draft.text,
+        payload: {
+          to: message.message.replyTo,
+          subject: `Re: ${message.message.subject}`,
+          body: draft.text,
+        },
+        status: "pending",
+      });
+
+      return {
+        ok: true,
+        result: "Queued reply draft for approval. Nothing has been sent.",
+        data: { id: String(doc._id) },
+      };
+    }
+
+    case "check_availability": {
+      const result = await findFreeSlot({
+        start: args?.start ? String(args.start) : undefined,
+        end: args?.end ? String(args.end) : undefined,
+        minutes: Number(args?.minutes) || 60,
+        workStart: Number.isFinite(Number(args?.workStart)) ? Number(args?.workStart) : 9,
+        workEnd: Number.isFinite(Number(args?.workEnd)) ? Number(args?.workEnd) : 18,
+      });
+      return { ok: result.ok, result: result.detail, data: result.slot };
+    }
+
+    case "upcoming_events": {
+      const result = await listUpcoming({ days: Number(args?.days) || 7, max: Number(args?.max) || 10 });
+      return {
+        ok: result.ok,
+        result: result.ok
+          ? `${result.detail} ${result.events.map((event) => `${event.start}: ${event.title}`).join(" | ")}`
+          : result.detail,
+        data: result.events,
+      };
+    }
+
+    case "schedule_block": {
+      const title = String(args?.title || "").trim();
+      if (!title) return { ok: false, result: "A block needs a title." };
+      const start = args?.start ? new Date(String(args.start)) : new Date();
+      if (Number.isNaN(start.getTime())) return { ok: false, result: "That start time could not be parsed." };
+
+      const minutes = Math.min(Math.max(Number(args?.minutes) || 60, 15), 480);
+      const end = new Date(start.getTime() + minutes * 60_000);
+
+      const conflict = await checkConflicts(start.toISOString(), end.toISOString());
+      const warning = conflict.ok && conflict.conflict ? " It overlaps an existing event." : "";
+
+      const guard = await evaluateExternalAction({ kind: "calendar", target: title });
+      if (!guard.allowed) return { ok: false, result: guard.reason };
+
+      const doc = await Approval.create({
+        kind: "calendar",
+        title,
+        detail: String(args?.notes || ""),
+        payload: {
+          start: start.toISOString(),
+          end: end.toISOString(),
+          notes: String(args?.notes || ""),
+        },
+        status: "pending",
+      });
+
+      return {
+        ok: true,
+        result: `Queued calendar block "${title}" for approval. Nothing written to Google yet.${warning}`,
+        data: { id: String(doc._id), start: start.toISOString(), end: end.toISOString() },
+      };
     }
 
     case "open_page": {
