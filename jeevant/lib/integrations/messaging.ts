@@ -3,6 +3,7 @@
 // Nothing here is required for the app to work.
 
 import type { ResolvedAccount } from "./accounts";
+import { safeFetch } from "@/lib/http/fetch";
 
 export interface MessageResult {
   ok: boolean;
@@ -59,7 +60,7 @@ export async function sendWhatsApp(
 
   const version = process.env.WHATSAPP_API_VERSION || "v20.0";
   try {
-    const res = await fetch(
+    const res = await safeFetch(
       `https://graph.facebook.com/${version}/${cfg(account, "phoneNumberId", "WHATSAPP_PHONE_NUMBER_ID")}/messages`,
       {
         method: "POST",
@@ -113,7 +114,7 @@ export async function sendSMS(to: string, body: string, account?: ResolvedAccoun
   }
 
   try {
-    const res = await fetch(
+    const res = await safeFetch(
       `https://api.twilio.com/2010-04-01/Accounts/${sec(account, "accountSid", "TWILIO_ACCOUNT_SID")}/Messages.json`,
       {
         method: "POST",
@@ -160,7 +161,7 @@ export async function placeCall(
 
   try {
     const twiml = `<Response><Say voice="alice">${message.replace(/[<>&]/g, "")}</Say></Response>`;
-    const res = await fetch(
+    const res = await safeFetch(
       `https://api.twilio.com/2010-04-01/Accounts/${sec(account, "accountSid", "TWILIO_ACCOUNT_SID")}/Calls.json`,
       {
         method: "POST",
