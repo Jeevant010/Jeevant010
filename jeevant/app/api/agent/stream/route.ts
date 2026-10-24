@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { getSession } from "@/lib/auth";
 import { runAgent } from "@/lib/agent/run";
-import { rateLimit, rateLimitKey } from "@/lib/security/rate-limit";
+import { rateLimitDistributed, rateLimitKey } from "@/lib/security/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const limited = rateLimit(rateLimitKey("agent-stream", request), 30, 60_000);
+  const limited = await rateLimitDistributed(rateLimitKey("agent-stream", request), 30, 60_000);
   if (!limited.ok) {
     return new Response(JSON.stringify({ error: "Too many requests." }), {
       status: 429,
