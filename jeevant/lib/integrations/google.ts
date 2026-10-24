@@ -1,5 +1,7 @@
 // Minimal Google OAuth (refresh-token) helper shared by Gmail + Calendar adapters.
 
+import { safeFetch } from "@/lib/http/fetch";
+
 export function googleConfigured(): boolean {
   return !!(
     process.env.GOOGLE_CLIENT_ID &&
@@ -12,7 +14,7 @@ export async function getGoogleAccessToken(): Promise<string | null> {
   if (!googleConfigured()) return null;
 
   try {
-    const res = await fetch("https://oauth2.googleapis.com/token", {
+    const res = await safeFetch("https://oauth2.googleapis.com/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
