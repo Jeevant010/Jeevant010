@@ -3,6 +3,7 @@ import { ChannelAccount } from "@/lib/database/models";
 import type { ResolvedAccount } from "./accounts";
 import { getGoogleAccessToken } from "./google";
 import { openSecrets } from "@/lib/crypto/secrets";
+import { safeFetch } from "@/lib/http/fetch";
 
 export type ProbeResult = { ok: boolean; mode: string; detail: string; provider?: string };
 
@@ -20,7 +21,7 @@ function fail(detail: string, mode = "manual"): ProbeResult {
 }
 
 async function get(url: string, headers?: Record<string, string>): Promise<Response> {
-  return fetch(url, {
+  return safeFetch(url, {
     method: "GET",
     headers,
     cache: "no-store",
@@ -109,7 +110,7 @@ export async function probeAccount(channel: string, account: ResolvedAccount | n
         const clientSecret = pick(account, "clientSecret", "GOOGLE_CLIENT_SECRET");
 
         if (refresh && clientId && clientSecret) {
-          const res = await fetch("https://oauth2.googleapis.com/token", {
+          const res = await safeFetch("https://oauth2.googleapis.com/token", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: new URLSearchParams({
@@ -161,7 +162,7 @@ export async function probeAccountById(id: string): Promise<ProbeResult> {
     return probeAccount(String(doc.channel), {
       id: String(doc._id),
       label: doc.label,
-      config: (doc.config || {}) as Record<string, string>,
+      config: openSecrets(doc.config),
       secrets: openSecrets(doc.secrets),
     });
   } catch (error) {
