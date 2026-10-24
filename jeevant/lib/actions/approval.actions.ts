@@ -11,6 +11,7 @@ import { sendByChannel } from "@/lib/integrations/messaging";
 import { resolveAccount } from "@/lib/integrations/accounts";
 import { audit, evaluateExternalAction } from "@/lib/guardrails/policy";
 import { redact } from "@/lib/logging/redact";
+import { safeFetch } from "@/lib/http/fetch";
 
 function plain(doc: any) {
   const obj = doc?.toObject ? doc.toObject() : doc;
@@ -97,6 +98,9 @@ export async function decideApproval(id: string, decision: "approved" | "rejecte
           to: payload.to,
           subject: payload.subject,
           body: payload.body || "",
+          threadId: payload.threadId,
+          inReplyTo: payload.inReplyTo,
+          references: payload.references,
         });
         result = draft.detail;
         if (!draft.ok && draft.mode === "failed") approval.status = "failed";
@@ -153,7 +157,7 @@ export async function decideApproval(id: string, decision: "approved" | "rejecte
           result = guard.reason;
         } else {
           try {
-            const res = await fetch(url, {
+            const res = await safeFetch(url, {
               method: String(payload.method || "POST"),
               headers: { "Content-Type": "application/json" },
               cache: "no-store",
