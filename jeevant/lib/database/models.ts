@@ -41,6 +41,7 @@ const TaskSchema = new Schema({
   projectId: { type: Schema.Types.ObjectId, ref: "Project" }, // Link task to a project
   order: { type: Number, default: 0 },
   reminderDate: { type: Date },
+  reminderPushedAt: { type: Date },
   sourceUrl: { type: String },
   category: { type: String },
   createdAt: { type: Date, default: Date.now },
@@ -594,6 +595,16 @@ const ActionTokenSchema = new Schema({
 });
 ActionTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
+// --- 31. PUSH SUBSCRIPTION (Web Push / VAPID) ---
+const PushSubscriptionSchema = new Schema({
+  endpoint: { type: String, required: true, unique: true },
+  p256dh: { type: String, required: true },
+  auth: { type: String, required: true },
+  userAgent: { type: String, default: "" },
+  createdAt: { type: Date, default: Date.now },
+  lastUsedAt: { type: Date },
+});
+
 export const Profile = models.Profile || model("Profile", ProfileSchema);
 export const Snippet = models.Snippet || model("Snippet", SnippetSchema);
 export const Message = models.Message || model("Message", MessageSchema);
@@ -626,3 +637,4 @@ export const Template = models.Template || model("Template", TemplateSchema);
 export const Activity = models.Activity || model("Activity", ActivitySchema);
 export const FocusSession = models.FocusSession || model("FocusSession", FocusSessionSchema);
 export const ActionToken = models.ActionToken || model("ActionToken", ActionTokenSchema);
+export const PushSubscription = models.PushSubscription || model("PushSubscription", PushSubscriptionSchema);
