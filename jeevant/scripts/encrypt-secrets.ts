@@ -22,13 +22,22 @@ async function main() {
   let changed = 0;
 
   for (const account of accounts) {
-    if (isSecretEnvelope(account.secrets)) continue;
+    const configSealed = isSecretEnvelope(account.config);
+    const secretsSealed = isSecretEnvelope(account.secrets);
+    if (configSealed && secretsSealed) continue;
 
-    const plain = openSecrets(account.secrets);
-    if (!Object.keys(plain).length) continue;
+    const plainConfig = openSecrets(account.config);
+    const plainSecrets = openSecrets(account.secrets);
 
-    account.secrets = sealSecrets(plain) as any;
-    account.markModified("secrets");
+    if (Object.keys(plainConfig).length) {
+      account.config = sealSecrets(plainConfig) as any;
+      account.markModified("config");
+    }
+    if (Object.keys(plainSecrets).length) {
+      account.secrets = sealSecrets(plainSecrets) as any;
+      account.markModified("secrets");
+    }
+
     await account.save();
     changed += 1;
     console.log(`encrypted ${account.channel}/${account.label}`);
