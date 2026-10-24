@@ -14,8 +14,10 @@ Credential secrets in `ChannelAccount.secrets` are encrypted with AES-256-GCM.
   `npm run secrets:encrypt` once to upgrade them.
 - Rotating `ADMIN_SECRET` makes old encrypted credentials unreadable. Rotate the
   credentials too, or keep the old secret for a migration window.
-- Non-secret `config` (for example a chat id or a from-number) is not encrypted.
-  Treat phone numbers as personal data.
+- Both `config` (chat id, from-number, phone number id) and `secrets` are
+  encrypted with the same envelope.
+- Legacy plaintext records remain readable through the fallback until the
+  migration runs.
 
 Failure behavior: if `ADMIN_SECRET` is missing or shorter than 16 characters in
 production, sealing throws rather than storing plaintext.
@@ -100,6 +102,17 @@ they are stored.
 
 Browser speech synthesis runs locally. There is no analytics or third-party
 tracking script in this app.
+
+## Backups
+
+- TTL deletion and `/privacy` deletion do **not** remove records already captured
+  in a database backup.
+- Keep backups encrypted and give them their own expiry; a 90-day database
+  retention with 365-day backups still keeps a year of chat.
+- Rotating `ADMIN_SECRET` makes encrypted credentials in old backups unreadable
+  only if the old secret is discarded. Keep the old secret long enough to migrate
+  live credentials, then destroy it.
+- Export before a destructive migration; the archive is the portable copy.
 
 ## What this does not protect
 
