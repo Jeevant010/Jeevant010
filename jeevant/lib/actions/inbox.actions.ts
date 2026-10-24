@@ -34,6 +34,9 @@ export async function queueReplyAction(formData: FormData): Promise<void> {
       to: message.message.replyTo,
       subject: `Re: ${message.message.subject}`,
       body: draft.text,
+      threadId: message.message.threadId,
+      inReplyTo: message.message.messageIdHeader,
+      references: message.message.references,
     },
     status: "pending",
   });
