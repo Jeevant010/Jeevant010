@@ -138,8 +138,6 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-package-lock.json
-
 utils\config.js
 
 classified/
