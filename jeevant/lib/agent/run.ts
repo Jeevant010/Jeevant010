@@ -8,6 +8,7 @@ import connectDB from "@/lib/db";
 import { Memory, ChatMessage } from "@/lib/database/models";
 import { getGuardrailSettings } from "@/lib/guardrails/policy";
 import { getStyleGuide } from "@/lib/style";
+import { safeFetch } from "@/lib/http/fetch";
 
 async function recentMemories(): Promise<string[]> {
   try {
@@ -118,7 +119,7 @@ async function plan(
   for (let attempt = 0; attempt < pool.length; attempt++) {
     const key = pool[attempt % pool.length];
     try {
-      const res = await fetch(
+      const res = await safeFetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${modelName()}:generateContent?key=${key}`,
         {
           method: "POST",
