@@ -4,7 +4,7 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createHash, timingSafeEqual } from "node:crypto";
 import { encrypt } from "@/lib/auth";
-import { rateLimit } from "@/lib/security/rate-limit";
+import { rateLimitDistributed } from "@/lib/security/rate-limit";
 
 function safeEqual(a: string, b: string): boolean {
   const left = createHash("sha256").update(a).digest();
@@ -23,7 +23,7 @@ export async function login(formData: FormData) {
   const headerStore = await headers();
   const forwarded = headerStore.get("x-forwarded-for") || "";
   const ip = forwarded.split(",")[0]?.trim() || headerStore.get("x-real-ip") || "unknown";
-  const limited = rateLimit(`login:${ip}`, 10, 10 * 60_000);
+  const limited = await rateLimitDistributed(`login:${ip}`, 10, 10 * 60_000);
   if (!limited.ok) {
     return { error: "ACCESS_DENIED // TOO_MANY_ATTEMPTS" };
   }
