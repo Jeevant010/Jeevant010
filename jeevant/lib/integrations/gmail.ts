@@ -2,6 +2,7 @@
 // Without credentials the draft is kept inside the app ("manual" mode).
 
 import { getGoogleAccessToken, googleConfigured } from "./google";
+import { safeFetch } from "@/lib/http/fetch";
 
 export function gmailConfigured(): boolean {
   return googleConfigured();
@@ -14,12 +15,26 @@ export interface DraftResult {
   id?: string;
 }
 
-function buildRawMessage({ to, subject, body }: { to?: string; subject?: string; body: string }): string {
+function buildRawMessage({
+  to,
+  subject,
+  body,
+  inReplyTo,
+  references,
+}: {
+  to?: string;
+  subject?: string;
+  body: string;
+  inReplyTo?: string;
+  references?: string;
+}): string {
   const from = process.env.GMAIL_SENDER || "me";
   const headers = [
     `From: ${from}`,
     to ? `To: ${to}` : "",
     `Subject: ${subject || "(no subject)"}`,
+    inReplyTo ? `In-Reply-To: ${inReplyTo}` : "",
+    references ? `References: ${references}` : "",
     "MIME-Version: 1.0",
     'Content-Type: text/plain; charset="UTF-8"',
   ].filter(Boolean);
@@ -28,7 +43,21 @@ function buildRawMessage({ to, subject, body }: { to?: string; subject?: string;
   return Buffer.from(message, "utf-8").toString("base64url");
 }
 
-export async function saveDraft({ to, subject, body }: { to?: string; subject?: string; body: string }): Promise<DraftResult> {
+export async function saveDraft({
+  to,
+  subject,
+  body,
+  threadId,
+  inReplyTo,
+  references,
+}: {
+  to?: string;
+  subject?: string;
+  body: string;
+  threadId?: string;
+  inReplyTo?: string;
+  references?: string;
+}): Promise<DraftResult> {
   const token = await getGoogleAccessToken();
   if (!token) {
     return {
@@ -39,11 +68,16 @@ export async function saveDraft({ to, subject, body }: { to?: string; subject?: 
   }
 
   try {
-    const res = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/drafts", {
+    const res = await safeFetch("https://gmail.googleapis.com/gmail/v1/users/me/drafts", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       cache: "no-store",
-      body: JSON.stringify({ message: { raw: buildRawMessage({ to, subject, body }) } }),
+      body: JSON.stringify({
+        message: {
+          raw: buildRawMessage({ to, subject, body, inReplyTo, references }),
+          ...(threadId ? { threadId } : {}),
+        },
+      }),
     });
 
     if (!res.ok) {
