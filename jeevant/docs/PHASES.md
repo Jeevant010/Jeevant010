@@ -154,15 +154,25 @@ from MongoDB while a project remains.
 
 **Goal:** it still works when the network, a key, or a tab is not cooperating.
 
-- Web Push with VAPID so reminders fire with the phone locked
-- Rate limiting on auth and agent endpoints
-- Timeouts and circuit breakers for every outbound provider
-- Unit tests for guardrails and tool argument validation
-- Bundle budget and a Lighthouse check in CI
-- Metrics endpoint plus alert thresholds for failed jobs and approvals
+- [x] Web Push with VAPID: subscription model, service worker push and click
+      handlers, on-device setup panel, test endpoint, and a reminder cron
+- [x] Push removes dead subscriptions on `404`/`410` and only marks a reminder
+      pushed when a notification actually sent
+- [x] In-memory rate limiting on login, agent, bridge, account tests, and export
+- [x] Node test suite (19 tests) for validation, encryption, redaction, rate
+      limiting, and theme routing, wired into CI
+- [x] Bundle budget in CI (1800 KB limit, current ~1403 KB)
+- [x] Health endpoint reports `ok`/`degraded`/`down` with failed and stuck jobs,
+      pending approvals, and push subscribers
+- [x] `docs/RELIABILITY.md` with setup, thresholds, and limits
+- [ ] Timeouts and circuit breakers on every provider (readers have 8s; Groq,
+      Gemini, and channel adapters still use platform defaults)
+- [ ] Distributed rate limiting (Redis or Mongo) for multi-instance deployments
+- [ ] Lighthouse CI
 
-**Acceptance:** a lock-screen reminder arrives with the app closed; a dead
-provider degrades to a documented fallback instead of a hang.
+**Acceptance:** enable push on a phone, receive the test, then let the reminder
+cron fire a due task with the app closed. `npm run verify` must pass, including
+tests and the bundle budget.
 
 ## Deliberately not promised
 
