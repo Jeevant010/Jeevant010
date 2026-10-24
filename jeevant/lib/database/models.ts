@@ -605,6 +605,14 @@ const PushSubscriptionSchema = new Schema({
   lastUsedAt: { type: Date },
 });
 
+// --- 32. RATE LIMIT BUCKET (distributed limiter) ---
+const RateLimitBucketSchema = new Schema({
+  key: { type: String, required: true, unique: true },
+  count: { type: Number, default: 0 },
+  resetAt: { type: Date, required: true },
+});
+RateLimitBucketSchema.index({ resetAt: 1 }, { expireAfterSeconds: 0 });
+
 export const Profile = models.Profile || model("Profile", ProfileSchema);
 export const Snippet = models.Snippet || model("Snippet", SnippetSchema);
 export const Message = models.Message || model("Message", MessageSchema);
@@ -638,3 +646,4 @@ export const Activity = models.Activity || model("Activity", ActivitySchema);
 export const FocusSession = models.FocusSession || model("FocusSession", FocusSessionSchema);
 export const ActionToken = models.ActionToken || model("ActionToken", ActionTokenSchema);
 export const PushSubscription = models.PushSubscription || model("PushSubscription", PushSubscriptionSchema);
+export const RateLimitBucket = models.RateLimitBucket || model("RateLimitBucket", RateLimitBucketSchema);
