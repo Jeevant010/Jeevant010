@@ -1,9 +1,10 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createHash, timingSafeEqual } from "node:crypto";
 import { encrypt } from "@/lib/auth";
+import { rateLimit } from "@/lib/security/rate-limit";
 
 function safeEqual(a: string, b: string): boolean {
   const left = createHash("sha256").update(a).digest();
@@ -17,6 +18,14 @@ export async function login(formData: FormData) {
 
   if (!SECRET) {
     return { error: "ACCESS_DENIED // SERVER_KEY_NOT_CONFIGURED" };
+  }
+
+  const headerStore = await headers();
+  const forwarded = headerStore.get("x-forwarded-for") || "";
+  const ip = forwarded.split(",")[0]?.trim() || headerStore.get("x-real-ip") || "unknown";
+  const limited = rateLimit(`login:${ip}`, 10, 10 * 60_000);
+  if (!limited.ok) {
+    return { error: "ACCESS_DENIED // TOO_MANY_ATTEMPTS" };
   }
 
   if (safeEqual(password, SECRET)) {
