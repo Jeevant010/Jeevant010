@@ -1,6 +1,7 @@
 import { getGoogleAccessToken } from "./google";
 import { groqChat, groqConfigured } from "./groq";
 import { getStyleGuide } from "@/lib/style";
+import { safeFetch } from "@/lib/http/fetch";
 
 export type MailSummary = {
   id: string;
@@ -13,11 +14,14 @@ export type MailSummary = {
   unread: boolean;
 };
 
+export type MailAttachment = { filename: string; mimeType: string; size: number };
+
 export type MailFull = MailSummary & {
   body: string;
   messageIdHeader: string;
   references: string;
   replyTo: string;
+  attachments: MailAttachment[];
 };
 
 export type MailListResult = { ok: boolean; mode: string; detail: string; messages: MailSummary[] };
@@ -45,6 +49,21 @@ function walkBody(part: any): string {
   }
   if (part.body?.data) return decodeBase64Url(part.body.data);
   return "";
+}
+
+function collectAttachments(part: any, output: MailAttachment[] = []): MailAttachment[] {
+  if (!part) return output;
+  if (part.filename && part.body?.attachmentId) {
+    output.push({
+      filename: String(part.filename),
+      mimeType: String(part.mimeType || "application/octet-stream"),
+      size: Number(part.body?.size || 0),
+    });
+  }
+  if (Array.isArray(part.parts)) {
+    for (const child of part.parts) collectAttachments(child, output);
+  }
+  return output;
 }
 
 function stripHtml(value: string): string {
@@ -97,6 +116,7 @@ function toFull(data: any): MailFull {
     messageIdHeader: header(payload, "Message-ID"),
     references: header(payload, "References"),
     replyTo: replyAddress(summary.from),
+    attachments: collectAttachments(payload),
   };
 }
 
@@ -121,7 +141,7 @@ export async function listMessages({
   if (query && query.trim()) url.searchParams.set("q", query.trim());
 
   try {
-    const res = await fetch(url, {
+    const res = await safeFetch(url, {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
@@ -136,7 +156,7 @@ export async function listMessages({
 
     const messages = await Promise.all(
       ids.map(async (id) => {
-        const detail = await fetch(
+        const detail = await safeFetch(
           `https://gmail.googleapis.com/gmail/v1/users/me/messages/${encodeURIComponent(id)}?format=metadata&metadataHeaders=Subject&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Date`,
           { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" }
         );
@@ -157,7 +177,7 @@ export async function getMessage(id: string): Promise<MailResult> {
   if (!token) return { ok: false, mode: "manual", detail: error || "Not configured." };
 
   try {
-    const res = await fetch(
+    const res = await safeFetch(
       `https://gmail.googleapis.com/gmail/v1/users/me/messages/${encodeURIComponent(id)}?format=full`,
       { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" }
     );
