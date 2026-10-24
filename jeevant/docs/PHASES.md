@@ -68,7 +68,8 @@ Application → Service Worker, confirm `jeevant-shell-v2`, and confirm
       [`docs/BRIDGE.md`](./BRIDGE.md)
 - [x] Every run writes to `AuditLog`; external actions still queue approvals
 - [x] `block_time` detects overlaps and says so in the receipt
-- [ ] Dashboard "run now" tiles (deferred; `/actions` covers manual use)
+- [x] Dashboard quick actions: block 60m, start/end focus, log 30m, and add a
+      task, each with a receipt and a board refresh
 
 **Acceptance:** create a reusable `create_task` link, run it twice, revoke it,
 and confirm the third run returns `410` with no new task. Check `/guardrails` for
@@ -117,8 +118,11 @@ and confirm the dispatch log row.
       `upcoming_events`, `schedule_block`
 - [x] Mobile-friendly `/inbox` and `/inbox/[id]` pages, plus sidebar entry
 - [x] Explicit scope errors that name the OAuth scope to add
-- [ ] Overnight digest built from real Gmail (the worker still reads `Message`)
-- [ ] Attachment parsing and thread-aware reply headers
+- [x] Overnight digest includes real Gmail unread summaries when Google is
+      configured, and falls back to the `Message` collection
+- [x] Thread-aware reply drafts (`threadId`, `In-Reply-To`, `References`) and
+      attachment metadata (name, type, size)
+- [ ] Attachment download and parsing
 
 **Acceptance:** search `in:inbox newer_than:7d`, open one message, see a summary,
 queue a reply, and approve it. Then ask the assistant "when am I free tomorrow
@@ -143,8 +147,8 @@ for 90 minutes" and confirm it returns a real slot, not a guess.
 - [x] Safe CSP directives enforced; full policy report-only so nothing breaks
 - [x] Threat model and data-flow document (`docs/PRIVACY.md`)
 - [ ] Nonce-based strict CSP enforcement
-- [ ] Encryption for non-secret config such as phone numbers
-- [ ] Backup-aware deletion guidance
+- [x] Non-secret config (phone numbers, chat ids) encrypted at rest too
+- [x] Backup-aware deletion guidance in `docs/PRIVACY.md`
 
 **Acceptance:** run `npm run secrets:encrypt`, confirm `/accounts` still tests a
 credential, download the export, and verify a deleted activity record is gone
@@ -165,9 +169,10 @@ from MongoDB while a project remains.
 - [x] Health endpoint reports `ok`/`degraded`/`down` with failed and stuck jobs,
       pending approvals, and push subscribers
 - [x] `docs/RELIABILITY.md` with setup, thresholds, and limits
-- [ ] Timeouts and circuit breakers on every provider (readers have 8s; Groq,
-      Gemini, and channel adapters still use platform defaults)
-- [ ] Distributed rate limiting (Redis or Mongo) for multi-instance deployments
+- [x] Shared `safeFetch` with a 10-second timeout and a per-host circuit breaker
+      across Groq, Gemini, Google, Gmail, Calendar, channels, messaging, and tools
+- [x] Mongo-backed distributed rate limiting with an in-memory fallback
+      (`RATE_LIMIT_STORE=memory`)
 - [ ] Lighthouse CI
 
 **Acceptance:** enable push on a phone, receive the test, then let the reminder
