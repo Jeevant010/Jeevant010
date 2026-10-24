@@ -35,15 +35,24 @@ import {
   WorkflowRun,
 } from "@/lib/database/models";
 import { openSecrets, secretsAreEncrypted } from "@/lib/crypto/secrets";
+import { rateLimit, rateLimitKey } from "@/lib/security/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-export async function GET() {
+export async function GET(request: Request) {
   const session = await getSession();
   if (!session || session.role !== "admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const limited = rateLimit(rateLimitKey("privacy-export", request), 5, 60_000);
+  if (!limited.ok) {
+    return NextResponse.json(
+      { error: "Too many requests." },
+      { status: 429, headers: { "Retry-After": String(limited.retryAfterSeconds) } }
+    );
   }
 
   await connectDB();
