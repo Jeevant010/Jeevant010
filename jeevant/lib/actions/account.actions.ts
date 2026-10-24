@@ -19,11 +19,12 @@ export async function getAccounts() {
         _id: String(doc._id),
         channel: doc.channel,
         label: doc.label,
-        config: doc.config || {},
+        config: openSecrets(doc.config),
         isDefault: !!doc.isDefault,
         hasSecrets: secretKeys.length > 0,
         secretKeys,
         encrypted: secretsAreEncrypted(doc.secrets),
+        configEncrypted: secretsAreEncrypted(doc.config),
       };
     });
   } catch {
@@ -97,7 +98,13 @@ export async function createAccountAction(formData: FormData): Promise<void> {
 
   await connectDB();
   const existing = await ChannelAccount.countDocuments({ channel });
-  await ChannelAccount.create({ channel, label, config, secrets: sealSecrets(secrets), isDefault: existing === 0 });
+  await ChannelAccount.create({
+    channel,
+    label,
+    config: sealSecrets(config),
+    secrets: sealSecrets(secrets),
+    isDefault: existing === 0,
+  });
 
   revalidatePath("/accounts");
   revalidatePath("/messages");
