@@ -5,6 +5,7 @@
 import type { DraftBundle, DraftArtifact, Intent, PlanBlock, TaskSuggestion } from "./types";
 import { groqChat, groqConfigured, groqModel } from "./groq";
 import { getStyleGuide } from "@/lib/style";
+import { safeFetch } from "@/lib/http/fetch";
 
 function apiKeys(): string[] {
   return (process.env.GEMINI_API_KEYS || "")
@@ -183,7 +184,7 @@ export async function draftFromTranscript(transcript: string, hint?: string): Pr
   for (let attempt = 0; attempt < keys.length; attempt++) {
     const key = nextKey();
     try {
-      const res = await fetch(
+      const res = await safeFetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${modelName()}:generateContent?key=${key}`,
         {
           method: "POST",
