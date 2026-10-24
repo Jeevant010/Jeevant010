@@ -1,5 +1,6 @@
 import PrivateShell from "@/components/layout/PrivateShell";
 import Assistant from "@/components/assistant/Assistant";
+import PushSetup from "@/components/layout/PushSetup";
 import { addMemoryAction, deleteMemoryAction, getMemories } from "@/lib/actions/memory.actions";
 import { getBriefing, getRecentHistory } from "@/lib/agent/briefing";
 import { Bot, Brain, Trash2 } from "lucide-react";
@@ -26,6 +27,8 @@ export default async function AssistantPage() {
         initialHistory={history}
         memoryCount={memories.length}
       />
+
+      <PushSetup />
 
       <section className="mt-6 grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
         <form action={addMemoryAction} className="panel-cyber h-fit p-5">
