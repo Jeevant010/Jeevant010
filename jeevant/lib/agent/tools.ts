@@ -10,6 +10,7 @@ import { groqChat, groqConfigured } from "@/lib/integrations/groq";
 import { getBriefing } from "@/lib/agent/briefing";
 import { draftReply, getMessage, listMessages, summarizeMessage, summarizeMessages } from "@/lib/integrations/gmail-read";
 import { checkConflicts, findFreeSlot, listUpcoming } from "@/lib/integrations/calendar-read";
+import { safeFetch } from "@/lib/http/fetch";
 
 export type ToolResult = {
   ok: boolean;
@@ -366,7 +367,7 @@ export async function executeTool(tool: string, args: any): Promise<ToolResult> 
       const query = String(args?.query || "").trim();
       if (!query) return { ok: false, result: "Give me something to search for." };
       try {
-        const res = await fetch(
+        const res = await safeFetch(
           `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`,
           { cache: "no-store" }
         );
@@ -387,7 +388,7 @@ export async function executeTool(tool: string, args: any): Promise<ToolResult> 
     case "weather": {
       const city = String(args?.city || "Surat").trim();
       try {
-        const geoRes = await fetch(
+        const geoRes = await safeFetch(
           `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`,
           { cache: "no-store" }
         );
@@ -395,7 +396,7 @@ export async function executeTool(tool: string, args: any): Promise<ToolResult> 
         const place = geo?.results?.[0];
         if (!place) return { ok: false, result: `Could not find "${city}".` };
 
-        const weatherRes = await fetch(
+        const weatherRes = await safeFetch(
           `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m,apparent_temperature,precipitation,weather_code&timezone=auto`,
           { cache: "no-store" }
         );
@@ -477,11 +478,11 @@ export async function executeTool(tool: string, args: any): Promise<ToolResult> 
     case "news": {
       const count = Math.min(Math.max(Number(args?.count || 5), 1), 10);
       try {
-        const idsRes = await fetch("https://hacker-news.firebaseio.com/v0/topstories.json", { cache: "no-store" });
+        const idsRes = await safeFetch("https://hacker-news.firebaseio.com/v0/topstories.json", { cache: "no-store" });
         const ids: number[] = await idsRes.json();
         const items = await Promise.all(
           ids.slice(0, count).map(async (id) => {
-            const res = await fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`, { cache: "no-store" });
+            const res = await safeFetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`, { cache: "no-store" });
             return res.json();
           })
         );
@@ -704,6 +705,9 @@ export async function executeTool(tool: string, args: any): Promise<ToolResult> 
           to: message.message.replyTo,
           subject: `Re: ${message.message.subject}`,
           body: draft.text,
+          threadId: message.message.threadId,
+          inReplyTo: message.message.messageIdHeader,
+          references: message.message.references,
         },
         status: "pending",
       });
