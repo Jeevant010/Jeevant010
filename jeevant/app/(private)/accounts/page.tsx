@@ -122,6 +122,9 @@ export default async function AccountsPage() {
                         <span className={`text-[9px] uppercase tracking-widest ${account.hasSecrets ? "text-emerald-400" : "text-amber-400"}`}>
                           {account.hasSecrets ? "secrets set" : "no secrets"}
                         </span>
+                        {account.configEncrypted ? (
+                          <span className="text-[9px] uppercase tracking-widest text-emerald-400/80">config encrypted</span>
+                        ) : null}
                       </div>
                       <h3 className="mt-2 text-sm font-bold text-shell-text">{account.label}</h3>
                       <p className="mt-1 break-words text-[11px] text-shell-muted">
