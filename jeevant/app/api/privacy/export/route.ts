@@ -34,8 +34,8 @@ import {
   Workflow,
   WorkflowRun,
 } from "@/lib/database/models";
-import { openSecrets, secretsAreEncrypted } from "@/lib/crypto/secrets";
-import { rateLimit, rateLimitKey } from "@/lib/security/rate-limit";
+import { openSecrets, secretsAreEncrypted, isSecretEnvelope } from "@/lib/crypto/secrets";
+import { rateLimitDistributed, rateLimitKey } from "@/lib/security/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -47,7 +47,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const limited = rateLimit(rateLimitKey("privacy-export", request), 5, 60_000);
+  const limited = await rateLimitDistributed(rateLimitKey("privacy-export", request), 5, 60_000);
   if (!limited.ok) {
     return NextResponse.json(
       { error: "Too many requests." },
@@ -125,6 +125,8 @@ export async function GET(request: Request) {
 
   const safeAccounts = (accounts as any[]).map((account) => ({
     ...account,
+    config: openSecrets(account.config),
+    configEncrypted: isSecretEnvelope(account.config),
     secrets: Object.keys(openSecrets(account.secrets)),
     encrypted: secretsAreEncrypted(account.secrets),
   }));
