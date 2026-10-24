@@ -2,6 +2,8 @@
 // Gemini keys are absent (and as a fallback when Gemini fails).
 // The key stays server-side in .env.local.
 
+import { safeFetch } from "@/lib/http/fetch";
+
 export function groqConfigured(): boolean {
   return !!process.env.GROQ_API_KEY;
 }
@@ -15,7 +17,7 @@ export async function groqChat(system: string, user: string, json = true): Promi
   if (!key) return null;
 
   try {
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const res = await safeFetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${key}`,
