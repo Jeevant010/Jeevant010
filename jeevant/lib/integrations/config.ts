@@ -52,7 +52,7 @@ export async function getRuntimeConfig(): Promise<RuntimeConfig> {
     const accounts = await ChannelAccount.find({ isDefault: true }).lean();
 
     for (const account of accounts as any[]) {
-      const config = (account.config || {}) as Record<string, string>;
+      const config = openSecrets(account.config);
       const secrets = openSecrets(account.secrets);
 
       switch (account.channel) {
