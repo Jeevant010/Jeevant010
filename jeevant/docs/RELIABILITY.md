@@ -43,21 +43,21 @@ subscriptions the provider reports as gone (`404`/`410`).
 
 ## Rate limits
 
-In-memory sliding windows, applied per IP. Limits reset when the process
-restarts.
+Mongo-backed sliding windows, applied per IP. They work across multiple
+instances because the counter lives in `RateLimitBucket`, which expires itself
+through a TTL index.
+
+Set `RATE_LIMIT_STORE=memory` to use the in-process fallback instead. If Mongo is
+unreachable, the limiter automatically falls back to memory.
 
 | Endpoint | Limit |
 |---|---|
 | Login | 10 attempts / 10 minutes |
 | Agent (JSON and stream) | 30 / minute |
-| Bridge run | 30 / minute |
+| Bridge run and quick actions | 30–40 / minute |
 | Bridge preview | 60 / minute |
 | Account test | 20 / minute |
 | Privacy export | 5 / minute |
-
-This is per instance. On a multi-instance deployment, replace the store with
-Redis or a Mongo-backed counter; the interface is one function,
-`rateLimit(key, limit, windowMs)`.
 
 ## Health
 
@@ -94,11 +94,17 @@ npm run build && npm run budget
 CI fails above 1800 KB of `.next/static/chunks`. The current build is about
 1403 KB. Raise `BUNDLE_BUDGET_KB` deliberately, not accidentally.
 
-## Timeouts
+## Timeouts and breakers
 
-Read-only probes and the Gmail/Calendar readers use an 8-second
-`AbortSignal.timeout`. The older Groq, Gemini, and channel adapters still rely on
-platform defaults; adding a shared timeout wrapper is the next reliability task.
+Every outbound provider call goes through `safeFetch`:
+
+- 10-second default timeout, overriding with `AbortSignal.timeout`.
+- Per-host circuit breaker: five consecutive failures or 5xx responses open the
+  host for 30 seconds, then a single probe closes it.
+- A 4xx response does not open the breaker; auth errors stay visible immediately.
+
+This covers Groq, Whisper, Gemini, Google OAuth, Gmail, Calendar, Telegram,
+Discord, Slack, Mastodon, WhatsApp, Twilio, DuckDuckGo, weather, and Hacker News.
 
 ## Honest limits
 
@@ -106,6 +112,7 @@ platform defaults; adding a shared timeout wrapper is the next reliability task.
   but a phone on the LAN needs HTTPS or a tunnel.
 - There is no background wake-word or OS-level automation; push is the only
   background channel.
-- Rate limits are not distributed.
+- Rate limits are best-effort under high concurrency: the Mongo counter reads
+  then increments, so a burst can overshoot by a few requests.
 - There is no Lighthouse CI yet; typecheck, lint, tests, build, and the bundle
   budget are the current gates.
