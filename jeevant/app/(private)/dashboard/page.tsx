@@ -4,6 +4,7 @@ import { getNotes } from "@/lib/actions/note.actions";
 import { getCharacterSheet } from "@/lib/actions/rpg.actions";
 import { getOpsCounts } from "@/lib/actions/voice.actions";
 import PrivateShell from "@/components/layout/PrivateShell";
+import QuickActions from "@/components/dashboard/QuickActions";
 import { 
   Activity, Target, FileText, Clock, ShieldAlert, Database, Terminal, Briefcase, BarChart, Mic, PenLine, Inbox
 } from "lucide-react";
@@ -71,6 +72,8 @@ export default async function Dashboard() {
             </div>
           ))}
         </div>
+
+        <QuickActions />
 
         {/* Impending Deadlines */}
         {upcomingDeadlines.length > 0 && (
