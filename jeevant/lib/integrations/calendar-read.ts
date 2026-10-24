@@ -1,4 +1,5 @@
 import { getGoogleAccessToken, googleConfigured } from "./google";
+import { safeFetch } from "@/lib/http/fetch";
 
 export type Slot = { start: string; end: string };
 
@@ -42,7 +43,7 @@ export async function getBusy(timeMin: string, timeMax: string): Promise<BusyRes
   }
 
   try {
-    const res = await fetch("https://www.googleapis.com/calendar/v3/freeBusy", {
+    const res = await safeFetch("https://www.googleapis.com/calendar/v3/freeBusy", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       cache: "no-store",
@@ -172,7 +173,7 @@ export async function listUpcoming({ days = 7, max = 20 }: { days?: number; max?
   url.searchParams.set("maxResults", String(Math.min(Math.max(max, 1), 50)));
 
   try {
-    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
+    const res = await safeFetch(url, { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
     if (!res.ok) {
       const text = await res.text().catch(() => "");
       return { ok: false, detail: scopeHint(res.status, text) || `Calendar read failed (${res.status}).`, events: [] };
