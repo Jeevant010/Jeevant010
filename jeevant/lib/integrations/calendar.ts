@@ -2,6 +2,7 @@
 // Without credentials the caller falls back to the local Schedule collection.
 
 import { getGoogleAccessToken, googleConfigured } from "./google";
+import { safeFetch } from "@/lib/http/fetch";
 
 export function calendarConfigured(): boolean {
   return googleConfigured();
@@ -36,7 +37,7 @@ export async function createEvent({
   const endDate = end ? new Date(end) : new Date(startDate.getTime() + 60 * 60 * 1000);
 
   try {
-    const res = await fetch(
+    const res = await safeFetch(
       `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
       {
         method: "POST",
