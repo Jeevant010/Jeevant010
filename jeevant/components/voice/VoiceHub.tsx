@@ -45,6 +45,7 @@ interface Digest {
   unreadMessages: { name: string; contact: string; preview: string; priority?: string; at?: string }[];
   overnightCaptures: { id: string; summary: string; intent: string; drafts: number }[];
   todayBlocks: { title: string; start?: string; end?: string }[];
+  gmail?: { source: string; count: number; summary: string };
 }
 
 export default function VoiceHub({ initialCaptures, digest }: { initialCaptures: Capture[]; digest: Digest }) {
@@ -105,7 +106,7 @@ export default function VoiceHub({ initialCaptures, digest }: { initialCaptures:
             <RefreshCw className="h-3 w-3" /> Refresh
           </button>
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <DigestCard title={`Overnight inbox (${digest.unreadMessages.length})`} icon={<Inbox className="h-4 w-4" />}>
             {digest.unreadMessages.slice(0, 4).map((message, index) => (
               <div key={index} className="border-b border-shell-border/40 pb-2 text-xs">
@@ -146,6 +147,12 @@ export default function VoiceHub({ initialCaptures, digest }: { initialCaptures:
             ))}
             {digest.todayBlocks.length === 0 && <Empty text="Nothing on the calendar." />}
           </DigestCard>
+
+          {digest.gmail ? (
+            <DigestCard title={`Gmail unread (${digest.gmail.count})`} icon={<Mail className="h-4 w-4" />}>
+              <p className="whitespace-pre-wrap text-xs leading-5 text-shell-muted">{digest.gmail.summary}</p>
+            </DigestCard>
+          ) : null}
         </div>
       </section>
 
