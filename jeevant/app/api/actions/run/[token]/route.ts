@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { previewActionToken, runActionToken } from "@/lib/bridge/tokens";
+import { rateLimit, rateLimitKey } from "@/lib/security/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,6 +12,14 @@ const MAX_BODY = 16_384;
 type Context = { params: Promise<{ token: string }> };
 
 export async function GET(_request: NextRequest, context: Context) {
+  const limited = rateLimit(rateLimitKey("bridge-preview", _request), 60, 60_000);
+  if (!limited.ok) {
+    return NextResponse.json(
+      { error: "Too many requests." },
+      { status: 429, headers: { ...NO_STORE, "Retry-After": String(limited.retryAfterSeconds) } }
+    );
+  }
+
   const { token } = await context.params;
   const preview = await previewActionToken(token);
   if (!preview.ok) {
@@ -20,6 +29,14 @@ export async function GET(_request: NextRequest, context: Context) {
 }
 
 export async function POST(request: NextRequest, context: Context) {
+  const limited = rateLimit(rateLimitKey("bridge-run", request), 30, 60_000);
+  if (!limited.ok) {
+    return NextResponse.json(
+      { error: "Too many requests." },
+      { status: 429, headers: { ...NO_STORE, "Retry-After": String(limited.retryAfterSeconds) } }
+    );
+  }
+
   const { token } = await context.params;
   const raw = await request.text();
   if (raw.length > MAX_BODY) {
