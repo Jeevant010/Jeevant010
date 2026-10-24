@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "verify": "npm run typecheck && npm run lint && npm run build",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "budget": "node scripts/bundle-budget.mjs",
+    "verify": "npm run typecheck && npm run lint && npm test && npm run build && npm run budget",
     "seed": "npx tsx scripts/seed.ts",
     "seed:fresh": "npx tsx scripts/seed.ts --fresh",
     "secrets:encrypt": "npx tsx scripts/encrypt-secrets.ts"
@@ -33,13 +35,15 @@
     "react-dom": "19.2.3",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
-    "tailwind-merge": "^3.4.0"
+    "tailwind-merge": "^3.4.0",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/web-push": "^3.6.4",
     "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.1.3",
