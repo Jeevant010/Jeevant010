@@ -3,6 +3,7 @@
 // pipeline still runs end-to-end.
 
 import type { TranscriptResult } from "./types";
+import { safeFetch } from "@/lib/http/fetch";
 
 const ENDPOINT = "https://api.groq.com/openai/v1/audio/transcriptions";
 
@@ -31,7 +32,7 @@ export async function transcribe(file: File): Promise<TranscriptResult> {
     formData.append("response_format", "text");
     formData.append("temperature", "0");
 
-    const res = await fetch(ENDPOINT, {
+    const res = await safeFetch(ENDPOINT, {
       method: "POST",
       headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}` },
       body: formData,
