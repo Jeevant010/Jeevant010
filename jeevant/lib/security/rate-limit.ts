@@ -1,3 +1,6 @@
+import connectDB from "@/lib/db";
+import { RateLimitBucket } from "@/lib/database/models";
+
 type Bucket = { count: number; resetAt: number };
 
 const buckets = new Map<string, Bucket>();
@@ -55,4 +58,40 @@ export function rateLimitKey(prefix: string, request: Request): string {
 
 export function resetRateLimits(): void {
   buckets.clear();
+}
+
+export async function rateLimitDistributed(
+  key: string,
+  limit: number,
+  windowMs: number
+): Promise<RateLimitResult> {
+  if (process.env.RATE_LIMIT_STORE === "memory") {
+    return rateLimit(key, limit, windowMs);
+  }
+
+  try {
+    await connectDB();
+    const now = new Date();
+    const current = await RateLimitBucket.findOne({ key }).lean();
+
+    if (!current || new Date(current.resetAt).getTime() <= now.getTime()) {
+      const resetAt = new Date(now.getTime() + windowMs);
+      await RateLimitBucket.updateOne({ key }, { $set: { key, count: 1, resetAt } }, { upsert: true });
+      return { ok: 1 <= limit, remaining: Math.max(0, limit - 1), retryAfterSeconds: 0 };
+    }
+
+    await RateLimitBucket.updateOne({ key }, { $inc: { count: 1 } });
+    const count = Number(current.count || 0) + 1;
+    const ok = count <= limit;
+
+    return {
+      ok,
+      remaining: Math.max(0, limit - count),
+      retryAfterSeconds: ok
+        ? 0
+        : Math.max(1, Math.ceil((new Date(current.resetAt).getTime() - now.getTime()) / 1000)),
+    };
+  } catch {
+    return rateLimit(key, limit, windowMs);
+  }
 }
