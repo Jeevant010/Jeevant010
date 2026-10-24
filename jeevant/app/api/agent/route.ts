@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { runAgent } from "@/lib/agent/run";
-import { rateLimit, rateLimitKey } from "@/lib/security/rate-limit";
+import { rateLimitDistributed, rateLimitKey } from "@/lib/security/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const limited = rateLimit(rateLimitKey("agent", request), 30, 60_000);
+  const limited = await rateLimitDistributed(rateLimitKey("agent", request), 30, 60_000);
   if (!limited.ok) {
     return NextResponse.json(
       { error: "Too many requests." },
