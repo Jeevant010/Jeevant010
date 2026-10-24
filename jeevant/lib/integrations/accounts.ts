@@ -24,7 +24,7 @@ export async function resolveAccount(channel: string, accountId?: string): Promi
     return {
       id: String(doc._id),
       label: doc.label,
-      config: doc.config || {},
+      config: openSecrets(doc.config),
       secrets: openSecrets(doc.secrets),
     };
   } catch {
