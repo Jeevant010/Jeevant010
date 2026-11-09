@@ -41,6 +41,43 @@ export function accountLabel(account?: ResolvedAccount | null): string {
   return account?.label || "env";
 }
 
+// Free self-hosted transport: hand the message to an n8n (or any) webhook.
+// That workflow can use Baileys/whatsapp-web.js, an Android bridge, or anything
+// else you run yourself. We report "handed off", never "delivered", because a
+// webhook 200 does not prove the message reached the recipient.
+async function sendViaWebhook(
+  channel: "whatsapp" | "sms",
+  to: string,
+  body: string
+): Promise<MessageResult | null> {
+  const url = String(process.env.N8N_WEBHOOK_URL || "").trim();
+  if (!url) return null;
+
+  try {
+    const res = await safeFetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      body: JSON.stringify({ type: "message", channel, to, body }),
+    });
+    return res.ok
+      ? {
+          ok: true,
+          mode: "webhook",
+          detail: `Handed the ${channel} message to the n8n workflow — check its log for delivery.`,
+          provider: "n8n",
+        }
+      : {
+          ok: false,
+          mode: "failed",
+          detail: `n8n webhook responded ${res.status}.`,
+          provider: "n8n",
+        };
+  } catch (error) {
+    return { ok: false, mode: "failed", detail: `n8n webhook error: ${(error as Error).message}`, provider: "n8n" };
+  }
+}
+
 export async function sendWhatsApp(
   to: string,
   body: string,
@@ -49,10 +86,14 @@ export async function sendWhatsApp(
   const target = digits(to);
 
   if (!whatsappConfigured(account)) {
+    const webhook = await sendViaWebhook("whatsapp", target, body);
+    if (webhook?.ok) return webhook;
     return {
       ok: true,
       mode: "link",
-      detail: "WhatsApp Cloud API not configured — share link is ready.",
+      detail: webhook
+        ? `${webhook.detail} Share link is ready as a fallback.`
+        : "WhatsApp Cloud API not configured — share link is ready (open it to send in one tap).",
       url: `https://wa.me/${target}?text=${encodeURIComponent(body)}`,
       provider: "wa.me",
     };
@@ -105,10 +146,14 @@ function twilioAuth(account?: ResolvedAccount | null): string {
 
 export async function sendSMS(to: string, body: string, account?: ResolvedAccount | null): Promise<MessageResult> {
   if (!twilioConfigured(account)) {
+    const webhook = await sendViaWebhook("sms", to, body);
+    if (webhook?.ok) return webhook;
     return {
       ok: true,
       mode: "manual",
-      detail: "Twilio not configured — message copied for manual sending.",
+      detail: webhook
+        ? `${webhook.detail} The message is also copied for manual sending.`
+        : "Twilio not configured — message copied for manual sending.",
       provider: "manual",
     };
   }
