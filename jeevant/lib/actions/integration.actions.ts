@@ -51,6 +51,13 @@ export async function saveSettings(formData: FormData) {
 export async function getIntegrationStatus() {
   const cfg = await getRuntimeConfig();
   const has = (v?: string) => !!v && v.trim().length > 0;
+  const discordUrls = Array.from(
+    new Set(
+      [...String(process.env.DISCORD_WEBHOOK_URLS || "").split(","), cfg.discordWebhookUrl]
+        .map((url) => String(url || "").trim())
+        .filter(Boolean)
+    )
+  );
 
   return [
     {
@@ -104,10 +111,13 @@ export async function getIntegrationStatus() {
     },
     {
       id: "discord",
-      label: "Discord Webhook",
-      env: "DISCORD_WEBHOOK_URL",
-      configured: has(cfg.discordWebhookUrl),
-      detail: "Posts into a Discord channel through a webhook.",
+      label: "Discord Webhooks",
+      env: "DISCORD_WEBHOOK_URL / DISCORD_WEBHOOK_URLS",
+      configured: discordUrls.length > 0,
+      detail:
+        discordUrls.length > 1
+          ? `Posts fan out to ${discordUrls.length} Discord webhooks.`
+          : "Posts into a Discord channel through a webhook.",
     },
     {
       id: "slack",
