@@ -45,41 +45,47 @@ export async function groqChat(
   system: string,
   user: string,
   json = true,
-  options: { maxTokens?: number } = {}
+  options: { maxTokens?: number; model?: string } = {}
 ): Promise<string | null> {
   const keys = groqKeys();
   if (!keys.length) return null;
 
-  for (const key of keys) {
-    try {
-      const res = await safeFetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${key}`,
-          "Content-Type": "application/json",
-        },
-        cache: "no-store",
-        body: JSON.stringify({
-          model: groqModel(),
-          temperature: 0.2,
-          max_tokens: options.maxTokens ?? 2048,
-          ...(json ? { response_format: { type: "json_object" } } : {}),
-          messages: [
-            { role: "system", content: system },
-            { role: "user", content: user },
-          ],
-        }),
-      });
+  // Try the requested model across every key, then fall back to the planning
+  // model. Qwen is good at code/content but its JSON tool-planning is weaker.
+  const models = Array.from(
+    new Set([options.model || groqModel(), process.env.GROQ_FALLBACK_MODEL || "openai/gpt-oss-120b"])
+  );
 
-      if (!res.ok) {
-        if (shouldRotate(res.status)) continue;
-        return null;
+  for (const model of models) {
+    for (const key of keys) {
+      try {
+        const res = await safeFetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${key}`,
+            "Content-Type": "application/json",
+          },
+          cache: "no-store",
+          body: JSON.stringify({
+            model,
+            temperature: 0.2,
+            max_tokens: options.maxTokens ?? 2048,
+            ...(json ? { response_format: { type: "json_object" } } : {}),
+            messages: [
+              { role: "system", content: system },
+              { role: "user", content: user },
+            ],
+          }),
+        });
+
+        if (!res.ok) continue;
+        const data: any = await res.json();
+        const content = data?.choices?.[0]?.message?.content;
+        if (content) return content;
+      } catch {
+        // Network/timeout: try the next key or model.
+        continue;
       }
-      const data: any = await res.json();
-      return data?.choices?.[0]?.message?.content || null;
-    } catch {
-      // Network/timeout: try the next key.
-      continue;
     }
   }
   return null;
