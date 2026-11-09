@@ -126,14 +126,63 @@ export async function dispatchToChannel(
     };
   }
 
-  if (channel === "discord" || channel === "slack") {
-    const webhookUrl = channel === "discord" ? cfg.discordWebhookUrl : cfg.slackWebhookUrl;
+  if (channel === "discord") {
+    // One post can fan out to several Discord channels. Use
+    // DISCORD_WEBHOOK_URL for the default and DISCORD_WEBHOOK_URLS for more.
+    const urls = Array.from(
+      new Set(
+        [
+          ...String(process.env.DISCORD_WEBHOOK_URLS || "").split(","),
+          cfg.discordWebhookUrl,
+        ]
+          .map((url) => String(url || "").trim())
+          .filter(Boolean)
+      )
+    );
+
+    if (!urls.length) {
+      return {
+        channel,
+        ok: true,
+        mode: "manual",
+        detail: "Discord webhook not configured — copy the post.",
+      };
+    }
+
+    const outcomes: { ok: boolean; status: number }[] = [];
+    for (const webhookUrl of urls) {
+      try {
+        const res = await safeFetch(webhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          cache: "no-store",
+          body: JSON.stringify({ content: text }),
+        });
+        outcomes.push({ ok: res.ok, status: res.status });
+      } catch {
+        outcomes.push({ ok: false, status: 0 });
+      }
+    }
+
+    const accepted = outcomes.filter((outcome) => outcome.ok).length;
+    return {
+      channel,
+      ok: accepted > 0,
+      mode: "direct",
+      detail: `Posted to ${accepted}/${outcomes.length} Discord webhook(s).${
+        accepted < outcomes.length ? " Some failed." : ""
+      }`,
+    };
+  }
+
+  if (channel === "slack") {
+    const webhookUrl = cfg.slackWebhookUrl;
     if (!isTruthy(webhookUrl)) {
       return {
         channel,
         ok: true,
         mode: "manual",
-        detail: `${channel === "discord" ? "Discord" : "Slack"} webhook not configured — copy the post.`,
+        detail: "Slack webhook not configured — copy the post.",
       };
     }
     try {
@@ -141,15 +190,13 @@ export async function dispatchToChannel(
         method: "POST",
         headers: { "Content-Type": "application/json" },
         cache: "no-store",
-        body: JSON.stringify(
-          channel === "discord" ? { content: text } : { text }
-        ),
+        body: JSON.stringify({ text }),
       });
       return {
         channel,
         ok: res.ok,
         mode: "direct",
-        detail: res.ok ? `Posted to ${channel}.` : `${channel} responded ${res.status}.`,
+        detail: res.ok ? "Posted to Slack." : `Slack responded ${res.status}.`,
       };
     } catch (error) {
       return { channel, ok: false, mode: "direct", detail: (error as Error).message };

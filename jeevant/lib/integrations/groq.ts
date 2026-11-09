@@ -31,7 +31,8 @@ export function groqConfigured(): boolean {
 }
 
 export function groqModel(): string {
-  return process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+  // Qwen on Groq, verified with JSON mode. Override with GROQ_MODEL if needed.
+  return process.env.GROQ_MODEL || "qwen/qwen3.8-27b";
 }
 
 // Retry across keys only when the failure is about this key or the provider's
