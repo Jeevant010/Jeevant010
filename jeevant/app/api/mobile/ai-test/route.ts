@@ -21,8 +21,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const model = groqModel();
-  const reply = await groqChat("You are a health check.", "Reply with exactly: AI OK", false, { maxTokens: 12 });
+  const model = process.env.AGENT_MODEL || "openai/gpt-oss-120b";
+  const reply = await groqChat("You are a health check.", "Reply with exactly: AI OK", false, {
+    maxTokens: 12,
+    model,
+  });
 
   if (!reply) {
     return mobileJson(
