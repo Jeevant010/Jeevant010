@@ -8,7 +8,7 @@ import { promises as fs, existsSync } from "node:fs";
 import path from "node:path";
 import connectDB from "@/lib/db";
 import { CodingJob } from "@/lib/database/models";
-import { groqChat, groqConfigured } from "@/lib/integrations/groq";
+import { groqChat, groqConfigured, groqModel } from "@/lib/integrations/groq";
 import { safeFetch } from "@/lib/http/fetch";
 import { redact } from "@/lib/logging/redact";
 import {
@@ -155,7 +155,7 @@ async function proposeEdits(prompt: string, files: FileContent[]): Promise<EditB
       ...files.map((file) => `--- ${file.path} ---\n${file.content}`),
     ].join("\n"),
     true,
-    { maxTokens: 4096 }
+    { maxTokens: 4096, model: process.env.CODING_MODEL || groqModel() }
   );
 
   if (!text) throw new Error("The model returned nothing. Check the Groq key and quota.");
