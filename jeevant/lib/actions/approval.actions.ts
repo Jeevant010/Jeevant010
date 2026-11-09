@@ -146,17 +146,26 @@ export async function decideApproval(
         const body = String(payload.body || "");
         const account = await resolveAccount(channel, payload.accountId);
         const outcome = await sendByChannel(channel, to, body, account);
+        const delivered = outcome.ok && (outcome.mode === "direct" || outcome.mode === "webhook");
+        const logStatus = !outcome.ok
+          ? "failed"
+          : delivered
+          ? "sent"
+          : outcome.mode === "link"
+          ? "link"
+          : "manual";
         await OutboundMessage.create({
           channel,
           to,
           body,
-          status: outcome.ok ? "sent" : "failed",
+          status: logStatus,
           mode: outcome.mode,
           provider: outcome.provider || "",
           detail: outcome.detail,
         });
         result = outcome.url ? `${outcome.detail} ${outcome.url}` : outcome.detail;
         if (!outcome.ok) approval.status = "failed";
+        else if (!delivered) approval.status = "needs_action";
       } else if (approval.kind === "http") {
         const url = String(payload.url || "");
         const guard = await evaluateExternalAction({ kind: "http", target: url });
@@ -182,7 +191,9 @@ export async function decideApproval(
         }
       }
 
-      if (approval.status !== "failed") approval.status = "executed";
+      if (approval.status !== "failed" && approval.status !== "needs_action") {
+        approval.status = "executed";
+      }
     } catch (error) {
       approval.status = "failed";
       result = (error as Error).message;
@@ -193,7 +204,11 @@ export async function decideApproval(
     await approval.save();
     await audit(
       { kind: approval.kind, target: approval.title },
-      approval.status === "failed" ? "failed" : "executed",
+      approval.status === "failed"
+        ? "failed"
+        : approval.status === "needs_action"
+        ? "approval"
+        : "executed",
       result
     );
     revalidatePath("/approvals");
