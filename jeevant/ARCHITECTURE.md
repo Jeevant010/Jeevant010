@@ -327,7 +327,7 @@ This is a self-contained subsystem added on top of the CMS. Full setup guide:
 
 ### Integration adapters (`lib/integrations/`)
 
-- `whisper.ts` — Groq Whisper transcription (`GROQ_API_KEY`).
+- `whisper.ts` — Groq Whisper transcription (`GROQ_API_KEYS` pool, or `GROQ_API_KEY`).
 - `gemini.ts` — drafting engine with rotating `GEMINI_API_KEYS`; retries the next key on 429/403/5xx; heuristic fallback when unconfigured.
 - `google.ts` — shared OAuth refresh-token helper.
 - `gmail.ts` — creates real Gmail drafts.
@@ -447,6 +447,18 @@ Hard rules, enforced in code — not by prompt:
 
 `MobileDock` adds a bottom navigation bar on phones; the private shell stacks to
 one column and the sidebar becomes a drawer.
+
+The standalone mobile app (`../jeevant-app`) uses a bearer-token API under
+`/api/mobile/*`: `login`, `briefing`, `tasks`, `notes`, `approvals`, `inbox`,
+`agent`, `voice`, `messages`, `contacts`, `content`, `plan`, `activity`, `focus`,
+`meetings`, `dispatch`, and `code`. It authenticates with
+`POST /api/mobile/login` (the admin secret) and sends
+`Authorization: Bearer <token>`; CORS is restricted by `MOBILE_ORIGINS`.
+
+The coding routes use `CODING_REPOS` as an allowlist and a temp clone; see
+[`docs/CODING.md`](./CODING.md). Nothing is pushed before the user approves the
+diff.
+
 
 The app is installable as a PWA (`public/manifest.webmanifest`,
 `public/sw.js`, icons under `public/icons/`). `app/layout.tsx` registers the
