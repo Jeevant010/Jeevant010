@@ -121,7 +121,7 @@ function coerce(raw: any): DraftBundle {
 
 // --- Local fallback (no keys) -------------------------------------------------
 function simulate(transcript: string, note?: string): DraftBundle {
-  const text = transcript.trim() || "(no transcript captured — transcription is stubbed without GROQ_API_KEY)";
+  const text = transcript.trim() || "(no transcript captured — transcription is stubbed without GROQ_API_KEYS / GROQ_API_KEY)";
   const lower = text.toLowerCase();
   const isEmail = /(reply|email|mail|write to|send to|coordinator|professor|team will|submit)/.test(lower);
   const isSchedule = /(today|tomorrow|deadline|by friday|schedule|block|target|task)/.test(lower);
