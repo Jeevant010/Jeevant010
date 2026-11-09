@@ -201,7 +201,7 @@ export async function getMorningDigest() {
       Schedule.find({ start: { $gte: since, $lte: new Date(since.getTime() + 24 * 60 * 60 * 1000) } }).sort({ start: 1 }).lean(),
     ]);
 
-    return {
+    const base = {
       unreadMessages: messages.map((m: any) => ({
         name: m.senderName,
         contact: m.senderContact,
@@ -217,6 +217,25 @@ export async function getMorningDigest() {
       })),
       todayBlocks: schedules.map((s: any) => ({ title: s.title, start: s.start, end: s.end })),
     };
+
+    let gmail: { source: string; count: number; summary: string } | undefined;
+
+    if (process.env.GOOGLE_REFRESH_TOKEN) {
+      try {
+        const { listMessages, summarizeMessages } = await import("@/lib/integrations/gmail-read");
+        const found = await listMessages({ query: "in:inbox is:unread newer_than:2d", count: 8 });
+        if (found.ok && found.messages.length) {
+          const summary = await summarizeMessages(found.messages);
+          if (summary.ok) {
+            gmail = { source: "gmail", count: found.messages.length, summary: summary.detail };
+          }
+        }
+      } catch {
+        // Gmail is optional; the local digest still works.
+      }
+    }
+
+    return { ...base, gmail };
   } catch (error) {
     console.error("Digest failed:", error);
     return { unreadMessages: [], overnightCaptures: [], todayBlocks: [] };

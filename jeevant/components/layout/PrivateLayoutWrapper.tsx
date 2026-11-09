@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "@/components/layout/Sidebar";
 import MobileDock from "@/components/layout/MobileDock";
 import ReminderWatcher from "@/components/layout/ReminderWatcher";
+import FocusWatcher from "@/components/layout/FocusWatcher";
 import { Menu } from "lucide-react";
 
 export default function PrivateLayoutWrapper({
@@ -83,6 +84,7 @@ export default function PrivateLayoutWrapper({
 
       <MobileDock />
       <ReminderWatcher />
+      <FocusWatcher />
     </div>
   );
 }

@@ -1,5 +1,11 @@
 import mongoose, { Schema, models, model } from "mongoose";
 
+function retentionSeconds(envKey: string, fallbackDays: number): number {
+  const days = Number(process.env[envKey]);
+  const safe = Number.isFinite(days) && days > 0 ? days : fallbackDays;
+  return Math.round(safe * 24 * 60 * 60);
+}
+
 // --- 1. PROJECT SCHEMA (Portfolio & Ideas) ---
 const ProjectSchema = new Schema({
   title: { type: String, required: true },
@@ -35,6 +41,7 @@ const TaskSchema = new Schema({
   projectId: { type: Schema.Types.ObjectId, ref: "Project" }, // Link task to a project
   order: { type: Number, default: 0 },
   reminderDate: { type: Date },
+  reminderPushedAt: { type: Date },
   sourceUrl: { type: String },
   category: { type: String },
   createdAt: { type: Date, default: Date.now },
@@ -463,7 +470,11 @@ const WorkflowRunSchema = new Schema({
 
 // --- 23. CHANNEL ACCOUNT SCHEMA (multi-account credentials) ---
 const ChannelAccountSchema = new Schema({
-  channel: { type: String, enum: ["whatsapp", "sms", "call", "telegram", "email"], required: true },
+  channel: {
+    type: String,
+    enum: ["whatsapp", "sms", "call", "telegram", "email", "discord", "slack", "mastodon", "twitter", "linkedin", "reddit"],
+    required: true,
+  },
   label: { type: String, required: true },
   config: { type: Schema.Types.Mixed, default: {} }, // phoneNumberId, fromNumber, chatId, sender
   secrets: { type: Schema.Types.Mixed, default: {} }, // tokens — server-only, never sent to the browser
@@ -483,6 +494,7 @@ const OutboundMessageSchema = new Schema({
   detail: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now },
 });
+OutboundMessageSchema.index({ createdAt: 1 }, { expireAfterSeconds: retentionSeconds("RETENTION_OUTBOUND_DAYS", 180) });
 
 // --- 20. CHAT MESSAGE SCHEMA (short-term conversation memory) ---
 const ChatMessageSchema = new Schema({
@@ -492,6 +504,7 @@ const ChatMessageSchema = new Schema({
   provider: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now },
 });
+ChatMessageSchema.index({ createdAt: 1 }, { expireAfterSeconds: retentionSeconds("RETENTION_CHAT_DAYS", 90) });
 
 // --- 24. AUDIT LOG SCHEMA (every external-action decision) ---
 const AuditLogSchema = new Schema({
@@ -502,6 +515,131 @@ const AuditLogSchema = new Schema({
   meta: { type: Schema.Types.Mixed },
   createdAt: { type: Date, default: Date.now },
 });
+AuditLogSchema.index({ createdAt: 1 }, { expireAfterSeconds: retentionSeconds("RETENTION_AUDIT_DAYS", 180) });
+
+// --- 25. CONTACT SCHEMA (name -> number/address resolution) ---
+const ContactSchema = new Schema({
+  name: { type: String, required: true },
+  phone: { type: String, default: "" },
+  whatsapp: { type: String, default: "" },
+  email: { type: String, default: "" },
+  instagram: { type: String, default: "" },
+  linkedin: { type: String, default: "" },
+  tags: [{ type: String }],
+  createdAt: { type: Date, default: Date.now },
+});
+
+// --- 26. STYLE PROFILE (how the owner writes) ---
+const StyleProfileSchema = new Schema({
+  samples: [{ type: String }],
+  guide: { type: String, default: "" },
+  updatedAt: { type: Date, default: Date.now },
+});
+
+// --- 27. TEMPLATE (copy-paste replies and posts) ---
+const TemplateSchema = new Schema({
+  name: { type: String, required: true },
+  kind: { type: String, enum: ["email", "linkedin", "whatsapp", "post", "reply", "meeting", "other"], default: "other" },
+  body: { type: String, required: true },
+  tags: [{ type: String }],
+  usageCount: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now },
+});
+
+// --- 28. ACTIVITY (time tracking) ---
+const ActivitySchema = new Schema({
+  kind: {
+    type: String,
+    enum: ["deep_work", "meeting", "eating", "sleep", "exercise", "waste", "break", "other"],
+    default: "other",
+  },
+  label: { type: String, required: true },
+  start: { type: Date, required: true },
+  end: { type: Date },
+  intended: { type: Boolean, default: true },
+  notes: { type: String, default: "" },
+  createdAt: { type: Date, default: Date.now },
+});
+
+// --- 29. FOCUS SESSION (anti-waste check-ins) ---
+const FocusSessionSchema = new Schema({
+  intent: { type: String, required: true },
+  status: { type: String, enum: ["active", "done", "abandoned"], default: "active" },
+  startedAt: { type: Date, default: Date.now },
+  endedAt: { type: Date },
+  checkIns: [
+    {
+      at: { type: Date, default: Date.now },
+      answer: { type: String, default: "" },
+      wasted: { type: Boolean, default: false },
+      _id: false,
+    },
+  ],
+  distractions: [{ label: String, at: Date, _id: false }],
+});
+
+// --- 30. CODING JOB (phone → sandbox → diff → approval → PR) ---
+const CodingJobSchema = new Schema({
+  repoKey: { type: String, required: true },
+  repoSlug: { type: String, default: "" },
+  prompt: { type: String, required: true },
+  files: [{ type: String }],
+  status: {
+    type: String,
+    enum: ["queued", "running", "needs_review", "approved", "rejected", "failed"],
+    default: "queued",
+  },
+  branch: { type: String, default: "" },
+  summary: { type: String, default: "" },
+  diff: { type: String, default: "" },
+  changedFiles: [{ type: String }],
+  commitMode: { type: String, enum: ["per-file", "bulk"], default: "per-file" },
+  commits: [{ type: String }],
+  testCommand: { type: String, default: "" },
+  testOk: { type: Boolean },
+  testOutput: { type: String, default: "" },
+  logs: { type: String, default: "" },
+  error: { type: String, default: "" },
+  prUrl: { type: String, default: "" },
+  workDir: { type: String, default: "" },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+});
+
+// --- 31. ACTION TOKEN (signed single-use or reusable bridge links) ---
+const ActionTokenSchema = new Schema({
+  tokenHash: { type: String, required: true, unique: true, index: true },
+  hint: { type: String, default: "" },
+  action: { type: String, required: true },
+  args: { type: Schema.Types.Mixed, default: {} },
+  label: { type: String, default: "" },
+  status: { type: String, enum: ["active", "exhausted", "revoked"], default: "active" },
+  maxUses: { type: Number, default: 1, min: 0 },
+  uses: { type: Number, default: 0, min: 0 },
+  expiresAt: { type: Date, required: true },
+  lastUsedAt: { type: Date },
+  result: { type: String, default: "" },
+  createdAt: { type: Date, default: Date.now },
+});
+ActionTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
+// --- 31. PUSH SUBSCRIPTION (Web Push / VAPID) ---
+const PushSubscriptionSchema = new Schema({
+  endpoint: { type: String, required: true, unique: true },
+  p256dh: { type: String, required: true },
+  auth: { type: String, required: true },
+  userAgent: { type: String, default: "" },
+  createdAt: { type: Date, default: Date.now },
+  lastUsedAt: { type: Date },
+});
+
+// --- 32. RATE LIMIT BUCKET (distributed limiter) ---
+const RateLimitBucketSchema = new Schema({
+  key: { type: String, required: true, unique: true },
+  count: { type: Number, default: 0 },
+  resetAt: { type: Date, required: true },
+});
+RateLimitBucketSchema.index({ resetAt: 1 }, { expireAfterSeconds: 0 });
 
 export const Profile = models.Profile || model("Profile", ProfileSchema);
 export const Snippet = models.Snippet || model("Snippet", SnippetSchema);
@@ -529,3 +667,12 @@ export const ChatMessage = models.ChatMessage || model("ChatMessage", ChatMessag
 export const OutboundMessage = models.OutboundMessage || model("OutboundMessage", OutboundMessageSchema);
 export const ChannelAccount = models.ChannelAccount || model("ChannelAccount", ChannelAccountSchema);
 export const AuditLog = models.AuditLog || model("AuditLog", AuditLogSchema);
+export const Contact = models.Contact || model("Contact", ContactSchema);
+export const StyleProfile = models.StyleProfile || model("StyleProfile", StyleProfileSchema);
+export const Template = models.Template || model("Template", TemplateSchema);
+export const Activity = models.Activity || model("Activity", ActivitySchema);
+export const FocusSession = models.FocusSession || model("FocusSession", FocusSessionSchema);
+export const CodingJob = models.CodingJob || model("CodingJob", CodingJobSchema);
+export const ActionToken = models.ActionToken || model("ActionToken", ActionTokenSchema);
+export const PushSubscription = models.PushSubscription || model("PushSubscription", PushSubscriptionSchema);
+export const RateLimitBucket = models.RateLimitBucket || model("RateLimitBucket", RateLimitBucketSchema);

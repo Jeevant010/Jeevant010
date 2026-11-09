@@ -80,6 +80,30 @@ recall · request_approval · list_tasks
 - Assistant, Messages, Automations, Approvals all usable at phone width.
 - Safe-area padding for the dock.
 
+## 5c. Contacts, media, installability
+
+| Capability | Status |
+|---|---|
+| Contacts (name → phone/WhatsApp/email/handles) | **Done** — `/contacts` |
+| “Message xyz” resolves a saved contact | **Done** — agent tool `send_message_to` |
+| Image → 1080×1920 MP4 (ffmpeg, no paid service) | **Done** — `/media`, `/api/media/video` |
+| Share image/video to a phone app (share sheet) | **Done** — Web Share API |
+| Installable mobile app (PWA, home-screen) | **Done** — manifest + service worker |
+| Standalone APK | **Missing** — needs Android SDK/Capacitor; PWA is the installable path |
+| Silent Instagram/LinkedIn posting | **Not possible for free** — use the share sheet or n8n with your own API app |
+
+## 5d. Personal workflows
+
+| Capability | Status |
+|---|---|
+| Learn writing style from pasted samples (`/style`) | **Done** — style guide injected into drafts and agent replies |
+| Copy-paste templates (`/templates`) | **Done** — create, copy to clipboard, usage count |
+| Time tracker (`/tracker`) | **Done** — activities, sleep, eating, waste, totals |
+| Focus sessions with check-ins | **Done** — in-app prompt every 20 minutes |
+| Summarize an email/message | **Done** — agent tool `summarize` |
+| Suggest a reply in your voice | **Done** — agent tool `suggest_reply` |
+| Monitor phone/laptop usage across other apps | **Missing** — needs OS-level permissions or a native app; this app can only self-report and prompt you |
+
 ## 6. Back office
 
 - CMS: projects, profile, journey, expertise, resume, RPG.

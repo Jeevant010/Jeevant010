@@ -3,6 +3,7 @@
 
 import connectDB from "@/lib/db";
 import { ChannelAccount } from "@/lib/database/models";
+import { openSecrets } from "@/lib/crypto/secrets";
 
 export interface ResolvedAccount {
   id?: string;
@@ -23,8 +24,8 @@ export async function resolveAccount(channel: string, accountId?: string): Promi
     return {
       id: String(doc._id),
       label: doc.label,
-      config: doc.config || {},
-      secrets: doc.secrets || {},
+      config: openSecrets(doc.config),
+      secrets: openSecrets(doc.secrets),
     };
   } catch {
     return null;

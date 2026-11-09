@@ -327,7 +327,7 @@ This is a self-contained subsystem added on top of the CMS. Full setup guide:
 
 ### Integration adapters (`lib/integrations/`)
 
-- `whisper.ts` — Groq Whisper transcription (`GROQ_API_KEY`).
+- `whisper.ts` — Groq Whisper transcription (`GROQ_API_KEYS` pool, or `GROQ_API_KEY`).
 - `gemini.ts` — drafting engine with rotating `GEMINI_API_KEYS`; retries the next key on 429/403/5xx; heuristic fallback when unconfigured.
 - `google.ts` — shared OAuth refresh-token helper.
 - `gmail.ts` — creates real Gmail drafts.
@@ -398,9 +398,10 @@ Calendar event); rejecting records the decision. Every decision is stored with a
 result string and timestamp.
 
 By default **all outbound actions are gated**: `dispatchPost`, voice email drafts,
-and voice calendar locks create pending approvals instead of firing. Set
-`AUTO_APPROVE=true` in `.env.local` to bypass the gate. Scheduled posts
-(`dispatch_due`) run automatically because the schedule itself is the approval.
+and voice calendar locks create pending approvals instead of firing. There is no
+auto-send environment variable; approve the item in `/approvals` to send it.
+Scheduled posts create an approval when they come due — they never publish
+themselves.
 
 ### Health
 
@@ -446,6 +447,53 @@ Hard rules, enforced in code — not by prompt:
 
 `MobileDock` adds a bottom navigation bar on phones; the private shell stacks to
 one column and the sidebar becomes a drawer.
+
+The standalone mobile app (`../jeevant-app`) uses a bearer-token API under
+`/api/mobile/*`: `login`, `briefing`, `tasks`, `notes`, `approvals`, `inbox`,
+`agent`, `voice`, `messages`, `contacts`, `content`, `plan`, `activity`, `focus`,
+`meetings`, `dispatch`, and `code`. It authenticates with
+`POST /api/mobile/login` (the admin secret) and sends
+`Authorization: Bearer <token>`; CORS is restricted by `MOBILE_ORIGINS`.
+
+The coding routes use `CODING_REPOS` as an allowlist and a temp clone; see
+[`docs/CODING.md`](./CODING.md). Nothing is pushed before the user approves the
+diff.
+
+
+The app is installable as a PWA (`public/manifest.webmanifest`,
+`public/sw.js`, icons under `public/icons/`). `app/layout.tsx` registers the
+service worker and sets the manifest/viewport metadata.
+
+### Contacts (`/contacts`)
+
+`Contact` resolves a spoken name to a number. The agent tool `send_message_to`
+looks up the contact and creates the same approval-gated message as
+`send_message`. If no number is saved, it says so instead of guessing.
+
+### Media (`/media`, `/api/media/video`)
+
+- Upload 1–10 images; `ffmpeg` renders a 1080×1920 MP4 (2s per image by
+  default) into `public/media/`.
+- Rendering requires a writable filesystem, so it runs on your own server, not
+  on a read-only serverless host.
+- Sharing uses the Web Share API (`navigator.share` with files) so the phone’s
+  share sheet can hand the file to Instagram or LinkedIn. Those platforms do not
+  allow free silent posting from a website.
+
+### Style, templates, tracking
+
+- `StyleProfile` stores pasted samples and a learned guide. `lib/style.ts` exposes
+  the guide; it is injected into voice drafting, agent replies, and `suggest_reply`.
+- `Template` stores copy-paste replies/posts with a usage count (`/templates`).
+- `Activity` records time blocks (deep work, meetings, eating, sleep, exercise,
+  waste, break). `/tracker` shows today, totals, and an open activity.
+- `FocusSession` records an intent, check-ins, and distractions. `FocusWatcher`
+  polls `/api/focus/status` and prompts for a check-in after 20 minutes. A
+  “distracted” answer also logs a waste activity.
+- Agent tools: `summarize`, `suggest_reply`, `log_activity`, `start_activity`,
+  `stop_activity`, `day_summary`, `list_templates`.
+- Limitation: cross-app phone/laptop monitoring is not possible from a website;
+  tracking is self-reported plus in-app prompts.
 
 ### Workflows (in-app n8n alternative)
 

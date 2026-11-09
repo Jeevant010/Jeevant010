@@ -34,7 +34,9 @@ mic ──► /api/voice ──► Groq Whisper ──► Gemini (rotating keys)
 
 ### Groq (speech-to-text)
 1. Create a key at <https://console.groq.com/keys>.
-2. Set `GROQ_API_KEY`. Model defaults to `whisper-large-v3`.
+2. Set `GROQ_API_KEYS` as a comma-separated list (or a single `GROQ_API_KEY`).
+   Free quota is per key, and the client rotates on 429/401/403/5xx. Model
+   defaults to `whisper-large-v3`.
 
 ### Gemini (drafting)
 1. Create one or more keys at <https://aistudio.google.com/app/apikey>.
@@ -102,7 +104,7 @@ Schedulers: system crontab, GitHub Actions (`schedule`), cron-job.org, Vercel Cr
 
 | Missing | Fallback |
 |---------|----------|
-| `GROQ_API_KEY` | Transcript is blank; capture is flagged `simulated` |
+| `GROQ_API_KEYS` / `GROQ_API_KEY` | Transcript is blank; capture is flagged `simulated` |
 | `GEMINI_API_KEYS` | Deterministic heuristic drafts |
 | Google OAuth | Gmail drafts stay in-app; time blocks go to the local `Schedule` |
 | `N8N_WEBHOOK_URL` | Share links / copy-ready drafts |

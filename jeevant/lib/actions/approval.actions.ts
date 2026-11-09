@@ -10,6 +10,8 @@ import { executePostDispatch } from "@/lib/actions/content.actions";
 import { sendByChannel } from "@/lib/integrations/messaging";
 import { resolveAccount } from "@/lib/integrations/accounts";
 import { audit, evaluateExternalAction } from "@/lib/guardrails/policy";
+import { redact } from "@/lib/logging/redact";
+import { safeFetch } from "@/lib/http/fetch";
 
 function plain(doc: any) {
   const obj = doc?.toObject ? doc.toObject() : doc;
@@ -48,10 +50,16 @@ export async function rejectApprovalAction(formData: FormData): Promise<void> {
   if (id) await decideApproval(id, "rejected");
 }
 
-export async function decideApproval(id: string, decision: "approved" | "rejected") {
+export async function decideApproval(
+  id: string,
+  decision: "approved" | "rejected",
+  options: { skipAuth?: boolean } = {}
+) {
   try {
-    const session = await getSession();
-    if (!session || session.role !== "admin") return { success: false, detail: "Unauthorized." };
+    if (!options.skipAuth) {
+      const session = await getSession();
+      if (!session || session.role !== "admin") return { success: false, detail: "Unauthorized." };
+    }
 
     await connectDB();
     const approval = await Approval.findById(id);
@@ -88,7 +96,9 @@ export async function decideApproval(id: string, decision: "approved" | "rejecte
 
     try {
       if (approval.kind === "post" && payload.postId) {
-        const outcome: any = await executePostDispatch(String(payload.postId), payload.channels);
+        const outcome: any = await executePostDispatch(String(payload.postId), payload.channels, {
+          skipAuth: options.skipAuth,
+        });
         result = outcome?.detail || (outcome?.success ? "Post dispatched." : "Post dispatch failed.");
         if (!outcome?.success) approval.status = "failed";
       } else if (approval.kind === "email") {
@@ -96,6 +106,9 @@ export async function decideApproval(id: string, decision: "approved" | "rejecte
           to: payload.to,
           subject: payload.subject,
           body: payload.body || "",
+          threadId: payload.threadId,
+          inReplyTo: payload.inReplyTo,
+          references: payload.references,
         });
         result = draft.detail;
         if (!draft.ok && draft.mode === "failed") approval.status = "failed";
@@ -152,7 +165,7 @@ export async function decideApproval(id: string, decision: "approved" | "rejecte
           result = guard.reason;
         } else {
           try {
-            const res = await fetch(url, {
+            const res = await safeFetch(url, {
               method: String(payload.method || "POST"),
               headers: { "Content-Type": "application/json" },
               cache: "no-store",
@@ -175,7 +188,7 @@ export async function decideApproval(id: string, decision: "approved" | "rejecte
       result = (error as Error).message;
     }
 
-    approval.result = result;
+    approval.result = redact(result);
     approval.decidedAt = new Date();
     await approval.save();
     await audit(

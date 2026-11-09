@@ -138,8 +138,9 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-package-lock.json
-
 utils\config.js
 
 classified/
+
+# Separate mobile app repo (git@github.com:Jeevant010/My-OS.git)
+jeevant-app/

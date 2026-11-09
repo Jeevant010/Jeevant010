@@ -4,6 +4,7 @@
 
 import connectDB from "@/lib/db";
 import { Setting, AuditLog } from "@/lib/database/models";
+import { redact } from "@/lib/logging/redact";
 
 export type GuardrailMode = "approval" | "blocked";
 
@@ -59,9 +60,9 @@ export async function audit(
     await connectDB();
     await AuditLog.create({
       action: action.kind,
-      target: action.target,
+      target: redact(action.target),
       decision,
-      reason,
+      reason: redact(reason),
       meta: action.meta,
     });
   } catch {

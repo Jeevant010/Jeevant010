@@ -68,7 +68,9 @@ export default function LoginPage() {
 
         <div className="mt-16 text-center">
            <p className="text-[10px] text-shell-text/20 font-mono">
-             SECURE_CONNECTION // {new Date().getFullYear()} // JEEVANT_OS
+             {"SECURE_CONNECTION // "}
+             {new Date().getFullYear()}
+             {" // JEEVANT_OS"}
            </p>
         </div>
       </div>

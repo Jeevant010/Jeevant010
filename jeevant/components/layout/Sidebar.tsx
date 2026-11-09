@@ -9,7 +9,7 @@ import {
   FileCog, Sword, UserCog, 
   LogOut, Monitor, Settings,
   Menu, X, Calendar, Compass, FileText, Award,
-  Code, Radio, Mail, Wrench, Mic, PenLine, Plug, Bot, Terminal, ShieldCheck, Workflow, MessageSquare, KeyRound, ShieldAlert
+  Code, Radio, Mail, Wrench, Mic, PenLine, Plug, Bot, Terminal, ShieldCheck, Workflow, MessageSquare, KeyRound, ShieldAlert, Users, Film, PenTool, ClipboardList, Timer, Link2, Inbox, Lock
 } from "lucide-react";
 import { logout } from "@/lib/actions/auth.actions";
 
@@ -88,12 +88,20 @@ export default function Sidebar({ isExpanded, toggleSidebar, isMobile }: Sidebar
               <SidebarItem href="/assistant" icon={<Bot size={18} />} label="Assistant" active={pathname === "/assistant"} expanded={isExpanded} />
               <SidebarItem href="/agent" icon={<Terminal size={18} />} label="Agent" active={pathname === "/agent"} expanded={isExpanded} />
               <SidebarItem href="/messages" icon={<MessageSquare size={18} />} label="Messages" active={pathname === "/messages"} expanded={isExpanded} />
+              <SidebarItem href="/inbox" icon={<Inbox size={18} />} label="Inbox" active={pathname.startsWith("/inbox")} expanded={isExpanded} />
+              <SidebarItem href="/contacts" icon={<Users size={18} />} label="Contacts" active={pathname === "/contacts"} expanded={isExpanded} />
+              <SidebarItem href="/media" icon={<Film size={18} />} label="Media" active={pathname === "/media"} expanded={isExpanded} />
+              <SidebarItem href="/style" icon={<PenTool size={18} />} label="Style" active={pathname === "/style"} expanded={isExpanded} />
+              <SidebarItem href="/templates" icon={<ClipboardList size={18} />} label="Templates" active={pathname === "/templates"} expanded={isExpanded} />
+              <SidebarItem href="/tracker" icon={<Timer size={18} />} label="Tracker" active={pathname === "/tracker"} expanded={isExpanded} />
               <SidebarItem href="/voice" icon={<Mic size={18} />} label="Voice Inbox" active={pathname === "/voice"} expanded={isExpanded} />
               <SidebarItem href="/studio" icon={<PenLine size={18} />} label="Studio" active={pathname === "/studio"} expanded={isExpanded} />
               <SidebarItem href="/integrations" icon={<Plug size={18} />} label="Integrations" active={pathname === "/integrations"} expanded={isExpanded} />
               <SidebarItem href="/accounts" icon={<KeyRound size={18} />} label="Accounts" active={pathname === "/accounts"} expanded={isExpanded} />
               <SidebarItem href="/approvals" icon={<ShieldCheck size={18} />} label="Approvals" active={pathname === "/approvals"} expanded={isExpanded} />
               <SidebarItem href="/guardrails" icon={<ShieldAlert size={18} />} label="Guardrails" active={pathname === "/guardrails"} expanded={isExpanded} />
+              <SidebarItem href="/privacy" icon={<Lock size={18} />} label="Privacy" active={pathname === "/privacy"} expanded={isExpanded} />
+              <SidebarItem href="/actions" icon={<Link2 size={18} />} label="Bridge" active={pathname === "/actions"} expanded={isExpanded} />
               <SidebarItem href="/automations" icon={<Workflow size={18} />} label="Automations" active={pathname === "/automations"} expanded={isExpanded} />
 
               {isExpanded && <div className="mt-4"><SectionHeader label="Private Tools" /></div>}

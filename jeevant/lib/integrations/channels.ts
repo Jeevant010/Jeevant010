@@ -12,6 +12,7 @@ import { isTruthy, type RuntimeConfig } from "./config";
 import type { ChannelId, DispatchOutcome } from "./types";
 import { CHANNELS } from "@/lib/catalog/channels";
 import { saveDraft } from "./gmail";
+import { safeFetch } from "@/lib/http/fetch";
 
 export { CHANNELS };
 
@@ -52,7 +53,7 @@ export function buildShareUrl(channel: ChannelId, post: PostPayload, cfg: Runtim
 async function postToWebhook(cfg: RuntimeConfig, payload: Record<string, unknown>): Promise<DispatchOutcome | null> {
   if (!isTruthy(cfg.n8nWebhookUrl)) return null;
   try {
-    const res = await fetch(cfg.n8nWebhookUrl, {
+    const res = await safeFetch(cfg.n8nWebhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       cache: "no-store",
@@ -72,7 +73,7 @@ async function postToWebhook(cfg: RuntimeConfig, payload: Record<string, unknown
 async function sendTelegram(cfg: RuntimeConfig, text: string): Promise<DispatchOutcome | null> {
   if (!isTruthy(cfg.telegramBotToken) || !isTruthy(cfg.telegramChatId)) return null;
   try {
-    const res = await fetch(`https://api.telegram.org/bot${cfg.telegramBotToken}/sendMessage`, {
+    const res = await safeFetch(`https://api.telegram.org/bot${cfg.telegramBotToken}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       cache: "no-store",
@@ -136,7 +137,7 @@ export async function dispatchToChannel(
       };
     }
     try {
-      const res = await fetch(webhookUrl, {
+      const res = await safeFetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         cache: "no-store",
@@ -157,7 +158,7 @@ export async function dispatchToChannel(
 
   if (channel === "mastodon") {
     const instance = cfg.mastodonInstance.replace(/\/$/, "");
-    const token = process.env.MASTODON_TOKEN;
+    const token = cfg.mastodonToken;
     if (!instance || !token) {
       return {
         channel,
@@ -167,7 +168,7 @@ export async function dispatchToChannel(
       };
     }
     try {
-      const res = await fetch(`${instance}/api/v1/statuses`, {
+      const res = await safeFetch(`${instance}/api/v1/statuses`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         cache: "no-store",

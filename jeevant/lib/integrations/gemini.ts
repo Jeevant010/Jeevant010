@@ -4,6 +4,8 @@
 
 import type { DraftBundle, DraftArtifact, Intent, PlanBlock, TaskSuggestion } from "./types";
 import { groqChat, groqConfigured, groqModel } from "./groq";
+import { getStyleGuide } from "@/lib/style";
+import { safeFetch } from "@/lib/http/fetch";
 
 function apiKeys(): string[] {
   return (process.env.GEMINI_API_KEYS || "")
@@ -52,11 +54,12 @@ Return ONLY valid JSON matching this shape:
   "taskSuggestions": [{ "title": string, "priority": "low"|"medium"|"high" }]
 }`;
 
-function buildPrompt(transcript: string, hint?: string): string {
+function buildPrompt(transcript: string, hint?: string, style?: string): string {
   const now = new Date();
   return [
     `CURRENT_DATETIME: ${now.toISOString()} (local: ${now.toString()})`,
     hint ? `REQUESTED_FOCUS: ${hint}` : "",
+    style ? `\nWRITING STYLE (match this):\n${style}` : "",
     "",
     "VOICE_NOTE_TRANSCRIPT:",
     '"""',
@@ -118,7 +121,7 @@ function coerce(raw: any): DraftBundle {
 
 // --- Local fallback (no keys) -------------------------------------------------
 function simulate(transcript: string, note?: string): DraftBundle {
-  const text = transcript.trim() || "(no transcript captured — transcription is stubbed without GROQ_API_KEY)";
+  const text = transcript.trim() || "(no transcript captured — transcription is stubbed without GROQ_API_KEYS / GROQ_API_KEY)";
   const lower = text.toLowerCase();
   const isEmail = /(reply|email|mail|write to|send to|coordinator|professor|team will|submit)/.test(lower);
   const isSchedule = /(today|tomorrow|deadline|by friday|schedule|block|target|task)/.test(lower);
@@ -157,9 +160,9 @@ function simulate(transcript: string, note?: string): DraftBundle {
   };
 }
 
-async function groqDraft(transcript: string, hint?: string): Promise<DraftBundle | null> {
+async function groqDraft(transcript: string, hint?: string, style?: string): Promise<DraftBundle | null> {
   if (!groqConfigured()) return null;
-  const text = await groqChat(SYSTEM_PROMPT, buildPrompt(transcript, hint), true);
+  const text = await groqChat(SYSTEM_PROMPT, buildPrompt(transcript, hint, style), true);
   if (!text) return null;
   try {
     const bundle = coerce(extractJson(text));
@@ -170,9 +173,10 @@ async function groqDraft(transcript: string, hint?: string): Promise<DraftBundle
 }
 
 export async function draftFromTranscript(transcript: string, hint?: string): Promise<DraftBundle> {
+  const style = await getStyleGuide();
   const keys = apiKeys();
   if (!keys.length) {
-    const viaGroq = await groqDraft(transcript, hint);
+    const viaGroq = await groqDraft(transcript, hint, style);
     return viaGroq ?? simulate(transcript);
   }
 
@@ -180,7 +184,7 @@ export async function draftFromTranscript(transcript: string, hint?: string): Pr
   for (let attempt = 0; attempt < keys.length; attempt++) {
     const key = nextKey();
     try {
-      const res = await fetch(
+      const res = await safeFetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${modelName()}:generateContent?key=${key}`,
         {
           method: "POST",
@@ -188,7 +192,7 @@ export async function draftFromTranscript(transcript: string, hint?: string): Pr
           cache: "no-store",
           body: JSON.stringify({
             systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-            contents: [{ role: "user", parts: [{ text: buildPrompt(transcript, hint) }] }],
+            contents: [{ role: "user", parts: [{ text: buildPrompt(transcript, hint, style) }] }],
             generationConfig: { temperature: 0.75, responseMimeType: "application/json" },
           }),
         }
@@ -215,7 +219,7 @@ export async function draftFromTranscript(transcript: string, hint?: string): Pr
     }
   }
 
-  const viaGroq = await groqDraft(transcript, hint);
+  const viaGroq = await groqDraft(transcript, hint, style);
   if (viaGroq) return viaGroq;
 
   return simulate(transcript, `All Gemini and Groq attempts failed (${lastError}). Showing heuristic drafts.`);

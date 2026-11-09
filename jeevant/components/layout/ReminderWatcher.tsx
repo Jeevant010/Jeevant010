@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { purgeExpired, readState, writeState } from "@/lib/client/state";
+
+const SEEN_KEY = "reminders.seen";
+const SEEN_TTL = 30 * 24 * 60 * 60 * 1000;
 
 // In-app notifications for due reminders. True background push would need a
 // service worker + VAPID keys; this works whenever the app is open.
@@ -8,6 +12,7 @@ export default function ReminderWatcher() {
   const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
+    purgeExpired();
     if (typeof window === "undefined" || !("Notification" in window)) return;
     setEnabled(Notification.permission === "granted");
   }, []);
@@ -21,7 +26,7 @@ export default function ReminderWatcher() {
         if (!res.ok) return;
         const json = await res.json();
 
-        const seen: string[] = JSON.parse(localStorage.getItem("hc_seen_reminders") || "[]");
+        const seen: string[] = readState<string[]>(SEEN_KEY, []);
         let changed = false;
 
         for (const task of json.tasks || []) {
@@ -33,7 +38,7 @@ export default function ReminderWatcher() {
           changed = true;
         }
 
-        if (changed) localStorage.setItem("hc_seen_reminders", JSON.stringify(seen.slice(-200)));
+        if (changed) writeState(SEEN_KEY, seen.slice(-200), SEEN_TTL);
       } catch {
         // best-effort
       }
