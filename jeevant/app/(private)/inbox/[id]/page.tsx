@@ -66,7 +66,7 @@ export default async function MailPage({ params }: { params: Promise<{ id: strin
           </div>
           {!summary.ok ? (
             <p className="mt-2 text-[10px] leading-4 text-amber-300/80">
-              Set GROQ_API_KEY for real summaries. The snippets above are still accurate.
+              Set GROQ_API_KEYS / GROQ_API_KEY for real summaries. The snippets above are still accurate.
             </p>
           ) : null}
         </div>
