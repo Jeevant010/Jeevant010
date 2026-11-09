@@ -1,8 +1,9 @@
-// Lightweight agent loop: Gemini plans JSON tool calls, we execute them against
-// the same MongoDB collections the admin UI uses. No extra dependency, and a
-// deterministic fallback when no key is configured.
+// Lightweight agent loop: deterministic router first, then Gemini/Groq plans
+// JSON tool calls, and we execute them against the same MongoDB collections the
+// admin UI uses. Fixed commands never touch an LLM.
 
 import { executeTool, TOOL_CATALOG, type ToolResult } from "./tools";
+import { routeIntent, UNKNOWN_REPLY } from "./router";
 import { groqChat, groqConfigured, groqModel } from "@/lib/integrations/groq";
 import connectDB from "@/lib/db";
 import { Memory, ChatMessage } from "@/lib/database/models";
@@ -147,87 +148,6 @@ async function plan(
   return null;
 }
 
-function fallback(prompt: string): { reply: string; actions: { tool: string; args: any }[] } {
-  const text = prompt.trim();
-  const match = (pattern: RegExp) => text.match(pattern)?.[1]?.trim();
-
-  if (/^(?:brief(?:\s+me)?|catch me up|what(?:'s| is) up|status|what(?:'s| is) going on)[?.!]*$/i.test(text)) {
-    return { reply: "Reading the live state.", actions: [{ tool: "get_briefing", args: {} }] };
-  }
-
-  if (/^(?:what(?:'s| is) due(?:\s+today)?|due today|my tasks?|open tasks?|list tasks?|show tasks?)[?.!]*$/i.test(text)) {
-    return { reply: "Here are your open tasks.", actions: [{ tool: "list_tasks", args: {} }] };
-  }
-
-  if (/^(?:what did i do(?: today)?|summari[sz]e my day|day summary|how did today go)[?.!]*$/i.test(text)) {
-    return { reply: "Reading today's log.", actions: [{ tool: "day_summary", args: {} }] };
-  }
-
-  if (/^(?:list|show|any|pending)?\s*approvals?[?.!]*$/i.test(text)) {
-    return { reply: "Checking approvals.", actions: [{ tool: "list_approvals", args: {} }] };
-  }
-
-  const focus = match(/^(?:start|begin)\s+focus(?:\s+on)?[:\s]+(.+)$/i);
-  if (focus) return { reply: "Starting focus.", actions: [{ tool: "start_focus", args: { intent: focus } }] };
-  if (/^(?:end|stop|close)\s+focus$/i.test(text)) {
-    return { reply: "Closing focus.", actions: [{ tool: "end_focus", args: {} }] };
-  }
-
-  const open = match(/^(?:open|go to|show me|show)\s+(?:the\s+)?([a-z /-]+?)[.!]*$/i);
-  if (open) {
-    return { reply: `Opening ${open}.`, actions: [{ tool: "open_page", args: { page: open } }] };
-  }
-
-  const addTask = match(/^(?:add|create)\s+task[:\s]+(.+)$/i);
-  if (addTask) return { reply: "Adding that task.", actions: [{ tool: "create_task", args: { title: addTask } }] };
-
-  const complete = match(/^(?:complete|finish|done)\s+task[:\s]+(.+)$/i);
-  if (complete) return { reply: "Marking it complete.", actions: [{ tool: "complete_task", args: { query: complete } }] };
-
-  const remove = match(/^(?:delete|remove)\s+task[:\s]+(.+)$/i);
-  if (remove)
-    return {
-      reply: "This is destructive. Say 'confirm delete task: …' to proceed.",
-      actions: [{ tool: "delete_task", args: { query: remove, confirm: false } }],
-    };
-
-  const confirm = match(/^confirm\s+(?:delete|remove)\s+task[:\s]+(.+)$/i);
-  if (confirm) return { reply: "Confirmed.", actions: [{ tool: "delete_task", args: { query: confirm, confirm: true } }] };
-
-  const removeNote = match(/^(?:delete|remove)\s+note[:\s]+(.+)$/i);
-  if (removeNote)
-    return {
-      reply: "This is destructive. Say 'confirm delete note: …' to proceed.",
-      actions: [{ tool: "delete_note", args: { query: removeNote, confirm: false } }],
-    };
-
-  const confirmNote = match(/^confirm\s+(?:delete|remove)\s+note[:\s]+(.+)$/i);
-  if (confirmNote)
-    return { reply: "Confirmed.", actions: [{ tool: "delete_note", args: { query: confirmNote, confirm: true } }] };
-
-  const note = match(/^(?:note|remember)[:\s]+(.+)$/i);
-  if (note) {
-    const [title, ...rest] = note.split("|").map((part) => part.trim());
-    return {
-      reply: "Saving that note.",
-      actions: [{ tool: "create_note", args: { title: title.slice(0, 80), content: rest.join(" ") || note } }],
-    };
-  }
-
-  const project = match(/^(?:project|new project)[:\s]+(.+)$/i);
-  if (project)
-    return {
-      reply: "Creating the project.",
-      actions: [{ tool: "create_project", args: { title: project, description: project } }],
-    };
-
-  return {
-    reply:
-      "I could not reach an LLM, so I only understood basic commands. Check GROQ_API_KEY in .env.local and restart the dev server. Basic commands: 'add task: …', 'complete task: …', 'note: title | body', 'list tasks'.",
-    actions: [],
-  };
-}
-
 export type AgentRunOptions = {
   persist?: boolean;
   onStep?: (step: string) => void;
@@ -237,10 +157,19 @@ export async function runAgent(prompt: string, opts: AgentRunOptions = {}): Prom
   const trimmed = prompt.trim();
   if (!trimmed) return { reply: "Give me a request.", actions: [], simulated: true, provider: "none" };
 
-  opts.onStep?.("connecting to the operator");
-  const planned = await plan(trimmed, opts.onStep);
-  const resolved = planned ?? fallback(trimmed);
-  const provider = planned ? (keys().length ? `gemini:${modelName()}` : `groq:${groqModel()}`) : "fallback-parser";
+  // Deterministic pass: fixed commands resolve here with zero network calls.
+  // Only ambiguous requests pay for the planner.
+  const routed = routeIntent(trimmed);
+  opts.onStep?.(routed ? "handled locally" : "connecting to the operator");
+  const planned = routed ? null : await plan(trimmed, opts.onStep);
+  const resolved = routed ?? planned ?? { reply: UNKNOWN_REPLY, actions: [] };
+  const provider = routed
+    ? "local-router"
+    : planned
+    ? keys().length
+      ? `gemini:${modelName()}`
+      : `groq:${groqModel()}`
+    : "fallback-parser";
 
   const actions: AgentAction[] = [];
   for (const action of resolved.actions) {
@@ -290,7 +219,7 @@ export async function runAgent(prompt: string, opts: AgentRunOptions = {}): Prom
   return {
     reply,
     actions,
-    simulated: !planned,
+    simulated: !routed && !planned,
     provider,
   };
 }
