@@ -73,6 +73,12 @@ Every probe is read-only. It never sends a message.
 dispatcher uses them without extra wiring. Today that covers Telegram, Discord,
 Slack, Mastodon, WhatsApp, email, SMS, and calls.
 
+For WhatsApp and SMS, if no paid provider is configured, the app now hands the
+message to `N8N_WEBHOOK_URL` with `{ type: "message", channel, to, body }` before
+falling back to a `wa.me` / manual path. That lets a self-hosted n8n + Baileys
+flow work without a Meta business account. The receipt says "handed off", not
+"delivered" — a webhook 200 is not proof of delivery.
+
 ## Current limits
 
 - Secrets are plaintext in MongoDB until Phase 5 encrypts them at rest. Use env
