@@ -9,7 +9,7 @@ import { whisperConfigured } from "@/lib/integrations/whisper";
 import { geminiConfigured } from "@/lib/integrations/gemini";
 import { gmailConfigured } from "@/lib/integrations/gmail";
 import { calendarConfigured } from "@/lib/integrations/calendar";
-import { groqConfigured, groqModel } from "@/lib/integrations/groq";
+import { groqConfigured, groqKeyCount, groqModel } from "@/lib/integrations/groq";
 import { dispatchToChannel } from "@/lib/integrations/channels";
 import type { ChannelId } from "@/lib/integrations/types";
 
@@ -56,16 +56,16 @@ export async function getIntegrationStatus() {
     {
       id: "whisper",
       label: "Speech → Text (Groq Whisper)",
-      env: "GROQ_API_KEY",
+      env: "GROQ_API_KEYS / GROQ_API_KEY",
       configured: whisperConfigured(),
       detail: "Free Whisper transcription of your voice notes.",
     },
     {
       id: "groq-llm",
       label: "AI Drafting & Agent (Groq)",
-      env: "GROQ_API_KEY · GROQ_MODEL",
+      env: "GROQ_API_KEYS · GROQ_MODEL",
       configured: groqConfigured(),
-      detail: `Active model: ${groqModel()}. Powers free-form agent commands and drafting.`,
+      detail: `Active model: ${groqModel()}. ${groqKeyCount()} free key(s) in the rotation pool. Powers free-form agent commands and drafting.`,
     },
     {
       id: "gemini",
