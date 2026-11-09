@@ -233,7 +233,7 @@ export async function draftReply({
   instruction?: string;
 }): Promise<{ ok: boolean; detail: string; text: string }> {
   if (!groqConfigured()) {
-    return { ok: false, detail: "Set GROQ_API_KEY to draft replies.", text: "" };
+    return { ok: false, detail: "Set GROQ_API_KEYS / GROQ_API_KEY to draft replies.", text: "" };
   }
 
   const style = await getStyleGuide();
