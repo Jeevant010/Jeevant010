@@ -11,6 +11,11 @@ inbox is empty.
 | Read and search mail | `https://www.googleapis.com/auth/gmail.readonly` |
 | Create Gmail drafts | `https://www.googleapis.com/auth/gmail.compose` |
 | Read free/busy and events | `https://www.googleapis.com/auth/calendar` |
+| Read Google Contacts (people sync) | `https://www.googleapis.com/auth/contacts.readonly` |
+
+People sync imports Gmail senders/recipients and Google Contacts. WhatsApp does
+not expose its contact list to web apps; Google Contacts is the automatic source
+for phone numbers. Re-authorize with all four scopes to enable it.
 
 Re-authorize the refresh token if a call returns `403 insufficientPermissions`.
 The error message on `/inbox` and in the agent names the exact scope to add.
