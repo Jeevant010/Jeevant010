@@ -148,10 +148,16 @@ async function runDispatch(post: any, channels?: string[]) {
 
 // Execute a dispatch immediately. Used by the approvals executor and by
 // scheduled jobs — never called directly from the UI.
-export async function executePostDispatch(id: string, channels?: string[]) {
+export async function executePostDispatch(
+  id: string,
+  channels?: string[],
+  options: { skipAuth?: boolean } = {}
+) {
   try {
-    const session = await getSession();
-    if (!session || session.role !== "admin") return { success: false, detail: "Unauthorized." };
+    if (!options.skipAuth) {
+      const session = await getSession();
+      if (!session || session.role !== "admin") return { success: false, detail: "Unauthorized." };
+    }
 
     await connectDB();
     const post = await ContentPost.findById(id);
