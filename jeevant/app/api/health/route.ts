@@ -49,6 +49,7 @@ export async function GET(request: NextRequest) {
       groq: groqConfigured(),
       groqKeys: groqKeyCount(),
       groqModel: groqModel(),
+      agentModel: process.env.AGENT_MODEL || "openai/gpt-oss-120b",
       gemini: !!process.env.GEMINI_API_KEYS,
       google: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_REFRESH_TOKEN),
       n8n: !!process.env.N8N_WEBHOOK_URL,
