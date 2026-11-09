@@ -50,10 +50,16 @@ export async function rejectApprovalAction(formData: FormData): Promise<void> {
   if (id) await decideApproval(id, "rejected");
 }
 
-export async function decideApproval(id: string, decision: "approved" | "rejected") {
+export async function decideApproval(
+  id: string,
+  decision: "approved" | "rejected",
+  options: { skipAuth?: boolean } = {}
+) {
   try {
-    const session = await getSession();
-    if (!session || session.role !== "admin") return { success: false, detail: "Unauthorized." };
+    if (!options.skipAuth) {
+      const session = await getSession();
+      if (!session || session.role !== "admin") return { success: false, detail: "Unauthorized." };
+    }
 
     await connectDB();
     const approval = await Approval.findById(id);
@@ -90,7 +96,9 @@ export async function decideApproval(id: string, decision: "approved" | "rejecte
 
     try {
       if (approval.kind === "post" && payload.postId) {
-        const outcome: any = await executePostDispatch(String(payload.postId), payload.channels);
+        const outcome: any = await executePostDispatch(String(payload.postId), payload.channels, {
+          skipAuth: options.skipAuth,
+        });
         result = outcome?.detail || (outcome?.success ? "Post dispatched." : "Post dispatch failed.");
         if (!outcome?.success) approval.status = "failed";
       } else if (approval.kind === "email") {
