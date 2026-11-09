@@ -1,5 +1,18 @@
 # Mobile decision: PWA or Capacitor
 
+## Update: the mobile app now exists
+
+The phone surface lives in `../jeevant-app` (separate repo: `My-OS`). It is a
+Capacitor shell that connects to this server through `/api/mobile/*` with a
+bearer token. It has native local notifications, voice input, live tasks/notes,
+approvals, inbox, and content generation. The PWA remains the zero-install
+fallback.
+
+The rest of this document records why the PWA came first and what the wrapper
+does and does not unlock.
+
+---
+
 Short answer: stay PWA until a specific chore genuinely requires a native shell.
 The wrapper does not unlock control of other apps.
 
