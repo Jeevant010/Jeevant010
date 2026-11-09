@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import { Job, Approval, PushSubscription } from "@/lib/database/models";
+import { groqConfigured, groqKeyCount, groqModel } from "@/lib/integrations/groq";
 
 export const runtime = "nodejs";
 
@@ -39,8 +40,9 @@ export async function GET() {
     db,
     latencyMs: Date.now() - started,
     providers: {
-      groq: !!process.env.GROQ_API_KEY,
-      groqModel: process.env.GROQ_MODEL || "openai/gpt-oss-120b",
+      groq: groqConfigured(),
+      groqKeys: groqKeyCount(),
+      groqModel: groqModel(),
       gemini: !!process.env.GEMINI_API_KEYS,
       google: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_REFRESH_TOKEN),
       n8n: !!process.env.N8N_WEBHOOK_URL,
