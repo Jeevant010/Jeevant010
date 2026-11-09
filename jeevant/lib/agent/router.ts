@@ -15,7 +15,7 @@ export type RoutedIntent = {
 };
 
 export const UNKNOWN_REPLY =
-  "I could not reach an LLM, so I only understood basic commands. Check GROQ_API_KEYS / GROQ_API_KEY in .env.local and restart the server. Basic commands: 'add task: …', 'complete task: …', 'note: title | body', 'list tasks', 'open tracker'.";
+  "I could not reach an LLM, so I only understood basic commands. Add GROQ_API_KEYS (or GROQ_API_KEY) to the server's environment — on Vercel that is the backend project, not the mobile app — then redeploy. Basic commands still work: 'add task: …', 'complete task: …', 'note: title | body', 'list tasks', 'open tracker'.";
 
 // Page aliases the deterministic `open` command will accept. Keeping this list
 // here (instead of routing every "open …") prevents "open the pod bay doors"
