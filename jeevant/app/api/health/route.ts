@@ -1,11 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import { Job, Approval, PushSubscription } from "@/lib/database/models";
 import { groqConfigured, groqKeyCount, groqModel } from "@/lib/integrations/groq";
+import { corsHeaders, mobileOptions } from "@/lib/mobile/http";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function OPTIONS(request: NextRequest) {
+  return mobileOptions(request);
+}
+
+export async function GET(request: NextRequest) {
   const started = Date.now();
   let db = false;
   let queue = { queued: 0, running: 0, failed: 0, done: 0, stuck: 0 };
@@ -53,5 +59,5 @@ export async function GET() {
     approvals: { pending: pendingApprovals },
     push: { subscriptions: pushSubscriptions },
     at: new Date().toISOString(),
-  });
+  }, { headers: corsHeaders(request) });
 }
