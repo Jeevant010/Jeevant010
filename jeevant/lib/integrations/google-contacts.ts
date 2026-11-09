@@ -37,7 +37,10 @@ export async function listGoogleContacts(max = 200): Promise<GoogleContactsResul
     });
     if (!res.ok) {
       const text = await res.text().catch(() => "");
-      const scopeHint = /insufficient|scope|permission|403/i.test(`${res.status} ${text}`)
+      const apiDisabled = /has not been used|is disabled|SERVICE_DISABLED|enable it/i.test(text);
+      const scopeHint = apiDisabled
+        ? " Enable the People API in Google Cloud Console for this project."
+        : /insufficient|scope|permission|403/i.test(`${res.status} ${text}`)
         ? " Re-authorize the Google token with https://www.googleapis.com/auth/contacts.readonly."
         : "";
       return {
