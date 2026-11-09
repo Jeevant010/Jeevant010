@@ -105,7 +105,9 @@ async function plan(
 
   if (!pool.length) {
     if (!groqConfigured()) return null;
-    const text = await groqChat(SYSTEM, userMessage, true);
+    const text = await groqChat(SYSTEM, userMessage, true, {
+      model: process.env.AGENT_MODEL || "openai/gpt-oss-120b",
+    });
     if (!text) return null;
     try {
       const parsed = extractJson(text);
@@ -164,12 +166,13 @@ export async function runAgent(prompt: string, opts: AgentRunOptions = {}): Prom
   opts.onStep?.(routed ? "handled locally" : "connecting to the operator");
   const planned = routed ? null : await plan(trimmed, opts.onStep);
   const resolved = routed ?? planned ?? { reply: UNKNOWN_REPLY, actions: [] };
+  const agentModel = process.env.AGENT_MODEL || "openai/gpt-oss-120b";
   const provider = routed
     ? "local-router"
     : planned
     ? keys().length
       ? `gemini:${modelName()}`
-      : `groq:${groqModel()}`
+      : `groq:${agentModel}`
     : "fallback-parser";
 
   const actions: AgentAction[] = [];
