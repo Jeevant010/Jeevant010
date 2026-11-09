@@ -83,7 +83,9 @@ export async function POST(request: NextRequest) {
 
   // 1. Gmail senders and recipients.
   try {
-    const mail = await listMessages({ query: "in:anywhere newer_than:180d", count: 50 });
+    // Keep this small: each message costs a metadata request, and this route
+    // runs inside a 60s serverless limit.
+    const mail = await listMessages({ query: "in:inbox newer_than:60d", count: 12 });
     gmail.ok = mail.ok;
     gmail.detail = mail.detail;
     if (mail.ok) {
