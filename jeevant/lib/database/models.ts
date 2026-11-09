@@ -578,7 +578,35 @@ const FocusSessionSchema = new Schema({
   distractions: [{ label: String, at: Date, _id: false }],
 });
 
-// --- 30. ACTION TOKEN (signed single-use or reusable bridge links) ---
+// --- 30. CODING JOB (phone → sandbox → diff → approval → PR) ---
+const CodingJobSchema = new Schema({
+  repoKey: { type: String, required: true },
+  repoSlug: { type: String, default: "" },
+  prompt: { type: String, required: true },
+  files: [{ type: String }],
+  status: {
+    type: String,
+    enum: ["queued", "running", "needs_review", "approved", "rejected", "failed"],
+    default: "queued",
+  },
+  branch: { type: String, default: "" },
+  summary: { type: String, default: "" },
+  diff: { type: String, default: "" },
+  changedFiles: [{ type: String }],
+  commitMode: { type: String, enum: ["per-file", "bulk"], default: "per-file" },
+  commits: [{ type: String }],
+  testCommand: { type: String, default: "" },
+  testOk: { type: Boolean },
+  testOutput: { type: String, default: "" },
+  logs: { type: String, default: "" },
+  error: { type: String, default: "" },
+  prUrl: { type: String, default: "" },
+  workDir: { type: String, default: "" },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+});
+
+// --- 31. ACTION TOKEN (signed single-use or reusable bridge links) ---
 const ActionTokenSchema = new Schema({
   tokenHash: { type: String, required: true, unique: true, index: true },
   hint: { type: String, default: "" },
@@ -644,6 +672,7 @@ export const StyleProfile = models.StyleProfile || model("StyleProfile", StylePr
 export const Template = models.Template || model("Template", TemplateSchema);
 export const Activity = models.Activity || model("Activity", ActivitySchema);
 export const FocusSession = models.FocusSession || model("FocusSession", FocusSessionSchema);
+export const CodingJob = models.CodingJob || model("CodingJob", CodingJobSchema);
 export const ActionToken = models.ActionToken || model("ActionToken", ActionTokenSchema);
 export const PushSubscription = models.PushSubscription || model("PushSubscription", PushSubscriptionSchema);
 export const RateLimitBucket = models.RateLimitBucket || model("RateLimitBucket", RateLimitBucketSchema);
