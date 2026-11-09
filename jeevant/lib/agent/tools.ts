@@ -65,6 +65,10 @@ const PAGES: Record<string, { path: string; label: string }> = {
   record: { path: "/projects", label: "the record" },
   projects: { path: "/projects", label: "the record" },
   journey: { path: "/journey", label: "the journey" },
+  inbox: { path: "/inbox", label: "the inbox" },
+  plan: { path: "/planner/daily", label: "the daily plan" },
+  people: { path: "/contacts", label: "people" },
+  content: { path: "/studio", label: "content" },
   about: { path: "/about", label: "the profile" },
   profile: { path: "/about", label: "the profile" },
   cv: { path: "/cv", label: "the CV" },
@@ -498,7 +502,7 @@ export async function executeTool(tool: string, args: any): Promise<ToolResult> 
     case "summarize": {
       const text = String(args?.text || "").trim();
       if (!text) return { ok: false, result: "Paste the text to summarize." };
-      if (!groqConfigured()) return { ok: false, result: "Set GROQ_API_KEY to enable summaries." };
+      if (!groqConfigured()) return { ok: false, result: "Set GROQ_API_KEYS / GROQ_API_KEY to enable summaries." };
       const summary = await groqChat(
         "Summarize the message in at most 3 short bullets. Then state the one action it needs, if any.",
         text,
@@ -512,7 +516,7 @@ export async function executeTool(tool: string, args: any): Promise<ToolResult> 
     case "suggest_reply": {
       const text = String(args?.text || "").trim();
       if (!text) return { ok: false, result: "Paste the message to reply to." };
-      if (!groqConfigured()) return { ok: false, result: "Set GROQ_API_KEY to enable reply drafting." };
+      if (!groqConfigured()) return { ok: false, result: "Set GROQ_API_KEYS / GROQ_API_KEY to enable reply drafting." };
       const style = await getStyleGuide();
       const tone = String(args?.tone || "").trim();
       const reply = await groqChat(
