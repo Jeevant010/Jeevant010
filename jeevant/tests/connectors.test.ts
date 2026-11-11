@@ -137,9 +137,9 @@ test("MCP client initializes, lists, and calls a tool over HTTP", async () => {
       return;
     }
     if (message.method === "tools/list") {
-      res.writeHead(200, { "content-type": "application/json" });
+      res.writeHead(200, { "content-type": "text/event-stream" });
       res.end(
-        JSON.stringify({
+        `event: message\ndata: ${JSON.stringify({
           jsonrpc: "2.0",
           id: message.id,
           result: {
@@ -152,18 +152,18 @@ test("MCP client initializes, lists, and calls a tool over HTTP", async () => {
               },
             ],
           },
-        })
+        })}\n\n`
       );
       return;
     }
     if (message.method === "tools/call") {
-      res.writeHead(200, { "content-type": "application/json" });
+      res.writeHead(200, { "content-type": "text/event-stream" });
       res.end(
-        JSON.stringify({
+        `event: message\ndata: ${JSON.stringify({
           jsonrpc: "2.0",
           id: message.id,
           result: { content: [{ type: "text", text: `echo:${message.params?.arguments?.text || ""}` }] },
-        })
+        })}\n\n`
       );
       return;
     }
