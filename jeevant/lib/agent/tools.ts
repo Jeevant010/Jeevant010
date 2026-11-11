@@ -11,6 +11,9 @@ import { getBriefing } from "@/lib/agent/briefing";
 import { draftReply, getMessage, listMessages, summarizeMessage, summarizeMessages } from "@/lib/integrations/gmail-read";
 import { checkConflicts, findFreeSlot, listUpcoming } from "@/lib/integrations/calendar-read";
 import { safeFetch } from "@/lib/http/fetch";
+import { searchTools, describeTool } from "./registry";
+
+export { TOOL_CATALOG } from "./registry";
 
 export type ToolResult = {
   ok: boolean;
@@ -19,46 +22,7 @@ export type ToolResult = {
   data?: unknown;
 };
 
-export const TOOL_CATALOG = `
-create_task        args: { title, priority?: "low"|"medium"|"high", dueDate?: ISO }
-complete_task      args: { query }           // marks the first matching task done
-delete_task        args: { query, confirm }  // confirm must be true; otherwise ask the user
-create_note        args: { title, content, tags?: string[] }
-delete_note        args: { query, confirm }
-search_notes       args: { query }
-create_project     args: { title, description, techStack?: string[], status?: "building"|"live"|"planned"|"stopped" }
-create_post        args: { title, body, channels?: string[] }
-add_achievement    args: { title, description?: string, when?: string }
-remember           args: { text, tags?: string[] }   // durable memory about the user
-recall             args: { query? }                  // search memories
-web_search         args: { query }             // free instant-answer search
-weather            args: { city }
-send_message       args: { channel: "whatsapp"|"sms"|"call", to, body }
-send_message_to    args: { name, channel: "whatsapp"|"sms"|"call", body }  // resolves a saved contact
-remind             args: { what, when }         // when = ISO datetime
-news               args: { count? }             // Hacker News top stories
-summarize          args: { text }               // 3-bullet summary of an email/message
-suggest_reply      args: { text, tone? }        // reply drafted in your learned style
-log_activity       args: { kind, label, minutes, intended? }
-start_activity     args: { kind, label }
-stop_activity      args: { }
-day_summary        args: { }
-list_templates     args: { kind? }
-list_tasks         args: {}
-get_briefing       args: {}                  // live state: tasks, approvals, focus, activity
-list_approvals     args: {}                  // pending approvals waiting on the user
-start_focus        args: { intent }          // start a focus session
-end_focus          args: {}                  // close the active focus session
-open_page          args: { page }            // navigate: home, projects, journey, cv, research, library, contact, dashboard, planner, notes, career, learning, approvals, studio, voice, tracker, messages, contacts, integrations, automations, guardrails, arsenal, media, templates, style
-gmail_search       args: { query, count? }        // read-only Gmail search
-read_email         args: { id }                   // full message body
-summarize_email    args: { id }                   // 3 bullets + the action it needs
-email_digest       args: { query?, count? }       // one summary of recent mail
-draft_email_reply  args: { id, instruction? }     // queues a Gmail draft approval
-check_availability args: { start?, end?, minutes?, workStart?, workEnd? }  // real free/busy
-upcoming_events    args: { days?, max? }          // next events from Google Calendar
-schedule_block     args: { title, start, minutes?, notes? }  // queues a calendar approval
-`.trim();
+
 
 const PAGES: Record<string, { path: string; label: string }> = {
   home: { path: "/", label: "home" },
@@ -272,6 +236,71 @@ export async function executeTool(tool: string, args: any): Promise<ToolResult> 
         visibility: "private",
       });
       return { ok: true, result: `Added achievement "${doc.title}".` };
+    }
+
+    case "create_contact": {
+      const name = String(args?.name || "").trim();
+      if (!name) return { ok: false, result: "A contact needs a name." };
+      const phone = String(args?.phone || "").trim();
+      const whatsapp = String(args?.whatsapp || phone).trim();
+      const email = String(args?.email || "").trim();
+
+      const existing = await Contact.findOne({
+        name: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i"),
+      });
+      if (existing) {
+        if (phone) existing.phone = phone;
+        if (whatsapp) existing.whatsapp = whatsapp;
+        if (email) existing.email = email;
+        await existing.save();
+        return { ok: true, result: `Updated contact "${existing.name}".` };
+      }
+
+      const contact = await Contact.create({ name, phone, whatsapp, email });
+      return { ok: true, result: `Added contact "${contact.name}".` };
+    }
+
+    case "list_contacts": {
+      const contacts = await Contact.find({}).sort({ name: 1 }).limit(50);
+      return {
+        ok: true,
+        result: contacts.length ? `${contacts.length} contact(s).` : "No contacts saved.",
+        data: contacts.map((contact: any) => ({
+          name: contact.name,
+          phone: contact.phone,
+          whatsapp: contact.whatsapp,
+          email: contact.email,
+        })),
+      };
+    }
+
+    case "search_tools": {
+      const query = String(args?.query || "").trim();
+      if (!query) return { ok: false, result: "What capability are you looking for?" };
+      const found = searchTools(query, 12);
+      return {
+        ok: true,
+        result: found.length
+          ? `Found ${found.length} tool(s): ${found.map((entry) => entry.name).join(", ")}. Call describe_tool for the schema, then call the tool.`
+          : `No tools matched "${query}".`,
+        data: found.map((entry) => ({
+          name: entry.name,
+          args: entry.args,
+          description: entry.description,
+          risk: entry.risk,
+        })),
+      };
+    }
+
+    case "describe_tool": {
+      const name = String(args?.name || "").trim();
+      const entry = describeTool(name);
+      if (!entry) return { ok: false, result: `No tool named "${name}". Try search_tools first.` };
+      return {
+        ok: true,
+        result: `${entry.name} ${entry.args}\n${entry.description}\nRisk: ${entry.risk}.`,
+        data: { name: entry.name, args: entry.args, description: entry.description, risk: entry.risk },
+      };
     }
 
     case "remember": {
@@ -649,8 +678,12 @@ export async function executeTool(tool: string, args: any): Promise<ToolResult> 
     }
 
     case "gmail_search": {
-      const query = String(args?.query || "").trim();
-      if (!query) return { ok: false, result: "Give me something to search for." };
+      let query = String(args?.query || "").trim();
+      // "read my latest email" has no search terms; default to recent inbox
+      // mail instead of failing the whole request.
+      if (!query || /^(latest|recent|newest|my\s+(latest|recent)\s+(email|mail|inbox)?)$/i.test(query)) {
+        query = "in:inbox newer_than:14d";
+      }
       const found = await listMessages({ query, count: Number(args?.count) || 8 });
       return {
         ok: found.ok,

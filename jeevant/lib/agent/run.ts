@@ -2,7 +2,8 @@
 // JSON tool calls, and we execute them against the same MongoDB collections the
 // admin UI uses. Fixed commands never touch an LLM.
 
-import { executeTool, TOOL_CATALOG, type ToolResult } from "./tools";
+import { executeTool, type ToolResult } from "./tools";
+import { retrieveTools, catalogForTools } from "./registry";
 import { routeIntent, UNKNOWN_REPLY } from "./router";
 import { groqChat, groqConfigured, groqModel } from "@/lib/integrations/groq";
 import connectDB from "@/lib/db";
@@ -49,10 +50,11 @@ function modelName(): string {
   return process.env.GEMINI_MODEL || "gemini-2.0-flash";
 }
 
-const SYSTEM = `You are the operator agent for Jeevant's personal OS.
+function systemPrompt(toolsText: string): string {
+  return `You are the operator agent for Jeevant's personal OS.
 You can change the real database through these tools:
 
-${TOOL_CATALOG}
+${toolsText}
 
 Rules:
 - Return ONLY JSON: { "reply": string, "actions": [ { "tool": string, "args": object } ] }.
@@ -73,7 +75,9 @@ Rules:
 - "start_focus" and "end_focus" control the focus session. Use them instead of describing focus.
 - For email questions, call gmail_search, email_digest, or summarize_email. Never invent inbox contents.
 - To schedule, call check_availability first, then schedule_block. Say the block is queued for approval; never claim it is on the calendar.
-- Prefer doing over explaining: if a tool can answer the request, call it.`;
+- Prefer doing over explaining: if a tool can answer the request, call it.
+- Only a relevant subset of tools is listed. If the needed tool is missing, call "search_tools", then "describe_tool", then call the tool. Never invent a tool name.`;
+}
 
 function extractJson(text: string): any {
   const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
@@ -100,15 +104,22 @@ async function plan(
   const style = await getStyleGuide();
   const styleBlock = style ? `WRITING STYLE (match this in your reply):\n${style}\n\n` : "";
   const userMessage = `CURRENT_DATETIME: ${new Date().toISOString()}\n\n${guardBlock}${styleBlock}${memoryBlock}${conversationBlock}REQUEST: ${prompt}`;
+  const toolsText = catalogForTools(retrieveTools(prompt, 16));
   const pool = keys();
   onStep?.("planning the action");
 
   if (!pool.length) {
     if (!groqConfigured()) return null;
-    const text = await groqChat(SYSTEM, userMessage, true, {
-      model: process.env.AGENT_MODEL || "openai/gpt-oss-120b",
-    });
-    if (!text) return null;
+    const model = process.env.AGENT_MODEL || "openai/gpt-oss-120b";
+    // Groq occasionally returns an empty choice under load. One immediate retry
+    // is cheaper than dropping to the deterministic fallback parser.
+    const text =
+      (await groqChat(systemPrompt(toolsText), userMessage, true, { model })) ||
+      (await groqChat(systemPrompt(toolsText), userMessage, true, { model }));
+    if (!text) {
+      console.warn("[agent] planner returned no text for:", prompt.slice(0, 120));
+      return null;
+    }
     try {
       const parsed = extractJson(text);
       return {
@@ -116,6 +127,7 @@ async function plan(
         actions: Array.isArray(parsed.actions) ? parsed.actions : [],
       };
     } catch {
+      console.warn("[agent] planner returned invalid JSON for:", prompt.slice(0, 120), text.slice(0, 240));
       return null;
     }
   }
@@ -130,7 +142,7 @@ async function plan(
           headers: { "Content-Type": "application/json" },
           cache: "no-store",
           body: JSON.stringify({
-            systemInstruction: { parts: [{ text: SYSTEM }] },
+            systemInstruction: { parts: [{ text: systemPrompt(toolsText) }] },
             contents: [{ role: "user", parts: [{ text: userMessage }] }],
             generationConfig: { temperature: 0.15, responseMimeType: "application/json" },
           }),
@@ -164,8 +176,67 @@ export async function runAgent(prompt: string, opts: AgentRunOptions = {}): Prom
   // Only ambiguous requests pay for the planner.
   const routed = routeIntent(trimmed);
   opts.onStep?.(routed ? "handled locally" : "connecting to the operator");
-  const planned = routed ? null : await plan(trimmed, opts.onStep);
-  const resolved = routed ?? planned ?? { reply: UNKNOWN_REPLY, actions: [] };
+
+  const actions: AgentAction[] = [];
+  const runActions = async (list: { tool: string; args: any }[]): Promise<AgentAction[]> => {
+    const outcomes: AgentAction[] = [];
+    for (const action of list) {
+      if (!action || typeof action.tool !== "string") continue;
+      let outcome: ToolResult;
+      opts.onStep?.(`running ${action.tool.replace(/_/g, " ")}`);
+      try {
+        outcome = await executeTool(action.tool, action.args || {});
+      } catch (error) {
+        outcome = { ok: false, result: `Tool "${action.tool}" failed: ${(error as Error).message}` };
+      }
+      const record: AgentAction = { tool: action.tool, args: action.args || {}, ...outcome };
+      actions.push(record);
+      outcomes.push(record);
+    }
+    return outcomes;
+  };
+
+  let planned: { reply: string; actions: { tool: string; args: any }[] } | null = null;
+  let resolved: { reply: string; actions: { tool: string; args: any }[] } | null = routed;
+
+  if (!routed) {
+    planned = await plan(trimmed, opts.onStep);
+
+    // If the planner asked for discovery, run it and re-plan once with the
+    // discovered tools. This is the "I don't have that tool" escape hatch.
+    if (planned) {
+      const discovery = planned.actions.filter(
+        (action) => action?.tool === "search_tools" || action?.tool === "describe_tool"
+      );
+      if (discovery.length) {
+        // Models sometimes emit the same discovery call twice. Run it once.
+        const seenDiscovery = new Set<string>();
+        const uniqueDiscovery = discovery.filter((action) => {
+          const key = `${action.tool}:${JSON.stringify(action.args || {})}`;
+          if (seenDiscovery.has(key)) return false;
+          seenDiscovery.add(key);
+          return true;
+        });
+        const discoveryOutcomes = await runActions(uniqueDiscovery);
+        const discoveryText = discoveryOutcomes
+          .map((outcome) => {
+            const data = outcome.data ? `\n${JSON.stringify(outcome.data).slice(0, 2000)}` : "";
+            return `${outcome.tool}: ${outcome.result}${data}`;
+          })
+          .join("\n");
+        const second = await plan(
+          `${trimmed}\n\nTOOL DISCOVERY RESULT:\n${discoveryText}\nNow call the actual discovered tool(s). Do not call search_tools again unless you still lack the capability.`,
+          opts.onStep
+        );
+        if (second) planned = second;
+      }
+    }
+
+    resolved = planned ?? { reply: UNKNOWN_REPLY, actions: [] };
+  }
+
+  await runActions(resolved?.actions || []);
+
   const agentModel = process.env.AGENT_MODEL || "openai/gpt-oss-120b";
   const provider = routed
     ? "local-router"
@@ -175,36 +246,27 @@ export async function runAgent(prompt: string, opts: AgentRunOptions = {}): Prom
       : `groq:${agentModel}`
     : "fallback-parser";
 
-  const actions: AgentAction[] = [];
-  for (const action of resolved.actions) {
-    if (!action || typeof action.tool !== "string") continue;
-    let outcome: ToolResult;
-    opts.onStep?.(`running ${action.tool.replace(/_/g, " ")}`);
-    try {
-      outcome = await executeTool(action.tool, action.args || {});
-    } catch (error) {
-      outcome = { ok: false, result: `Tool "${action.tool}" failed: ${(error as Error).message}` };
-    }
-    actions.push({ tool: action.tool, args: action.args || {}, ...outcome });
-  }
-
   opts.onStep?.(actions.length ? "writing the reply" : "composing the answer");
-  let reply = resolved.reply || (actions.length ? "Done." : "Nothing to do.");
+  let reply = resolved?.reply || (actions.length ? "Done." : "Nothing to do.");
 
   // Code-enforced truth: never let the model claim success for a blocked or
   // failed tool call, and never let it say "sent" when everything is queued.
-  const failures = actions.filter((action) => !action.ok && !action.needsConfirm);
+  // Discovery meta-tools are internal; do not speak their results.
+  const visibleActions = actions.filter(
+    (action) => action.tool !== "search_tools" && action.tool !== "describe_tool"
+  );
+  const failures = visibleActions.filter((action) => !action.ok && !action.needsConfirm);
   if (failures.length) {
     reply = failures.map((action) => action.result).join(" ");
   } else if (
-    actions.length > 0 &&
-    actions.every((action) => action.ok && /queued for approval/i.test(action.result))
+    visibleActions.length > 0 &&
+    visibleActions.every((action) => action.ok && /queued for approval/i.test(action.result))
   ) {
     reply = "Queued for approval — nothing has been sent.";
   } else {
     // Speak the tool results verbatim. This prevents the model from adding
     // claims like "queued for approval" to actions that actually completed.
-    const results = actions
+    const results = visibleActions
       .filter((action) => action.ok && action.result)
       .map((action) => action.result);
     if (results.length) reply = results.join(" ");
