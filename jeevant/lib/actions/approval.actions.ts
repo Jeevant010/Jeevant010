@@ -13,6 +13,7 @@ import { audit, evaluateExternalAction } from "@/lib/guardrails/policy";
 import { redact } from "@/lib/logging/redact";
 import { safeFetch } from "@/lib/http/fetch";
 import { executeApprovedConnectorRequest, executeApprovedMcpCall } from "@/lib/connectors/execute";
+import { executeCode, normalizeCodeLanguage } from "@/lib/agent/code-run";
 
 function plain(doc: any) {
   const obj = doc?.toObject ? doc.toObject() : doc;
@@ -170,6 +171,16 @@ export async function decideApproval(
         result = outcome.url ? `${outcome.detail} ${outcome.url}` : outcome.detail;
         if (!outcome.ok) approval.status = "failed";
         else if (!delivered) approval.status = "needs_action";
+      } else if (approval.kind === "code") {
+        const language = normalizeCodeLanguage(payload.language) || "javascript";
+        const outcome = await executeCode(language, String(payload.code || ""), payload.input);
+        result = outcome.result;
+        if (!outcome.ok) approval.status = "failed";
+      } else if (approval.kind === "ui") {
+        // The server has no native access. Approving marks it ready; the phone
+        // runs it only after the user taps Run on this device.
+        approval.status = "needs_action";
+        result = "Approved. Open Approvals on the phone and tap Run on this device.";
       } else if (approval.kind === "mcp") {
         const outcome = await executeApprovedMcpCall(payload);
         result = outcome.detail;

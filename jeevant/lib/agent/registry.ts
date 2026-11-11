@@ -34,6 +34,9 @@ export const TOOL_CATALOG = `
 search_tools       args: { query }            // find tools by name/description when the needed one is not listed
 describe_tool      args: { name }             // get a tool's args/schema
 http_request       args: { method?, url, body?, connector? } // generic HTTP; GET is read, writes queue for approval
+run_code           args: { language: "javascript"|"python", code, input? } // queue server-side code; needs approval; persistent host only
+read_url           args: { url, summarize? } // read a public page as text, optionally summarize it
+ui_action          args: { app, steps: [{action:"tap"|"type"|"scroll"|"back"|"wait", text?, direction?, ms?}], note? } // queue an Android UI sequence; runs only when you tap Run
 create_task        args: { title, priority?: "low"|"medium"|"high", dueDate?: ISO }
 complete_task      args: { query }           // marks the first matching task done
 delete_task        args: { query, confirm }  // confirm must be true; otherwise ask the user
@@ -97,6 +100,8 @@ const EXTERNAL = new Set([
   "schedule_block",
   "request_approval",
   "http_request",
+  "run_code",
+  "ui_action",
 ]);
 
 const DESTRUCTIVE = new Set(["delete_task", "delete_note"]);
@@ -121,12 +126,24 @@ const SYNONYMS: Record<string, string[]> = {
   activity: ["tracker", "focus", "log"],
   weather: ["forecast", "temperature"],
   news: ["headlines", "hacker"],
-  code: ["repo", "coding", "sandbox"],
+  code: ["repo", "coding", "sandbox", "script", "run", "javascript", "python", "program", "calculate"],
   publish: ["post", "channels", "dispatch"],
   content: ["post", "draft", "linkedin", "twitter"],
-  chart: ["activity", "tracker", "data", "summary", "visual", "plot"],
-  graph: ["activity", "tracker", "data", "summary", "visual", "plot"],
-  visualization: ["activity", "tracker", "data", "summary", "chart", "plot"],
+  chart: ["activity", "tracker", "data", "summary", "visual", "plot", "code", "script"],
+  graph: ["activity", "tracker", "data", "summary", "visual", "plot", "code"],
+  visualization: ["activity", "tracker", "data", "summary", "chart", "plot", "code"],
+  script: ["code", "run", "javascript", "python", "program"],
+  python: ["code", "script", "run"],
+  javascript: ["code", "script", "run", "node"],
+  page: ["url", "read_url", "web", "fetch", "summarize", "scrape"],
+  url: ["page", "read_url", "web", "fetch", "link"],
+  website: ["page", "url", "read_url", "web", "fetch"],
+  scrape: ["page", "url", "read_url", "web", "fetch"],
+  summarize: ["read_url", "summary", "email", "page"],
+  tap: ["ui_action", "android", "accessibility", "click", "screen"],
+  android: ["ui_action", "tap", "app", "accessibility"],
+  whatsapp: ["ui_action", "message", "contact", "tap"],
+  screen: ["ui_action", "tap", "android", "accessibility"],
   api: ["http", "endpoint", "request", "rest", "connector", "openapi", "mcp"],
   http: ["api", "endpoint", "request", "rest", "connector", "openapi"],
   endpoint: ["api", "http", "request", "rest", "connector"],

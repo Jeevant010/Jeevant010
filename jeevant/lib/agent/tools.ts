@@ -14,6 +14,13 @@ import { safeFetch } from "@/lib/http/fetch";
 import { searchTools, describeTool } from "./registry";
 import { refreshConnectorRegistry } from "@/lib/connectors/store";
 import { executeDynamicTool, executeHttpRequest } from "@/lib/connectors/execute";
+import {
+  codeExecutionAvailable,
+  codeExecutionUnavailableReason,
+  normalizeCodeLanguage,
+} from "./code-run";
+import { readUrl } from "./read-url";
+import { describeUiSteps, normalizeApp, normalizeUiSteps } from "./ui";
 
 export { TOOL_CATALOG } from "./registry";
 
@@ -315,6 +322,70 @@ export async function executeTool(tool: string, args: any): Promise<ToolResult> 
 
     case "http_request":
       return executeHttpRequest(args || {});
+
+    case "run_code": {
+      if (!codeExecutionAvailable()) {
+        return { ok: false, result: codeExecutionUnavailableReason() };
+      }
+      const language = normalizeCodeLanguage(args?.language) || "javascript";
+      const code = String(args?.code || "").trim();
+      if (!code) return { ok: false, result: "No code was provided." };
+      if (code.length > 20_000) return { ok: false, result: "Keep the code under 20,000 characters." };
+
+      const guard = await evaluateExternalAction({
+        kind: "code",
+        target: language,
+        meta: { bytes: code.length },
+      });
+      if (!guard.allowed) return { ok: false, result: guard.reason };
+
+      const doc = await Approval.create({
+        kind: "code",
+        title: `Run ${language}`,
+        detail: `${code.replace(/\s+/g, " ").slice(0, 900)}`,
+        payload: { language, code, input: args?.input },
+        status: "pending",
+      });
+      return {
+        ok: true,
+        result: `Queued ${language} code for approval. Nothing has executed yet.${
+          language === "python" ? " Python runs with network and file access outside its temp dir blocked." : " JavaScript runs with network, subprocesses, and file access outside its temp dir blocked."
+        }`,
+        data: { approvalId: String(doc._id), language },
+      };
+    }
+
+    case "read_url":
+      return readUrl(args || {});
+
+    case "ui_action": {
+      const app = normalizeApp(args?.app);
+      if (app.error) return { ok: false, result: app.error };
+      const normalized = normalizeUiSteps(args?.steps);
+      if (normalized.error) return { ok: false, result: normalized.error };
+      const note = String(args?.note || "").trim().slice(0, 500);
+
+      const guard = await evaluateExternalAction({
+        kind: "ui",
+        target: app.packageName,
+        meta: { steps: normalized.steps.length },
+      });
+      if (!guard.allowed) return { ok: false, result: guard.reason };
+
+      const detail = `${note ? `${note}\n\n` : ""}${describeUiSteps(normalized.steps)}`;
+      const doc = await Approval.create({
+        kind: "ui",
+        title: `UI: ${app.label} (${app.packageName})`,
+        detail,
+        payload: { app: app.packageName, label: app.label, steps: normalized.steps },
+        status: "pending",
+      });
+      return {
+        ok: true,
+        result: `Queued a ${normalized.steps.length}-step UI action on ${app.label} for approval. Nothing has run yet; after you approve, tap Run on this phone in Approvals.`,
+        data: { approvalId: String(doc._id), steps: normalized.steps },
+      };
+    }
 
     case "remember": {
       const text = String(args?.text || "").trim();

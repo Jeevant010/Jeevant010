@@ -411,7 +411,7 @@ const JobSchema = new Schema({
 
 // --- 18. APPROVAL SCHEMA (human-in-the-loop guardrail) ---
 const ApprovalSchema = new Schema({
-  kind: { type: String, enum: ["email", "post", "calendar", "whatsapp", "sms", "call", "http", "mcp", "delete", "generic"], default: "generic" },
+  kind: { type: String, enum: ["email", "post", "calendar", "whatsapp", "sms", "call", "http", "mcp", "code", "ui", "delete", "generic"], default: "generic" },
   title: { type: String, required: true },
   detail: { type: String },
   payload: { type: Schema.Types.Mixed },
