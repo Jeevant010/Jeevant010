@@ -411,7 +411,7 @@ const JobSchema = new Schema({
 
 // --- 18. APPROVAL SCHEMA (human-in-the-loop guardrail) ---
 const ApprovalSchema = new Schema({
-  kind: { type: String, enum: ["email", "post", "calendar", "whatsapp", "sms", "call", "http", "delete", "generic"], default: "generic" },
+  kind: { type: String, enum: ["email", "post", "calendar", "whatsapp", "sms", "call", "http", "mcp", "delete", "generic"], default: "generic" },
   title: { type: String, required: true },
   detail: { type: String },
   payload: { type: Schema.Types.Mixed },
@@ -483,6 +483,40 @@ const ChannelAccountSchema = new Schema({
   config: { type: Schema.Types.Mixed, default: {} }, // phoneNumberId, fromNumber, chatId, sender
   secrets: { type: Schema.Types.Mixed, default: {} }, // tokens — server-only, never sent to the browser
   isDefault: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+});
+
+// --- 21b. CONNECTOR SCHEMA (MCP / OpenAPI dynamic tools) ---
+// Tools and credentials live server-side. The browser only ever sees the
+// public metadata (name, kind, tool list, status); secrets are sealed.
+const ConnectorToolSchema = new Schema(
+  {
+    name: { type: String, required: true },
+    description: { type: String, default: "" },
+    inputSchema: { type: Schema.Types.Mixed },
+    risk: { type: String, enum: ["read", "write", "external", "destructive"], default: "external" },
+    method: { type: String },
+    path: { type: String },
+    queryParams: [{ type: String }],
+    bodyMode: { type: String, enum: ["none", "object", "value"], default: "none" },
+  },
+  { _id: false }
+);
+
+const ConnectorSchema = new Schema({
+  name: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  kind: { type: String, enum: ["mcp", "openapi"], default: "mcp" },
+  url: { type: String, required: true },
+  baseUrl: { type: String, default: "" },
+  authType: { type: String, enum: ["none", "bearer", "header"], default: "none" },
+  authHeader: { type: String, default: "" },
+  secrets: { type: Schema.Types.Mixed, default: {} }, // AES-GCM envelope, never returned
+  enabled: { type: Boolean, default: true },
+  risk: { type: String, enum: ["read", "write", "external", "destructive"], default: "external" },
+  tools: { type: [ConnectorToolSchema], default: [] },
+  lastSyncedAt: { type: Date },
+  lastError: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
@@ -670,6 +704,7 @@ export const WorkflowRun = models.WorkflowRun || model("WorkflowRun", WorkflowRu
 export const ChatMessage = models.ChatMessage || model("ChatMessage", ChatMessageSchema);
 export const OutboundMessage = models.OutboundMessage || model("OutboundMessage", OutboundMessageSchema);
 export const ChannelAccount = models.ChannelAccount || model("ChannelAccount", ChannelAccountSchema);
+export const Connector = models.Connector || model("Connector", ConnectorSchema);
 export const AuditLog = models.AuditLog || model("AuditLog", AuditLogSchema);
 export const Contact = models.Contact || model("Contact", ContactSchema);
 export const StyleProfile = models.StyleProfile || model("StyleProfile", StyleProfileSchema);

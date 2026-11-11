@@ -4,6 +4,7 @@
 
 import { executeTool, type ToolResult } from "./tools";
 import { retrieveTools, catalogForTools } from "./registry";
+import { refreshConnectorRegistry } from "@/lib/connectors/store";
 import { routeIntent, UNKNOWN_REPLY } from "./router";
 import { groqChat, groqConfigured, groqModel } from "@/lib/integrations/groq";
 import connectDB from "@/lib/db";
@@ -104,6 +105,7 @@ async function plan(
   const style = await getStyleGuide();
   const styleBlock = style ? `WRITING STYLE (match this in your reply):\n${style}\n\n` : "";
   const userMessage = `CURRENT_DATETIME: ${new Date().toISOString()}\n\n${guardBlock}${styleBlock}${memoryBlock}${conversationBlock}REQUEST: ${prompt}`;
+  await refreshConnectorRegistry();
   const toolsText = catalogForTools(retrieveTools(prompt, 16));
   const pool = keys();
   onStep?.("planning the action");

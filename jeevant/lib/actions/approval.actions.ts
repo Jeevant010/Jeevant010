@@ -12,6 +12,7 @@ import { resolveAccount } from "@/lib/integrations/accounts";
 import { audit, evaluateExternalAction } from "@/lib/guardrails/policy";
 import { redact } from "@/lib/logging/redact";
 import { safeFetch } from "@/lib/http/fetch";
+import { executeApprovedConnectorRequest, executeApprovedMcpCall } from "@/lib/connectors/execute";
 
 function plain(doc: any) {
   const obj = doc?.toObject ? doc.toObject() : doc;
@@ -82,6 +83,9 @@ export async function decideApproval(
     const gate = await evaluateExternalAction({
       kind: approval.kind,
       target: String(payload.to || payload.url || payload.postId || approval.title),
+      meta: {
+        allowedHosts: Array.isArray(payload.allowedHosts) ? payload.allowedHosts : undefined,
+      },
     });
     if (!gate.allowed) {
       approval.status = "failed";
@@ -166,27 +170,51 @@ export async function decideApproval(
         result = outcome.url ? `${outcome.detail} ${outcome.url}` : outcome.detail;
         if (!outcome.ok) approval.status = "failed";
         else if (!delivered) approval.status = "needs_action";
+      } else if (approval.kind === "mcp") {
+        const outcome = await executeApprovedMcpCall(payload);
+        result = outcome.detail;
+        if (!outcome.ok) approval.status = "failed";
       } else if (approval.kind === "http") {
-        const url = String(payload.url || "");
-        const guard = await evaluateExternalAction({ kind: "http", target: url });
-        if (!guard.allowed) {
-          approval.status = "failed";
-          result = guard.reason;
+        if (payload.connector) {
+          const outcome = await executeApprovedConnectorRequest(payload);
+          result = outcome.detail;
+          if (!outcome.ok) approval.status = "failed";
         } else {
-          try {
-            const res = await safeFetch(url, {
-              method: String(payload.method || "POST"),
-              headers: { "Content-Type": "application/json" },
-              cache: "no-store",
-              body: JSON.stringify(payload.body || {}),
-            });
-            result = `HTTP ${res.status} ${url}`;
-            if (!res.ok) approval.status = "failed";
-            await audit({ kind: "http", target: url }, res.ok ? "executed" : "failed", result);
-          } catch (error) {
+          const url = String(payload.url || "");
+          const guard = await evaluateExternalAction({
+            kind: "http",
+            target: url,
+            meta: { allowedHosts: Array.isArray(payload.allowedHosts) ? payload.allowedHosts : undefined },
+          });
+          if (!guard.allowed) {
             approval.status = "failed";
-            result = (error as Error).message;
-            await audit({ kind: "http", target: url }, "failed", result);
+            result = guard.reason;
+          } else {
+            try {
+              const method = String(payload.method || "POST").toUpperCase();
+              const body =
+                method === "GET" || method === "HEAD" || method === "OPTIONS"
+                  ? undefined
+                  : JSON.stringify(payload.body || {});
+              const headers: Record<string, string> = {
+                ...(payload.headers && typeof payload.headers === "object" ? payload.headers : {}),
+                ...(body ? { "Content-Type": "application/json" } : {}),
+              };
+              const res = await safeFetch(url, {
+                method,
+                headers,
+                cache: "no-store",
+                body,
+              });
+              const text = await res.text();
+              result = `HTTP ${res.status} ${url}${text ? `: ${text.slice(0, 1000)}` : ""}`;
+              if (!res.ok) approval.status = "failed";
+              await audit({ kind: "http", target: url }, res.ok ? "executed" : "failed", result);
+            } catch (error) {
+              approval.status = "failed";
+              result = (error as Error).message;
+              await audit({ kind: "http", target: url }, "failed", result);
+            }
           }
         }
       }

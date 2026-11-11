@@ -6,6 +6,12 @@ function tool(prompt: string): string | undefined {
   return routeIntent(prompt)?.actions[0]?.tool;
 }
 
+test("does not treat API endpoint calls as phone calls", () => {
+  assert.equal(routeIntent("call the mockapi hello endpoint"), null);
+  assert.equal(routeIntent("call the GitHub API"), null);
+  assert.equal(tool("call Rahul"), "send_message_to");
+});
+
 test("routes fixed commands without an LLM", () => {
   assert.equal(tool("list tasks"), "list_tasks");
   assert.equal(tool("brief me"), "get_briefing");

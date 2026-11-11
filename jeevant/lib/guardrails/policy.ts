@@ -81,10 +81,17 @@ export async function evaluateExternalAction(action: GuardrailAction): Promise<G
 
   if (action.kind === "http") {
     const host = hostOf(action.target);
-    const allowlist = settings.httpAllowlist
-      .split(/[\s,]+/)
-      .map((entry) => entry.trim().toLowerCase())
-      .filter(Boolean);
+    const meta = action.meta && typeof action.meta === "object" ? (action.meta as Record<string, unknown>) : {};
+    const extraHosts = Array.isArray(meta.allowedHosts)
+      ? meta.allowedHosts.map((entry) => String(entry).trim().toLowerCase()).filter(Boolean)
+      : [];
+    const allowlist = [
+      ...settings.httpAllowlist
+        .split(/[\s,]+/)
+        .map((entry) => entry.trim().toLowerCase())
+        .filter(Boolean),
+      ...extraHosts,
+    ];
 
     if (!host || !allowlist.includes(host)) {
       const reason = `HTTP host "${host || "unknown"}" is not in the allowlist.`;

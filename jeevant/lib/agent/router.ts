@@ -217,7 +217,12 @@ export function routeIntent(prompt: string): RoutedIntent | null {
   }
 
   // --- Messaging ----------------------------------------------------------
-  const call = text.match(/^(?:call|phone|ring)\s+([a-z0-9][a-z0-9 .'-]*?)(?:\s*[:\-]\s*([\s\S]+))?$/i);
+  // "Call the GitHub API" is not a phone call. Technical nouns must reach the
+  // planner so connector/http tools can handle them.
+  const technicalCall = /\b(endpoint|api|tool|connector|webhook|url|https?|server|method|function)\b/i.test(text);
+  const call = technicalCall
+    ? null
+    : text.match(/^(?:call|phone|ring)\s+([a-z0-9][a-z0-9 .'-]*?)(?:\s*[:\-]\s*([\s\S]+))?$/i);
   if (call) {
     const name = clean(call[1]);
     const body = clean(call[2]);

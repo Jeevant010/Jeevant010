@@ -12,6 +12,8 @@ import { draftReply, getMessage, listMessages, summarizeMessage, summarizeMessag
 import { checkConflicts, findFreeSlot, listUpcoming } from "@/lib/integrations/calendar-read";
 import { safeFetch } from "@/lib/http/fetch";
 import { searchTools, describeTool } from "./registry";
+import { refreshConnectorRegistry } from "@/lib/connectors/store";
+import { executeDynamicTool, executeHttpRequest } from "@/lib/connectors/execute";
 
 export { TOOL_CATALOG } from "./registry";
 
@@ -288,6 +290,7 @@ export async function executeTool(tool: string, args: any): Promise<ToolResult> 
           args: entry.args,
           description: entry.description,
           risk: entry.risk,
+          kind: entry.dynamic?.kind || "builtin",
         })),
       };
     }
@@ -296,12 +299,22 @@ export async function executeTool(tool: string, args: any): Promise<ToolResult> 
       const name = String(args?.name || "").trim();
       const entry = describeTool(name);
       if (!entry) return { ok: false, result: `No tool named "${name}". Try search_tools first.` };
+      const schema = entry.inputSchema ? JSON.stringify(entry.inputSchema) : entry.args;
       return {
         ok: true,
-        result: `${entry.name} ${entry.args}\n${entry.description}\nRisk: ${entry.risk}.`,
-        data: { name: entry.name, args: entry.args, description: entry.description, risk: entry.risk },
+        result: `${entry.name} ${schema}\n${entry.description}\nRisk: ${entry.risk}.`,
+        data: {
+          name: entry.name,
+          args: schema,
+          description: entry.description,
+          risk: entry.risk,
+          kind: entry.dynamic?.kind || "builtin",
+        },
       };
     }
+
+    case "http_request":
+      return executeHttpRequest(args || {});
 
     case "remember": {
       const text = String(args?.text || "").trim();
@@ -824,7 +837,16 @@ export async function executeTool(tool: string, args: any): Promise<ToolResult> 
       return { ok: true, result: `Opening ${page.label}.`, data: { path: page.path } };
     }
 
-    default:
+    default: {
+      // Dynamic connector tools are registered before planning. If a caller
+      // invokes one directly (e.g. a queued action), refresh once and retry.
+      let entry = describeTool(tool);
+      if (!entry) {
+        await refreshConnectorRegistry(true);
+        entry = describeTool(tool);
+      }
+      if (entry?.dynamic) return executeDynamicTool(entry, args || {});
       return { ok: false, result: `Unknown tool "${tool}".` };
+    }
   }
 }

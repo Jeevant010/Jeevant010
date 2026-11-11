@@ -6,6 +6,18 @@
 
 export type ToolRisk = "read" | "write" | "external" | "destructive";
 
+export type DynamicToolMeta = {
+  connectorId: string;
+  connectorName: string;
+  kind: "mcp" | "openapi";
+  remoteName: string;
+  method?: string;
+  path?: string;
+  queryParams?: string[];
+  bodyMode?: "none" | "object" | "value";
+  baseUrl?: string;
+};
+
 export type ToolEntry = {
   name: string;
   args: string;
@@ -14,11 +26,14 @@ export type ToolEntry = {
   risk: ToolRisk;
   core: boolean;
   line: string;
+  inputSchema?: Record<string, unknown>;
+  dynamic?: DynamicToolMeta;
 };
 
 export const TOOL_CATALOG = `
 search_tools       args: { query }            // find tools by name/description when the needed one is not listed
 describe_tool      args: { name }             // get a tool's args/schema
+http_request       args: { method?, url, body?, connector? } // generic HTTP; GET is read, writes queue for approval
 create_task        args: { title, priority?: "low"|"medium"|"high", dueDate?: ISO }
 complete_task      args: { query }           // marks the first matching task done
 delete_task        args: { query, confirm }  // confirm must be true; otherwise ask the user
@@ -81,6 +96,7 @@ const EXTERNAL = new Set([
   "draft_email_reply",
   "schedule_block",
   "request_approval",
+  "http_request",
 ]);
 
 const DESTRUCTIVE = new Set(["delete_task", "delete_note"]);
@@ -111,6 +127,16 @@ const SYNONYMS: Record<string, string[]> = {
   chart: ["activity", "tracker", "data", "summary", "visual", "plot"],
   graph: ["activity", "tracker", "data", "summary", "visual", "plot"],
   visualization: ["activity", "tracker", "data", "summary", "chart", "plot"],
+  api: ["http", "endpoint", "request", "rest", "connector", "openapi", "mcp"],
+  http: ["api", "endpoint", "request", "rest", "connector", "openapi"],
+  endpoint: ["api", "http", "request", "rest", "connector"],
+  rest: ["api", "http", "endpoint", "request"],
+  connector: ["api", "http", "mcp", "openapi"],
+  mcp: ["connector", "tool", "server"],
+  openapi: ["api", "http", "connector", "schema"],
+  github: ["repo", "issue", "pull", "code"],
+  notion: ["page", "database", "note"],
+  slack: ["message", "channel", "workspace"],
 };
 
 export const TOOL_REGISTRY: ToolEntry[] = TOOL_CATALOG.split("\n")
@@ -145,6 +171,28 @@ export const TOOL_REGISTRY: ToolEntry[] = TOOL_CATALOG.split("\n")
   })
   .filter((entry): entry is ToolEntry => !!entry);
 
+// Dynamic entries come from connectors. They are replaced on every registry
+// refresh, so a deleted connector disappears immediately.
+let DYNAMIC_TOOLS: ToolEntry[] = [];
+
+export function registerDynamicTools(entries: ToolEntry[]): void {
+  const staticNames = new Set(TOOL_REGISTRY.map((entry) => entry.name));
+  const seen = new Set<string>();
+  DYNAMIC_TOOLS = entries.filter((entry) => {
+    if (!entry?.name || staticNames.has(entry.name) || seen.has(entry.name)) return false;
+    seen.add(entry.name);
+    return true;
+  });
+}
+
+export function clearDynamicTools(): void {
+  DYNAMIC_TOOLS = [];
+}
+
+export function allTools(): ToolEntry[] {
+  return [...TOOL_REGISTRY, ...DYNAMIC_TOOLS];
+}
+
 function tokens(text: string): string[] {
   return text.toLowerCase().match(/[a-z0-9_]+/g) ?? [];
 }
@@ -166,8 +214,10 @@ function score(entry: ToolEntry, queryTokens: string[]): number {
 
 export function retrieveTools(query: string, limit = 16): ToolEntry[] {
   const queryTokens = tokens(query);
-  const core = TOOL_REGISTRY.filter((entry) => entry.core);
-  const ranked = TOOL_REGISTRY.filter((entry) => !entry.core)
+  const pool = allTools();
+  const core = pool.filter((entry) => entry.core);
+  const ranked = pool
+    .filter((entry) => !entry.core)
     .map((entry) => ({ entry, score: score(entry, queryTokens) }))
     .sort((left, right) => right.score - left.score || left.entry.name.localeCompare(right.entry.name));
 
@@ -198,7 +248,8 @@ export function retrieveTools(query: string, limit = 16): ToolEntry[] {
 
 export function searchTools(query: string, limit = 12): ToolEntry[] {
   const queryTokens = tokens(query);
-  return TOOL_REGISTRY.map((entry) => ({ entry, score: score(entry, queryTokens) }))
+  return allTools()
+    .map((entry) => ({ entry, score: score(entry, queryTokens) }))
     .filter((item) => item.score > 0)
     .sort((left, right) => right.score - left.score || left.entry.name.localeCompare(right.entry.name))
     .slice(0, limit)
@@ -207,7 +258,11 @@ export function searchTools(query: string, limit = 12): ToolEntry[] {
 
 export function describeTool(name: string): ToolEntry | null {
   const target = String(name || "").trim().toLowerCase();
-  return TOOL_REGISTRY.find((entry) => entry.name === target) || null;
+  return (
+    TOOL_REGISTRY.find((entry) => entry.name === target) ||
+    DYNAMIC_TOOLS.find((entry) => entry.name === target) ||
+    null
+  );
 }
 
 export function catalogForTools(entries: ToolEntry[]): string {
