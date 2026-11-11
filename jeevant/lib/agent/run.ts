@@ -7,34 +7,13 @@ import { retrieveTools, catalogForTools } from "./registry";
 import { refreshConnectorRegistry } from "@/lib/connectors/store";
 import { routeIntent, UNKNOWN_REPLY } from "./router";
 import { groqChat, groqConfigured, groqModel } from "@/lib/integrations/groq";
-import connectDB from "@/lib/db";
-import { Memory, ChatMessage } from "@/lib/database/models";
 import { getGuardrailSettings } from "@/lib/guardrails/policy";
 import { getStyleGuide } from "@/lib/style";
+import { getPersona, personaPrompt } from "./persona";
+import { retrieveConversation, retrieveMemories } from "./memory";
 import { safeFetch } from "@/lib/http/fetch";
-
-async function recentMemories(): Promise<string[]> {
-  try {
-    await connectDB();
-    const docs = await Memory.find({}).sort({ createdAt: -1 }).limit(20);
-    return docs.map((doc: any) => String(doc.text));
-  } catch {
-    return [];
-  }
-}
-
-async function recentConversation(): Promise<string> {
-  try {
-    await connectDB();
-    const docs = await ChatMessage.find({ thread: "main" }).sort({ createdAt: -1 }).limit(10);
-    return docs
-      .reverse()
-      .map((doc: any) => `${doc.role}: ${doc.content}`)
-      .join("\n");
-  } catch {
-    return "";
-  }
-}
+import connectDB from "@/lib/db";
+import { ChatMessage } from "@/lib/database/models";
 
 export type AgentAction = { tool: string; args: Record<string, unknown> } & ToolResult;
 
@@ -51,8 +30,9 @@ function modelName(): string {
   return process.env.GEMINI_MODEL || "gemini-2.0-flash";
 }
 
-function systemPrompt(toolsText: string): string {
-  return `You are the operator agent for Jeevant's personal OS.
+function systemPrompt(toolsText: string, personaText: string): string {
+  return `${personaText}
+
 You can change the real database through these tools:
 
 ${toolsText}
@@ -93,13 +73,15 @@ async function plan(
   prompt: string,
   onStep?: (step: string) => void
 ): Promise<{ reply: string; actions: { tool: string; args: any }[] } | null> {
-  const memories = await recentMemories();
-  const conversation = await recentConversation();
-  onStep?.("reading memory and the last turns");
+  const persona = await getPersona();
+  const personaBlock = personaPrompt(persona);
+  const memories = await retrieveMemories(prompt, 8);
+  const conversation = await retrieveConversation(prompt, 6);
+  onStep?.("reading memory and relevant turns");
   const memoryBlock = memories.length
-    ? `KNOWN FACTS ABOUT THE USER (memory):\n- ${memories.join("\n- ")}\n\n`
+    ? `KNOWN FACTS ABOUT THE USER (most relevant first):\n- ${memories.join("\n- ")}\n\n`
     : "";
-  const conversationBlock = conversation ? `RECENT CONVERSATION:\n${conversation}\n\n` : "";
+  const conversationBlock = conversation ? `RELEVANT RECENT CONVERSATION:\n${conversation}\n\n` : "";
   const guardrail = await getGuardrailSettings();
   const guardBlock = `GUARDRAIL_MODE: ${guardrail.mode} (approval = queue the action; blocked = refuse it).\n\n`;
   const style = await getStyleGuide();
@@ -116,8 +98,8 @@ async function plan(
     // Groq occasionally returns an empty choice under load. One immediate retry
     // is cheaper than dropping to the deterministic fallback parser.
     const text =
-      (await groqChat(systemPrompt(toolsText), userMessage, true, { model })) ||
-      (await groqChat(systemPrompt(toolsText), userMessage, true, { model }));
+      (await groqChat(systemPrompt(toolsText, personaBlock), userMessage, true, { model })) ||
+      (await groqChat(systemPrompt(toolsText, personaBlock), userMessage, true, { model }));
     if (!text) {
       console.warn("[agent] planner returned no text for:", prompt.slice(0, 120));
       return null;
@@ -144,7 +126,7 @@ async function plan(
           headers: { "Content-Type": "application/json" },
           cache: "no-store",
           body: JSON.stringify({
-            systemInstruction: { parts: [{ text: systemPrompt(toolsText) }] },
+            systemInstruction: { parts: [{ text: systemPrompt(toolsText, personaBlock) }] },
             contents: [{ role: "user", parts: [{ text: userMessage }] }],
             generationConfig: { temperature: 0.15, responseMimeType: "application/json" },
           }),
