@@ -190,6 +190,32 @@ export function routeIntent(prompt: string): RoutedIntent | null {
     };
   }
 
+  // --- Contacts (internal, no approval) -----------------------------------
+  const addContact = text.match(/^(?:add|create|save)\s+contact[:\s]+(.+)$/i);
+  if (addContact) {
+    const parts = addContact[1].split(/[,|]/).map((part) => part.trim()).filter(Boolean);
+    let name = parts.shift() || "";
+    const rest = [...parts];
+    if (name.includes(":")) {
+      const [head, ...tail] = name.split(":");
+      name = head.trim();
+      if (tail.join(":").trim()) rest.unshift(tail.join(":").trim());
+    }
+    const phone = rest.find((part) => /^[+\d][\d\s()-]{6,}$/.test(part)) || "";
+    const email = rest.find((part) => part.includes("@")) || "";
+    if (name) {
+      return {
+        reply: `Saving contact ${name}.`,
+        actions: [{ tool: "create_contact", args: { name, phone, whatsapp: phone, email } }],
+        confidence: "high",
+      };
+    }
+  }
+
+  if (/^(?:list|show)\s+contacts$/i.test(text)) {
+    return { reply: "Reading contacts.", actions: [{ tool: "list_contacts", args: {} }], confidence: "high" };
+  }
+
   // --- Messaging ----------------------------------------------------------
   const call = text.match(/^(?:call|phone|ring)\s+([a-z0-9][a-z0-9 .'-]*?)(?:\s*[:\-]\s*([\s\S]+))?$/i);
   if (call) {

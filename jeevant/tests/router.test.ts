@@ -71,6 +71,16 @@ test("routes calls and channel-specific messages by name", () => {
   assert.equal(numbered?.actions[0]?.args.name, "Astra3D");
 });
 
+test("creates contacts from chat without an approval gate", () => {
+  const contact = routeIntent("add contact Rahul: +919306130032, rahul@example.com");
+  assert.equal(contact?.actions[0]?.tool, "create_contact");
+  assert.equal(contact?.actions[0]?.args.name, "Rahul");
+  assert.equal(contact?.actions[0]?.args.phone, "+919306130032");
+  assert.equal(contact?.actions[0]?.args.email, "rahul@example.com");
+
+  assert.equal(tool("list contacts"), "list_contacts");
+});
+
 test("escalates ambiguous language instead of guessing", () => {
   assert.equal(routeIntent("open the pod bay doors"), null);
   assert.equal(routeIntent("what should I do about the launch?"), null);
