@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dispatchDuePosts } from "@/lib/actions/content.actions";
 import { getMorningDigest } from "@/lib/actions/voice.actions";
+import { cronAuth } from "@/lib/security/cron";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -10,13 +11,9 @@ export const maxDuration = 60;
 //   curl https://your-host/api/cron/dispatch -H "Authorization: Bearer $CRON_SECRET"
 
 async function handle(request: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  if (secret) {
-    const header = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
-    const key = new URL(request.url).searchParams.get("key");
-    if (header !== secret && key !== secret) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  const auth = cronAuth(request);
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
   const dispatched = await dispatchDuePosts();

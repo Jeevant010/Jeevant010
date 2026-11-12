@@ -1,5 +1,9 @@
 # Jeevant OS — Feature Inventory
 
+> **Historical note:** this file describes an earlier build. For the current
+> feature list, security posture, and personal-readiness verdict, see
+> `docs/PERSONAL-READINESS.md` and `docs/SECURITY-AUDIT.md`.
+
 This is the honest list: what ships today, what is partial, and what is missing
 versus Siri / Google Assistant. No invented capabilities.
 
