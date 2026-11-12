@@ -12,6 +12,7 @@ import { draftReply, getMessage, listMessages, summarizeMessage, summarizeMessag
 import { checkConflicts, findFreeSlot, listUpcoming } from "@/lib/integrations/calendar-read";
 import { safeFetch } from "@/lib/http/fetch";
 import { searchTools, describeTool } from "./registry";
+import { isToolDisabled, refreshToolHealth } from "./reliability";
 import { refreshConnectorRegistry } from "@/lib/connectors/store";
 import { executeDynamicTool, executeHttpRequest } from "@/lib/connectors/execute";
 import {
@@ -110,6 +111,14 @@ export async function executeTool(tool: string, args: any): Promise<ToolResult> 
     await connectDB();
   } catch (error) {
     return { ok: false, result: `Database unavailable: ${(error as Error).message}` };
+  }
+
+  await refreshToolHealth();
+  if (isToolDisabled(tool)) {
+    return {
+      ok: false,
+      result: `Tool "${tool}" is disabled in Reliability. Re-enable it from Settings before using it.`,
+    };
   }
 
   switch (tool) {

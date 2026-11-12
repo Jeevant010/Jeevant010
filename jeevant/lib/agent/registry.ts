@@ -191,6 +191,15 @@ export const TOOL_REGISTRY: ToolEntry[] = TOOL_CATALOG.split("\n")
 // Dynamic entries come from connectors. They are replaced on every registry
 // refresh, so a deleted connector disappears immediately.
 let DYNAMIC_TOOLS: ToolEntry[] = [];
+let DISABLED_TOOLS = new Set<string>();
+
+export function setDisabledTools(names: string[]): void {
+  DISABLED_TOOLS = new Set(names.filter(Boolean));
+}
+
+export function isToolDisabled(name: string): boolean {
+  return DISABLED_TOOLS.has(name);
+}
 
 export function registerDynamicTools(entries: ToolEntry[]): void {
   const staticNames = new Set(TOOL_REGISTRY.map((entry) => entry.name));
@@ -207,7 +216,7 @@ export function clearDynamicTools(): void {
 }
 
 export function allTools(): ToolEntry[] {
-  return [...TOOL_REGISTRY, ...DYNAMIC_TOOLS];
+  return [...TOOL_REGISTRY, ...DYNAMIC_TOOLS].filter((entry) => !DISABLED_TOOLS.has(entry.name));
 }
 
 function tokens(text: string): string[] {

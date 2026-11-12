@@ -395,6 +395,21 @@ const MemorySchema = new Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+// --- 16b. TOOL METRIC SCHEMA (reliability dashboard) ---
+const ToolMetricSchema = new Schema({
+  name: { type: String, required: true, unique: true },
+  calls: { type: Number, default: 0 },
+  success: { type: Number, default: 0 },
+  failure: { type: Number, default: 0 },
+  totalMs: { type: Number, default: 0 },
+  maxMs: { type: Number, default: 0 },
+  latencies: { type: [Number], default: [] },
+  lastError: { type: String, default: "" },
+  lastAt: { type: Date },
+  disabled: { type: Boolean, default: false },
+  updatedAt: { type: Date, default: Date.now },
+});
+
 // --- 17. JOB SCHEMA (background worker queue) ---
 const JobSchema = new Schema({
   type: { type: String, required: true },
@@ -696,6 +711,7 @@ export const Resume = models.Resume || model("Resume", ResumeSchema);
 export const VoiceCapture = models.VoiceCapture || model("VoiceCapture", VoiceCaptureSchema);
 export const ContentPost = models.ContentPost || model("ContentPost", ContentPostSchema);
 export const Setting = models.Setting || model("Setting", SettingSchema);
+export const ToolMetric = models.ToolMetric || model("ToolMetric", ToolMetricSchema);
 export const Memory = models.Memory || model("Memory", MemorySchema);
 export const Job = models.Job || model("Job", JobSchema);
 export const Approval = models.Approval || model("Approval", ApprovalSchema);

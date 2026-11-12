@@ -5,6 +5,7 @@
 import { executeTool, type ToolResult } from "./tools";
 import { retrieveTools, catalogForTools } from "./registry";
 import { refreshConnectorRegistry } from "@/lib/connectors/store";
+import { isRetryableTool, recordToolMetric, refreshToolHealth } from "./reliability";
 import { routeIntent, UNKNOWN_REPLY } from "./router";
 import { groqChat, groqConfigured, groqModel } from "@/lib/integrations/groq";
 import { getGuardrailSettings } from "@/lib/guardrails/policy";
@@ -88,6 +89,7 @@ async function plan(
   const styleBlock = style ? `WRITING STYLE (match this in your reply):\n${style}\n\n` : "";
   const userMessage = `CURRENT_DATETIME: ${new Date().toISOString()}\n\n${guardBlock}${styleBlock}${memoryBlock}${conversationBlock}REQUEST: ${prompt}`;
   await refreshConnectorRegistry();
+  await refreshToolHealth();
   const toolsText = catalogForTools(retrieveTools(prompt, 16));
   const pool = keys();
   onStep?.("planning the action");
@@ -166,13 +168,23 @@ export async function runAgent(prompt: string, opts: AgentRunOptions = {}): Prom
     const outcomes: AgentAction[] = [];
     for (const action of list) {
       if (!action || typeof action.tool !== "string") continue;
-      let outcome: ToolResult;
       opts.onStep?.(`running ${action.tool.replace(/_/g, " ")}`);
-      try {
-        outcome = await executeTool(action.tool, action.args || {});
-      } catch (error) {
-        outcome = { ok: false, result: `Tool "${action.tool}" failed: ${(error as Error).message}` };
+      const started = Date.now();
+      const attempts = isRetryableTool(action.tool) ? 2 : 1;
+      let outcome: ToolResult = { ok: false, result: `Tool "${action.tool}" failed.` };
+
+      for (let attempt = 0; attempt < attempts; attempt++) {
+        try {
+          outcome = await executeTool(action.tool, action.args || {});
+        } catch (error) {
+          outcome = { ok: false, result: `Tool "${action.tool}" failed: ${(error as Error).message}` };
+        }
+        if (outcome.ok || attempt === attempts - 1) break;
+        await new Promise((resolve) => setTimeout(resolve, 120));
       }
+
+      const elapsed = Date.now() - started;
+      await recordToolMetric(action.tool, outcome.ok, elapsed, outcome.ok ? undefined : outcome.result);
       const record: AgentAction = { tool: action.tool, args: action.args || {}, ...outcome };
       actions.push(record);
       outcomes.push(record);
